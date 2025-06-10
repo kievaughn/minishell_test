@@ -6,7 +6,7 @@
 /*   By: kievaughn <kievaughn@student.42.fr>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/11 12:16:21 by kbrandon          #+#    #+#             */
-/*   Updated: 2025/06/10 16:24:48 by kievaughn        ###   ########.fr       */
+/*   Updated: 2025/06/10 16:53:18 by kievaughn        ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -73,9 +73,9 @@ static size_t   next_c(char *s, char c)
             quote = 0;
                 continue ;
         }
-                if (!quote && s[len] == c)
-                        break ;
-                len++;
+        if (!quote && s[len] == c)
+                break ;
+        len++;
     }
     return (len);
 }
@@ -105,7 +105,7 @@ static void     remove_quotes(char *str)
         str[j] = '\0';
 }
 
-char    **ft_split(char const *s, char c)
+char    **ft_tokenize(char const *s, char c)
 {
         char    **arr;
         int             i;

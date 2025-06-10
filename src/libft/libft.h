@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   libft.h                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: dimendon <dimendon@student.hive.fi>        +#+  +:+       +#+        */
+/*   By: kievaughn <kievaughn@student.42.fr>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/12 19:39:49 by dimendon          #+#    #+#             */
-/*   Updated: 2025/06/04 21:00:19 by dimendon         ###   ########.fr       */
+/*   Updated: 2025/06/10 16:32:49 by kievaughn        ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -69,5 +69,6 @@ t_list	*ft_lstmap(t_list *lst, void *(*f)(void *), void (*del)(void *));
 char	*ft_strtok(char *str, const char delim);
 int		ft_is_str_num(const char *str);
 int		ft_atoany(const char *str, long long *out);
+char    **ft_tokenize(char const *s, char c);
 
 #endif
