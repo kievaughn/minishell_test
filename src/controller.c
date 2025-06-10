@@ -3,7 +3,7 @@
 
 void process_command(char **envp, char *line)
 {
-    char **cmd = ft_split(line, ' ');
+    char **cmd = ft_tokenize(line, ' ');
     char *path;
 
     if (!cmd || !cmd[0])
