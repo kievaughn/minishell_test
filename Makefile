@@ -28,10 +28,11 @@ SRCS =	src/builtins/custom_cd.c \
 		src/builtins/custom_export.c \
 		src/cleanup.c \
 		src/controller.c \
-		src/handlers.c \
-		src/helpers.c \
-		src/main.c \
-		src/utils.c
+                src/handlers.c \
+                src/helpers.c \
+                src/pipeline.c \
+                src/main.c \
+                src/utils.c
 
 OBJS = $(SRCS:src/%.c=$(OBJ_PATH)%.o)
 HEADERS = includes/minishell.h
