@@ -58,6 +58,7 @@ void    run_builtin(char **envp, char **cmd);
 
 // ==================== HELPERS ====================
 void        execute_command(char *path, char **cmd, char **envp);
+void        execute_pipeline(char **envp, char **segments);
 short int   is_builtin(const char *cmd);
 char        **copy_envp(char **envp);
 

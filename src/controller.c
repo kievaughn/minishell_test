@@ -15,29 +15,38 @@
 
 void process_command(char **envp, char *line)
 {
-    char **cmd;
-    char *path;
-    cmd = ft_tokenize(line, ' ');
-    
-    if (!cmd || !cmd[0])
-    {
-        free_cmd(cmd);
-        return;
-    }
+    char    **segments;
+    char    **cmd;
+    char    *path;
 
-    if (is_builtin(cmd[0]))
-        run_builtin(envp, cmd);
-    else
+    segments = ft_tokenize(line, '|');
+    if (!segments)
+        return ;
+    if (!segments[1])
     {
-        path = get_path(envp, cmd);
-        if (path)
+        cmd = ft_tokenize(segments[0], ' ');
+        if (!cmd || !cmd[0])
         {
-            execute_command(path, cmd, envp);
-            free(path);
+            free_cmd(cmd);
+            free_cmd(segments);
+            return ;
         }
+        if (is_builtin(cmd[0]))
+            run_builtin(envp, cmd);
         else
-            printf("Command not found: %s\n", cmd[0]);
+        {
+            path = get_path(envp, cmd);
+            if (path)
+            {
+                execute_command(path, cmd, envp);
+                free(path);
+            }
+            else
+                printf("Command not found: %s\n", cmd[0]);
+        }
+        free_cmd(cmd);
     }
-
-    free_cmd(cmd);
+    else
+        execute_pipeline(envp, segments);
+    free_cmd(segments);
 }

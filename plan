@@ -81,17 +81,13 @@ TO DO:
 
 ------------------------------------------------------------------------------
 
-Phase 6: Pipes  
-DONE:  
-- None yet.
+Phase 6: Pipes
+DONE:
+- Basic pipeline execution with `|` implemented.
+- Create pipes with pipe(), fork processes, and redirect using dup2().
+- Close unused file descriptors and wait for child processes.
 
-TO DO:  
-- Support chaining commands with pipes (|).  
-- Parse multiple piped commands.  
-- Create pipes with pipe().  
-- Fork processes for each command in the pipe chain.  
-- Redirect stdin/stdout with dup2() to connect pipes.  
-- Close unused file descriptors properly.  
+TO DO:
 - Support combined use of pipes and redirections.
 
 ------------------------------------------------------------------------------
