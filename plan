@@ -3,7 +3,7 @@ Minishell Project Progress & To-Do Plan
 Phase 1: Setup & Basic Input Handling  
 DONE:  
 - Shell loop reading user input with readline().  
-- Commands added to history via add_history().  
+- Commands added to history via add_history() with line number.  
 - Ctrl-D (EOF) handled gracefully to exit shell.  
 - Signal handler for Ctrl-C (SIGINT) implemented to prevent shell exit and refresh prompt correctly.  
 - Debug printing of input commands.
@@ -11,40 +11,50 @@ DONE:
 TO DO:  
 - None (Phase 1 complete).
 
----
+------------------------------------------------------------------------------
 
 Phase 2: Command Parsing  
 DONE:  
 - Basic tokenization by splitting input line on spaces (ft_split(line, ' ')).
+- Handle quotes (single ' and double ").
 
 TO DO:  
-- Handle quotes (single ' and double ").  
 - Implement escape sequences (\).  
 - Expand environment variables ($VAR).  
 - Parse and associate redirection operators (>, >>, <).  
 - Parse pipes (|) and correctly associate them with commands.  
 - Build internal data structures (linked lists/arrays) to represent parsed commands and operators.
 
----
+------------------------------------------------------------------------------
 
-Phase 3: Built-in Commands  
-DONE:  
-- cd (update working directory, handle errors) 
+Phase 3: Built-in Commands
+These commands are executed directly by the shell without creating a new process:
 
-TO DO:  
-- Implement built-in commands:  
-  - echo (with options like -n)  
-  - pwd (print current directory)  
-  - env (display environment variables)  
-  - export (set environment variables)  
-  - unset (remove environment variables)  
-  - exit (exit shell, with optional status code)  
-- Ensure built-ins execute in the main shell process (no fork).  
-- Use printf for output and error messages.
+DONE
+echo	Only support -n flag
+cd	Only relative/absolute path, cd with no args = $HOME
+pwd	Just print current path
+export	Only VAR or VAR=value
+unset	Only remove vars by name
+env	No args, just print env
+exit	Only exit [numeric_code]
 
----
+------------------------------------------------------------------------------
 
-Phase 4: Executing External Commands  
+Phase 4: Executing External Commands 
+External Commands (Stored in /bin/, /usr/bin/, etc.)
+These are separate executables that the shell finds using $PATH:
+ls – List directory contents
+cat – Display file contents
+grep – Search text patterns
+find – Locate files
+chmod – Change file permissions
+tar – Archive files
+curl – Fetch data from URLs
+ping – Test network connectivity
+awk – Text processing tool
+sed – Stream editor
+
 DONE:  
 - Resolving executable paths by searching the PATH environment variable (get_path() function).  
 - Basic command existence check and debug print.  
@@ -55,7 +65,7 @@ TO DO:
 - Handle errors more gracefully (command not found, permission denied).  
 - Support multiple arguments robustly and complex command lines.
 
----
+------------------------------------------------------------------------------
 
 Phase 5: Redirections  
 DONE:  
@@ -69,7 +79,7 @@ TO DO:
 - Use open(), dup2(), and close() for file descriptor management.  
 - Support redirections alongside built-in and external commands.
 
----
+------------------------------------------------------------------------------
 
 Phase 6: Pipes  
 DONE:  
@@ -84,7 +94,7 @@ TO DO:
 - Close unused file descriptors properly.  
 - Support combined use of pipes and redirections.
 
----
+------------------------------------------------------------------------------
 
 Phase 7: Signal Handling & Terminal Control  
 DONE:  
@@ -96,7 +106,7 @@ TO DO:
 - Implement terminal settings control with tcgetattr(), tcsetattr() for features like disabling echo or raw mode.  
 - Optionally use ioctl(), ttyslot(), ttyname() for advanced terminal features.
 
----
+------------------------------------------------------------------------------
 
 Phase 8: Final Touches  
 DONE:  

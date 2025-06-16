@@ -3,10 +3,10 @@
 #                                                         :::      ::::::::    #
 #    Makefile                                           :+:      :+:    :+:    #
 #                                                     +:+ +:+         +:+      #
-#    By: kievaughn <kievaughn@student.42.fr>        +#+  +:+       +#+         #
+#    By: kbrandon <kbrandon@student.hive.fi>        +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/11/12 19:39:40 by dimendon          #+#    #+#              #
-#    Updated: 2025/06/10 16:24:02 by kievaughn        ###   ########.fr        #
+#    Updated: 2025/06/10 18:00:58 by kbrandon         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 

@@ -6,7 +6,7 @@
 /*   By: dimendon <dimendon@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/04 13:41:38 by dimendon          #+#    #+#             */
-/*   Updated: 2025/06/04 21:03:14 by dimendon         ###   ########.fr       */
+/*   Updated: 2025/06/13 18:22:28 by dimendon         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,7 +18,7 @@ char *get_env_value(char **envp, const char *name)
     int i;
     size_t len;
 	
-	len = strlen(name);
+	len = ft_strlen(name);
 	i = 0;
     while (envp[i])
     {

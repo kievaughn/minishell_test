@@ -6,17 +6,18 @@
 /*   By: dimendon <dimendon@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/11 16:54:45 by dimendon          #+#    #+#             */
-/*   Updated: 2024/11/12 14:50:47 by dimendon         ###   ########.fr       */
+/*   Updated: 2025/06/13 15:46:51 by dimendon         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "libft.h"
 
-static unsigned int	getsize(int n)
+static unsigned int	getsize(long n)
 {
-	unsigned int	size;
+	unsigned int	size = 0;
 
-	size = 0;
+	if (n == 0)
+		return (1);
 	while (n != 0)
 	{
 		n = n / 10;
@@ -30,7 +31,6 @@ static void	passtostring(unsigned int size, unsigned int n, char *s,
 {
 	if (isnegative == 1)
 	{
-		n = n * -1;
 		s[0] = '-';
 		while (size > 1)
 		{
@@ -54,26 +54,20 @@ char	*ft_itoa(int n)
 {
 	char			*ret;
 	unsigned int	size;
+	long			num;
+	short int		isnegative;
 
-	if (n == 0)
-		return (ft_strdup("0"));
-	else if (n < 0)
+	num = n;
+	isnegative = 0;
+	if (num < 0)
 	{
-		size = getsize(n * -1) + 1;
-		ret = ft_calloc(size + 1, 1);
-		if (!ret)
-			return (NULL);
-		passtostring(size, n, ret, 1);
+		isnegative = 1;
+		num = -num;
 	}
-	else if (n > 0)
-	{
-		size = getsize(n);
-		ret = ft_calloc(size + 1, 1);
-		if (!ret)
-			return (NULL);
-		passtostring(size, n, ret, 0);
-	}
-	else
+	size = getsize(num) + isnegative;
+	ret = ft_calloc(size + 1, sizeof(char));
+	if (!ret)
 		return (NULL);
+	passtostring(size, num, ret, isnegative);
 	return (ret);
 }

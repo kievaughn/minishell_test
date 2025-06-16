@@ -6,19 +6,7 @@
 #    By: dimendon <dimendon@student.hive.fi>        +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2025/06/04 13:42:42 by dimendon          #+#    #+#              #
-#    Updated: 2025/06/04 17:36:34 by dimendon         ###   ########.fr        #
-#                                                                              #
-# **************************************************************************** #
-
-# **************************************************************************** #
-#                                                                              #
-#                                                         :::      ::::::::    #
-#    Makefile                                           :+:      :+:    :+:    #
-#                                                     +:+ +:+         +:+      #
-#    By: dimendon <dimendon@student.hive.fi>        +#+  +:+       +#+         #
-#                                                 +#+#+#+#+#+   +#+            #
-#    Created: 2025/06/04 13:42:42 by dimendon          #+#    #+#              #
-#    Updated: 2025/06/04 16:20:14 by dimendon         ###   ########.fr        #
+#    Updated: 2025/06/16 16:11:11 by dimendon         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -33,7 +21,11 @@ OBJ_PATH    = obj/
 LIBFT_DIR   = src/libft
 LIBFT_LIB   = $(LIBFT_DIR)/libft.a
 
-SRCS =	src/builtin.c \
+SRCS =	src/builtins/custom_cd.c \
+		src/builtins/custom_echo.c \
+		src/builtins/custom_exit.c \
+		src/builtins/custom_pwd.c \
+		src/builtins/custom_export.c \
 		src/cleanup.c \
 		src/controller.c \
 		src/handlers.c \
@@ -44,7 +36,6 @@ SRCS =	src/builtin.c \
 OBJS = $(SRCS:src/%.c=$(OBJ_PATH)%.o)
 HEADERS = includes/minishell.h
 
-# Color codes
 GREEN  = \033[0;32m
 YELLOW = \033[1;33m
 CYAN   = \033[0;36m
