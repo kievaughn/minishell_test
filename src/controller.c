@@ -57,7 +57,7 @@ void process_command(char ***envp, char *line)
     char **cmd;
     char *path;
 
-    cmd = ft_tokenize(line, ' ');
+    cmd = ft_tokenize(line, ' ', *envp);
     if (!cmd || !cmd[0])
     {
         free_cmd(cmd);

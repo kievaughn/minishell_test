@@ -31,11 +31,9 @@ SRCS =	        src/builtins/custom_cd.c \
                 src/builtins/custom_export.c \
                 src/builtins/custom_env.c \
                 src/builtins/custom_unset.c \
-				        src/parsing/ft_tokenize.c \
-		            src/cleanup.c \
-		            src/controller.c \
-		            src/cleanup.c \
-		            src/controller.c \
+                                        src/parsing/ft_tokenize.c \
+                            src/cleanup.c \
+                            src/controller.c \
                 src/handlers.c \
                 src/helpers.c \
                 src/pipeline.c \
