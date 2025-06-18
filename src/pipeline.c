@@ -32,6 +32,7 @@ void    execute_pipeline(char **envp, char **segments)
     int     in_fd;  /* read end of the previous pipe */
     int     fd[2];  /* file descriptors for the current pipe */
     int     i;
+    int     status = 0;
 
     num = count_segments(segments);             /* number of commands */
     pids = malloc(sizeof(pid_t) * num);         /* allocate pid array */
@@ -43,7 +44,7 @@ void    execute_pipeline(char **envp, char **segments)
     while (++i < num)
     {
         /* tokenize current segment into command + args */
-        char    **cmd = ft_tokenize(segments[i], ' ');
+        char    **cmd = ft_tokenize(segments[i], ' ', envp);
         if (!cmd || !cmd[0])
         {
             free_cmd(cmd);
@@ -75,7 +76,11 @@ void    execute_pipeline(char **envp, char **segments)
             }
             /* execute builtin directly, otherwise try external command */
             if (is_builtin(cmd[0]))
+            {
                 run_builtin(&envp, cmd);
+                free_cmd(cmd);
+                _exit(last_exit_code);
+            }
             else
             {
                 char *path = get_path(envp, cmd);
@@ -84,12 +89,14 @@ void    execute_pipeline(char **envp, char **segments)
                     execve(path, cmd, envp);
                     perror("execve");
                     free(path);
+                    _exit(127);
                 }
                 else
+                {
                     printf("Command not found: %s\n", cmd[0]);
+                    _exit(127);
+                }
             }
-            free_cmd(cmd);
-            _exit(1);
         }
         else if (pids[i] < 0)
         {
@@ -120,6 +127,12 @@ void    execute_pipeline(char **envp, char **segments)
         close(in_fd);
     /* wait for all child processes */
     while (--i >= 0)
-        waitpid(pids[i], NULL, 0);
+        waitpid(pids[i], &status, 0);
+    if (WIFEXITED(status))
+        last_exit_code = WEXITSTATUS(status);
+    else if (WIFSIGNALED(status))
+        last_exit_code = 128 + WTERMSIG(status);
+    else
+        last_exit_code = 1;
     free(pids);
 }

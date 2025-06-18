@@ -98,6 +98,6 @@ char    **get_env_path(char **envp, const char *name);
 char    *get_path(char **envp, char **cmd);
 
 // ==================== PARSING ====================
-char    **ft_tokenize(char const *s, char c);
+char    **ft_tokenize(char const *s, char c, char **envp);
 
 #endif
