@@ -75,7 +75,7 @@ void    execute_pipeline(char **envp, char **segments)
             }
             /* execute builtin directly, otherwise try external command */
             if (is_builtin(cmd[0]))
-                run_builtin(envp, cmd);
+                run_builtin(&envp, cmd);
             else
             {
                 char *path = get_path(envp, cmd);

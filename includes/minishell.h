@@ -41,26 +41,33 @@
 # include <readline/history.h>  // rl_clear_history, rl_on_new_line, rl_replace_line, rl_redisplay
 
 // ==================== BUILTIN ====================
+extern int  last_exit_code;
+
 short int   custom_cd(char **envp, char **args);
 short int   custom_exit(char **args);
 short int   custom_echo(char **arg);
-short int   custom_pwd();
-void        custom_export(char **envp);
+short int   custom_pwd(void);
+short int   custom_export(char ***env, char **args);
+short int   custom_unset(char ***envp, char **args);
+short int   custom_env(char **envp);
 
 // ==================== CLEANUP ====================
-void    free_cmd(char **cmd);
+void        free_cmd(char **cmd);
 
 // ==================== CONTROLLER ====================
-void    process_command(char **envp, char *line);
+void        process_command(char ***envp, char *line);
 
 // ==================== HANDLER ====================
-void    run_builtin(char **envp, char **cmd);
+int         run_builtin(char ***envp, char **cmd);
 
 // ==================== HELPERS ====================
-void        execute_command(char *path, char **cmd, char **envp);
+int         execute_command(char *path, char **cmd, char **envp);
 void        execute_pipeline(char **envp, char **segments);
 short int   is_builtin(const char *cmd);
 char        **copy_envp(char **envp);
+int         env_size(char **env);
+char        **env_realloc_add(char **env);
+int         env_add(char ***env_ptr, const char *new_var);
 
 // ==================== UTILS ====================
 char    *get_env_value(char **envp, const char *name);
