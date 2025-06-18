@@ -6,50 +6,12 @@
 /*   By: dimendon <dimendon@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/04 13:41:07 by dimendon          #+#    #+#             */
-/*   Updated: 2025/06/16 16:00:02 by dimendon         ###   ########.fr       */
+/*   Updated: 2025/06/18 18:03:48 by dimendon         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minishell.h"
 #include "libft/libft.h"
-
-short int is_builtin(const char *cmd)
-{
-    return (
-        ft_strncmp(cmd, "echo", 5) == 0 ||
-        ft_strncmp(cmd, "cd", 3) == 0 ||
-        ft_strncmp(cmd, "pwd", 4) == 0 ||
-        ft_strncmp(cmd, "export", 7) == 0
-/*        ft_strncmp(cmd, "unset", 6) == 0 ||
-        ft_strncmp(cmd, "env", 4) == 0 ||
-        ft_strncmp(cmd, "exit", 5) == 0 */
-    );
-}
-
-void execute_command(char *path, char **cmd, char **envp)
-{
-    pid_t pid;
-    int status;
-
-    pid = fork();
-    status = 0;
-    if (pid == 0)
-    {
-        if (execve(path, cmd, envp) == -1)
-        {
-            perror("execve");
-            _exit(1);
-        }
-    }
-    else if (pid > 0)
-    {
-        waitpid(pid, &status, 0);
-    }
-    else
-    {
-        perror("fork");
-    }
-}
 
 char **copy_envp(char **envp)
 {
@@ -79,4 +41,80 @@ char **copy_envp(char **envp)
     return (env);
 }
 
+int env_size(char **env)
+{
+    int size;
+    
+    size = 0;
+    while (env[size])
+        size++;
+        
+    return (size);
+}
+
+char **env_realloc_add(char **env)
+{
+    int size;
+    char **new_env;
+    int i;
+
+    size = env_size(env);
+    new_env = malloc(sizeof(char *) * (size + 2)); // +1 for new var +1 for NULL
+    if (!new_env)
+        return (NULL);
+
+    i = 0;
+    while (i < size)
+    {
+        new_env[i] = env[i];  // shallow copy pointers
+        i++;
+    }
+    new_env[size] = NULL;
+    free(env);  // free old array (not the strings)
+    return (new_env);
+}
+
+int env_add(char ***env_ptr, const char *new_var)
+{
+    char **env;
+    int env_size;
+    char **new_env;
+
+    env = *env_ptr;
+    env_size = 0;
+
+    if (!env)
+    {
+        new_env = malloc(sizeof(char *) * 2);
+        if (!new_env)
+            return (-1);
+        new_env[0] = ft_strdup(new_var);
+        if (!new_env[0])
+        {
+            free(new_env);
+            return (-1);
+        }
+        new_env[1] = NULL;
+        *env_ptr = new_env;
+        return (0);
+    }
+
+    while (env[env_size])
+        env_size++;
+
+    new_env = env_realloc_add(env);
+    if (!new_env)
+        return (-1);
+
+    new_env[env_size] = ft_strdup(new_var);
+    if (!new_env[env_size])
+    {
+        free(new_env);
+        return (-1);
+    }
+    new_env[env_size + 1] = NULL;
+
+    *env_ptr = new_env;
+    return (0);
+}
 

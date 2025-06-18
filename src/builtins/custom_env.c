@@ -1,39 +1,31 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   custom_cd.c                                        :+:      :+:    :+:   */
+/*   custom_env.c                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: dimendon <dimendon@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2025/06/13 18:15:57 by dimendon          #+#    #+#             */
-/*   Updated: 2025/06/18 17:58:50 by dimendon         ###   ########.fr       */
+/*   Created: 2025/06/18 16:41:47 by dimendon          #+#    #+#             */
+/*   Updated: 2025/06/18 17:59:52 by dimendon         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minishell.h"
 #include "../libft/libft.h"
 
-short int custom_cd(char **envp, char **args)
+short int custom_env(char **envp)
 {
-    char *target_dir;
+    int i;
 
-    if (!args[1] || ft_strlen(args[1]) == 0)
-    {
-        target_dir = get_env_value(envp, "HOME");
-        if (!target_dir)
-        {
-            fprintf(stderr, "cd: HOME not set\n");
-            return 1;
-        }
-    }
-    else
-        target_dir = args[1];
+    if (!envp)
+        return (1);
 
-    if (chdir(target_dir) != 0)
+    i = 0;
+    while (envp[i] != NULL)
     {
-        perror("cd");
-        return 1;
+        printf("%s\n", envp[i]);
+        i++;
     }
-    //PWD and OLDPWD here
-    return 0;
+
+    return (0);
 }

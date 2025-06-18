@@ -6,13 +6,15 @@
 /*   By: dimendon <dimendon@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/04 13:41:29 by dimendon          #+#    #+#             */
-/*   Updated: 2025/06/16 16:00:15 by dimendon         ###   ########.fr       */
+/*   Updated: 2025/06/18 17:42:47 by dimendon         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minishell.h"
 #include "libft/libft.h"
 #include <limits.h>
+
+int last_exit_code = 0;
 
 void sigint_handler(int signum)
 {
@@ -44,7 +46,7 @@ int main(int argc, char **argv, char **envp)
         if (*line)
             add_history(line);
 
-        process_command(env, line);
+        process_command(&env, line);
         free(line);
     }
     return (0);

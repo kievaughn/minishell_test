@@ -6,7 +6,7 @@
 /*   By: dimendon <dimendon@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/13 18:15:55 by dimendon          #+#    #+#             */
-/*   Updated: 2025/06/13 18:20:41 by dimendon         ###   ########.fr       */
+/*   Updated: 2025/06/18 18:08:39 by dimendon         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -44,6 +44,7 @@ short int custom_echo(char **arg)
 {
     int i = 1;
     int flag_newline = 1;
+    char *code;
 
     i = skip_n_flags(arg, i);
     if (i > 1)
@@ -51,19 +52,21 @@ short int custom_echo(char **arg)
 
     while (arg[i])
     {
-        if (write(1, arg[i], ft_strlen(arg[i])) == -1)
+        if (ft_strncmp(arg[i], "$?", 3) == 0)
         {
-            perror("Command failed");
-            return (1);
-        }
-        if (arg[i + 1] != NULL)
-        {
-            if (write(1, " ", 1) == -1)
-            {
-                perror("Command failed");
+            code = ft_itoa(last_exit_code);
+            if (!code)
                 return (1);
-            }
+            write(1, code, ft_strlen(code));
+            free(code);
         }
+        else
+        {
+            write(1, arg[i], ft_strlen(arg[i]));
+        }
+
+        if (arg[i + 1])
+            write(1, " ", 1);
         i++;
     }
     if (flag_newline)

@@ -56,7 +56,6 @@ void    execute_pipeline(char **envp, char **segments)
             free_cmd(cmd);
             break ;
         }
-
         /* spawn child process */
         pids[i] = fork();
         if (pids[i] == 0)
@@ -67,7 +66,6 @@ void    execute_pipeline(char **envp, char **segments)
                 dup2(in_fd, STDIN_FILENO);
                 close(in_fd);
             }
-
             /* child: connect stdout to write end of current pipe */
             if (i < num - 1)
             {
@@ -120,10 +118,8 @@ void    execute_pipeline(char **envp, char **segments)
     /* close any remaining pipe end in parent */
     if (in_fd != 0)
         close(in_fd);
-
     /* wait for all child processes */
     while (--i >= 0)
         waitpid(pids[i], NULL, 0);
-
     free(pids);
 }
