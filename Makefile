@@ -23,10 +23,12 @@ LIBFT_LIB   = $(LIBFT_DIR)/libft.a
 
 SRCS =	src/builtins/custom_cd.c \
 		src/builtins/custom_echo.c \
-		src/builtins/custom_exit.c \
-		src/builtins/custom_pwd.c \
-		src/builtins/custom_export.c \
-		src/cleanup.c \
+                src/builtins/custom_exit.c \
+                src/builtins/custom_pwd.c \
+                src/builtins/custom_export.c \
+                src/builtins/custom_env.c \
+                src/builtins/custom_unset.c \
+                src/cleanup.c \
 		src/controller.c \
                 src/handlers.c \
                 src/helpers.c \
