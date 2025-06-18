@@ -3,10 +3,10 @@
 #                                                         :::      ::::::::    #
 #    Makefile                                           :+:      :+:    :+:    #
 #                                                     +:+ +:+         +:+      #
-#    By: kbrandon <kbrandon@student.hive.fi>        +#+  +:+       +#+         #
+#    By: dimendon <dimendon@student.hive.fi>        +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/11/12 19:39:40 by dimendon          #+#    #+#              #
-#    Updated: 2025/06/10 18:00:58 by kbrandon         ###   ########.fr        #
+#    Updated: 2025/06/18 19:54:47 by dimendon         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -61,8 +61,7 @@ SRCS = \
 	ft_lstmap_bonus.c \
 	ft_strtok.c \
 	ft_atoany.c \
-	ft_is_str_num.c \
-	ft_tokenize.c
+	ft_is_str_num.c
 
 OBJS = $(SRCS:.c=.o)
 HEADERS = libft.h

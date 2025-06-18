@@ -6,7 +6,7 @@
 /*   By: dimendon <dimendon@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/04 13:41:07 by dimendon          #+#    #+#             */
-/*   Updated: 2025/06/18 18:03:48 by dimendon         ###   ########.fr       */
+/*   Updated: 2025/06/18 19:10:10 by dimendon         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -59,18 +59,18 @@ char **env_realloc_add(char **env)
     int i;
 
     size = env_size(env);
-    new_env = malloc(sizeof(char *) * (size + 2)); // +1 for new var +1 for NULL
+    new_env = malloc(sizeof(char *) * (size + 2));
     if (!new_env)
         return (NULL);
 
     i = 0;
     while (i < size)
     {
-        new_env[i] = env[i];  // shallow copy pointers
+        new_env[i] = env[i];
         i++;
     }
     new_env[size] = NULL;
-    free(env);  // free old array (not the strings)
+    free(env);
     return (new_env);
 }
 

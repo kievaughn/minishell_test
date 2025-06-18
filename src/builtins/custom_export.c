@@ -6,7 +6,7 @@
 /*   By: dimendon <dimendon@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/16 16:02:23 by dimendon          #+#    #+#             */
-/*   Updated: 2025/06/18 18:06:19 by dimendon         ###   ########.fr       */
+/*   Updated: 2025/06/18 19:41:18 by dimendon         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -145,12 +145,10 @@ short int custom_export(char ***env, char **args)
     index = malloc(sizeof(int) * size);
     if (!index)
         return (1);
-    i = 0;
-    while (i < size)
-    {
+    i = -1;
+    while (++i < size)
         index[i] = i;
-        i++;
-    }
+        
     sort_index(*env, index, size);
     if (!args[1])
         print_env(*env, index, size);

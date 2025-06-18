@@ -1,9 +1,0 @@
-Apple
-banana
-APPLE
-orange
-banana
-ORANGE
-banana
-Foo Bar
-foo bar

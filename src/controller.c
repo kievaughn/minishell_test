@@ -6,7 +6,7 @@
 /*   By: dimendon <dimendon@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/13 18:22:38 by dimendon          #+#    #+#             */
-/*   Updated: 2025/06/18 18:01:41 by dimendon         ###   ########.fr       */
+/*   Updated: 2025/06/18 19:09:28 by dimendon         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -63,7 +63,6 @@ void process_command(char ***envp, char *line)
         free_cmd(cmd);
         return;
     }
-
     if (is_builtin(cmd[0]))
         run_builtin(envp, cmd);
     else
