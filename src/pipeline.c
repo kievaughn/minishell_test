@@ -54,6 +54,8 @@ void    execute_pipeline(char **envp, char **segments)
         {
             perror("pipe");
             free_cmd(cmd);
+            if (in_fd != 0)
+                close(in_fd);
             break ;
         }
         /* spawn child process */
@@ -75,7 +77,11 @@ void    execute_pipeline(char **envp, char **segments)
             }
             /* execute builtin directly, otherwise try external command */
             if (is_builtin(cmd[0]))
+            {
                 run_builtin(&envp, cmd);
+                free_cmd(cmd);
+                exit(last_exit_code);
+            }
             else
             {
                 char *path = get_path(envp, cmd);
@@ -84,12 +90,16 @@ void    execute_pipeline(char **envp, char **segments)
                     execve(path, cmd, envp);
                     perror("execve");
                     free(path);
+                    last_exit_code = 126;
                 }
                 else
-                    printf("Command not found: %s\n", cmd[0]);
+                {
+                    fprintf(stderr, "Command not found: %s\n", cmd[0]);
+                    last_exit_code = 127;
+                }
+                free_cmd(cmd);
+                exit(last_exit_code);
             }
-            free_cmd(cmd);
-            _exit(1);
         }
         else if (pids[i] < 0)
         {
@@ -100,6 +110,8 @@ void    execute_pipeline(char **envp, char **segments)
                 close(fd[0]);
                 close(fd[1]);
             }
+            if (in_fd != 0)
+                close(in_fd);
             free_cmd(cmd);
             break ;
         }
@@ -119,7 +131,24 @@ void    execute_pipeline(char **envp, char **segments)
     if (in_fd != 0)
         close(in_fd);
     /* wait for all child processes */
-    while (--i >= 0)
-        waitpid(pids[i], NULL, 0);
+    {
+        int status;
+        int j = 0;
+        while (j < num)
+        {
+            if (waitpid(pids[j], &status, 0) == -1)
+                perror("waitpid");
+            if (j == num - 1)
+            {
+                if (WIFEXITED(status))
+                    last_exit_code = WEXITSTATUS(status);
+                else if (WIFSIGNALED(status))
+                    last_exit_code = 128 + WTERMSIG(status);
+                else
+                    last_exit_code = 1;
+            }
+            j++;
+        }
+    }
     free(pids);
 }
