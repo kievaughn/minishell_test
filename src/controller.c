@@ -54,10 +54,25 @@ short int is_builtin(const char *cmd)
 
 void process_command(char ***envp, char *line)
 {
+    char **segments;
     char **cmd;
     char *path;
+    int     count;
 
-    cmd = ft_tokenize(line, ' ', *envp);
+    segments = split_pipes(line);
+    if (!segments)
+        return ;
+    count = 0;
+    while (segments[count])
+        count++;
+    if (count > 1)
+    {
+        execute_pipeline(*envp, segments);
+        free_cmd(segments);
+        return ;
+    }
+    cmd = ft_tokenize(segments[0], ' ', *envp);
+    free_cmd(segments);
     if (!cmd || !cmd[0])
     {
         free_cmd(cmd);

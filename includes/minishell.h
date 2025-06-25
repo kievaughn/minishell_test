@@ -85,5 +85,6 @@ char    *get_path(char **envp, char **cmd);
 
 // ==================== PARSING ====================
 char    **ft_tokenize(char const *s, char c, char **envp);
+char    **split_pipes(const char *line);
 
 #endif

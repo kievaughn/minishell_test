@@ -35,6 +35,7 @@ SRCS =	        src/builtins/custom_cd.c \
                 src/handlers.c \
                 src/helpers.c \
                 src/pipeline.c \
+                src/split_pipes.c \
                 src/main.c \
                 src/utils.c
 
