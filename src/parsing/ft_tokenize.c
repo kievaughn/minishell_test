@@ -1,101 +1,204 @@
 #include "minishell.h"
 #include "../libft/libft.h"
 
-static char *append_char(char *str, char c)
+static size_t	token_count(char const *s, char c)
 {
-    char tmp[2];
-    tmp[0] = c;
-    tmp[1] = '\0';
-    return ft_strcatrealloc(str, tmp);
-}
-
-static char *expand_variable(char *dst, const char **src, char **envp)
-{
-    const char *s = *src + 1; /* skip $ */
-    if (*s == '?')
-    {
-        char *code = ft_itoa(last_exit_code);
-        dst = ft_strcatrealloc(dst, code ? code : "");
-        free(code);
-        s++;
-    }
-    else if (ft_isalpha(*s) || *s == '_')
-    {
-        int len = 0;
-        while (ft_isalnum(s[len]) || s[len] == '_')
-            len++;
-        char *name = ft_substr(s, 0, len);
-        char *val = name ? get_env_value(envp, name) : NULL;
-        if (val)
-            dst = ft_strcatrealloc(dst, val);
-        free(name);
-        s += len;
-    }
-    else
-    {
-        dst = append_char(dst, '$');
-    }
-    *src = s;
-    return dst;
-}
-
-char **ft_tokenize(char const *s, char c, char **envp)
-{
-    size_t max = ft_strlen(s) + 1;
-    char **arr = malloc(sizeof(char *) * max);
-    size_t i = 0;
-    const char *p = s;
-
-    if (!arr)
-        return NULL;
-    while (*p)
-    {
-        while (*p == c)
-            p++;
-        if (!*p)
-            break;
-        char quote = 0;
-        if (*p == '\'' || *p == '"')
+        size_t  i;
+        size_t  count;
+        char    quote;
+		
+        i = 0;
+        count = 0;
+        while (s[i])
         {
-            quote = *p;
-            p++;
-        }
-        char *token = NULL;
-        while (*p && (quote || *p != c))
-        {
-            if (!quote && (*p == '\'' || *p == '"'))
-            {
-                quote = *p;
-                p++;
-                continue;
-            }
-            if (quote && *p == quote)
-            {
+                while (s[i] == c)
+                        i++;
+                if (!s[i])
+                        break ;
+                count++;
                 quote = 0;
-                p++;
-                continue;
-            }
-            if (*p == '$' && quote != '\'')
-            {
-                token = expand_variable(token, &p, envp);
-                continue;
-            }
-            token = append_char(token, *p);
-            p++;
+                while (s[i])
+                {
+                        if (!quote && (s[i] == '"' || s[i] == '\''))
+                        {
+                                quote = s[i++];
+                                while (s[i] && s[i] != quote)
+                                        i++;
+                                if (s[i] == quote)
+                                        i++;
+                                quote = 0;
+                                continue ;
+                        }
+                        if (!quote && s[i] == c)
+                                break ;
+                        i++;
+                }
         }
-        if (quote)
+        return (count);
+}
+
+static void	free_arr(char **arr, int i)
+{
+	while (i-- > 0)
+		free(arr[i]);
+	free(arr);
+}
+static size_t   next_c(char *s, char c)
+{
+    size_t  len;
+	char    quote;
+
+    len = 0;
+    quote = 0;
+    while (s[len])
+    {
+        if (!quote && (s[len] == '"' || s[len] == '\''))
         {
-            fprintf(stderr, "Unclosed quote\n");
-            while (i > 0)
-                free(arr[--i]);
-            free(arr);
-            exit(1);
+            quote = s[len++];
+            while (s[len] && s[len] != quote)
+                len++;
+            if (s[len] == quote)
+                len++;
+            quote = 0;
+                continue ;
         }
-        arr[i] = token ? token : ft_strdup("");
-        i++;
-        if (*p == c)
-            p++;
+        if (!quote && s[len] == c)
+                break ;
+        len++;
     }
-    arr[i] = NULL;
-    return arr;
+    return (len);
+}
+static void     remove_quotes(char *str)
+{
+        size_t  i;
+        size_t  j;
+        char    quote;
+
+        i = 0;
+        j = 0;
+        quote = 0;
+        while (str[i])
+        {
+                if (!quote && (str[i] == '"' || str[i] == '\''))
+                {
+                        quote = str[i++];
+                        while (str[i] && str[i] != quote)
+                                str[j++] = str[i++];
+                        if (str[i] == quote)
+                                i++;
+                        quote = 0;
+                }
+                else
+                        str[j++] = str[i++];
+        }
+        str[j] = '\0';
+}
+static char *append_literal(char *result, char *str, int start, int i)
+{
+    char *tmp;
+
+    str[i] = '\0';  // Temporarily terminate literal segment
+    tmp = ft_strcatrealloc(result, str + start);
+    str[i] = '$';   // Restore '$' after append
+    if (!tmp)
+    {
+        free(result);
+        return (NULL);
+    }
+    return (tmp);
+}
+
+static char *expand_var(char *str, int *var_len)
+{
+    int i = 0;
+
+    while (str[i] != '\0' && ft_isalnum(str[i]))
+        i++;
+    *var_len = i;
+    if (i > 0)
+        return (ft_substr(str, 0, i));
+    return (NULL);
+}
+
+static char *append_expanded_var(char *result, char *str, int *i, char **envp)
+{
+    int var_len;
+    char *var;
+    char *value;
+    char *tmp;
+
+    var_len = 0;
+    var = expand_var(&str[*i + 1], &var_len);
+    value = get_env_value(envp, var);
+    if (!value)
+        value = "";
+    tmp = ft_strcatrealloc(result, value);
+    free(var);
+    if (!tmp)
+        return (NULL);
+    *i += var_len + 1;
+    return (tmp);
+}
+
+static char *build_expanded_str(char *str, char **envp)
+{
+    int i;
+    int start;
+    char *result;
+
+    i = 0;
+    start = 0;
+    result = NULL;
+    while (str[i])
+    {
+        if (str[i] == '$' && ft_isalnum(str[i + 1]))
+        {
+            if (!(result = append_literal(result, str, start, i)))
+                return (NULL);
+            if (!(result = append_expanded_var(result, str, &i, envp)))
+                return (NULL);
+            start = i;
+        }
+        else
+            i++;
+    }
+    if (!(result = ft_strcatrealloc(result, str + start)))
+        return (NULL);
+    return (result);
+}
+
+char    **ft_tokenize(char const *s, char c, char **envp)
+{
+        char    **arr;
+        int             i;
+        size_t  len;
+
+        if (!s)
+                return (NULL);
+        arr = (char **)malloc((token_count(s, c) + 1) * sizeof(char *));
+        if (!arr)
+                return (NULL);
+        i = 0;
+        while (*s)
+        {
+                while (*s == c)
+                        s++;
+                if (!*s)
+                        break ;
+                len = next_c((char *)s, c);
+                arr[i] = ft_substr((char *)s, 0, len);
+                if (!arr[i])
+                        return (free_arr(arr, i), NULL);
+                if(arr[i][0] != '\'')
+                {
+                        char *expanded = build_expanded_str(arr[i], envp);
+                        free(arr[i]);
+                        arr[i] = expanded;
+                }
+                remove_quotes(arr[i]);
+                i++;
+                s += len;
+        }
+        arr[i] = NULL;
+        return (arr);
 }

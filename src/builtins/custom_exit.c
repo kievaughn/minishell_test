@@ -6,7 +6,7 @@
 /*   By: dimendon <dimendon@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/13 18:15:52 by dimendon          #+#    #+#             */
-/*   Updated: 2025/06/18 18:00:26 by dimendon         ###   ########.fr       */
+/*   Updated: 2025/06/23 19:53:56 by dimendon         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,20 +17,22 @@ short int custom_exit(char **args)
 {
     long long value;
 
-    printf("exit\n");
-
-    if (!args || !args[1])
-        return (0);
-
-    if (!ft_atoany(args[1], &value))
+    if (args[1] && args[2])
     {
-        printf("exit: %s: numeric argument required\n", args[1]);
-        return (255);
-    }
-    if (args[2])
-    {
-        printf("exit: too many arguments\n");
+        fprintf(stderr, "exit: too many arguments\n");
+        last_exit_code = 1;
         return (1);
     }
-    return (unsigned char)(value % 256);
+    printf("exit\n");
+    if (args[1])
+    {
+        if (!ft_atoany(args[1], &value))
+        {
+            fprintf(stderr, "exit: %s: numeric argument required\n", args[1]);
+            exit(2);
+        }
+        exit((unsigned char)value);
+    }
+
+    exit(last_exit_code);
 }

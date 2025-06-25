@@ -6,7 +6,7 @@
 /*   By: dimendon <dimendon@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/16 16:02:23 by dimendon          #+#    #+#             */
-/*   Updated: 2025/06/18 19:41:18 by dimendon         ###   ########.fr       */
+/*   Updated: 2025/06/23 19:45:21 by dimendon         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -95,13 +95,16 @@ short int check_update_env(char ***env, char **args)
     int i;
     int size;
     int found;
+    short int had_error;
 
+    had_error = 0;
     arg_i = 1;
     while (args[arg_i])
     {
         if(!is_valid_name(args[arg_i]))
         {
             fprintf(stderr, "export: not an identifier: %s \n", args[arg_i]);
+            had_error = -1;
             arg_i++;
             continue;
         }
@@ -132,7 +135,7 @@ short int check_update_env(char ***env, char **args)
         }
         arg_i++;
     }
-    return (0);
+    return (had_error);
 }
 
 short int custom_export(char ***env, char **args)
