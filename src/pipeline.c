@@ -77,7 +77,11 @@ void    execute_pipeline(char **envp, char **segments)
             }
             /* execute builtin directly, otherwise try external command */
             if (is_builtin(cmd[0]))
+            {
                 run_builtin(&envp, cmd);
+                free_cmd(cmd);
+                exit(last_exit_code);
+            }
             else
             {
                 char *path = get_path(envp, cmd);
@@ -86,12 +90,16 @@ void    execute_pipeline(char **envp, char **segments)
                     execve(path, cmd, envp);
                     perror("execve");
                     free(path);
+                    last_exit_code = 126;
                 }
                 else
-                    printf("Command not found: %s\n", cmd[0]);
+                {
+                    fprintf(stderr, "Command not found: %s\n", cmd[0]);
+                    last_exit_code = 127;
+                }
+                free_cmd(cmd);
+                exit(last_exit_code);
             }
-            free_cmd(cmd);
-            _exit(1);
         }
         else if (pids[i] < 0)
         {
