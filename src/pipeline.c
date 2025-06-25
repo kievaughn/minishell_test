@@ -54,6 +54,8 @@ void    execute_pipeline(char **envp, char **segments)
         {
             perror("pipe");
             free_cmd(cmd);
+            if (in_fd != 0)
+                close(in_fd);
             break ;
         }
         /* spawn child process */
@@ -100,6 +102,8 @@ void    execute_pipeline(char **envp, char **segments)
                 close(fd[0]);
                 close(fd[1]);
             }
+            if (in_fd != 0)
+                close(in_fd);
             free_cmd(cmd);
             break ;
         }
@@ -119,7 +123,24 @@ void    execute_pipeline(char **envp, char **segments)
     if (in_fd != 0)
         close(in_fd);
     /* wait for all child processes */
-    while (--i >= 0)
-        waitpid(pids[i], NULL, 0);
+    {
+        int status;
+        int j = 0;
+        while (j < num)
+        {
+            if (waitpid(pids[j], &status, 0) == -1)
+                perror("waitpid");
+            if (j == num - 1)
+            {
+                if (WIFEXITED(status))
+                    last_exit_code = WEXITSTATUS(status);
+                else if (WIFSIGNALED(status))
+                    last_exit_code = 128 + WTERMSIG(status);
+                else
+                    last_exit_code = 1;
+            }
+            j++;
+        }
+    }
     free(pids);
 }
