@@ -1,28 +1,16 @@
 #include "minishell.h"
 #include "libft/libft.h"
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include <sys/wait.h>
 
 static int count_segments(char **segments)
 {
-    int i;
-
-    i = 0;
+    int i = 0;
     while (segments && segments[i])
         i++;
-    return (i);
-}
-
-static void redirect_fds(int fd_in, int fd_out, int last)
-{
-    if (fd_in != STDIN_FILENO)
-    {
-        dup2(fd_in, STDIN_FILENO);
-        close(fd_in);
-    }
-    if (!last)
-    {
-        dup2(fd_out, STDOUT_FILENO);
-        close(fd_out);
-    }
+    return i;
 }
 
 static void execute_cmd(char **envp, char **cmd)
@@ -51,73 +39,55 @@ static void execute_cmd(char **envp, char **cmd)
     exit(last_exit_code);
 }
 
-static void run_child(char **envp, char **cmd, int fd_in, int fd_out, int last)
-{
-    redirect_fds(fd_in, fd_out, last);
-    execute_cmd(envp, cmd);
-}
-
-static void wait_children(pid_t *pids, int num)
-{
-    int status;
-    int i;
-
-    i = 0;
-    while (i < num)
-    {
-        if (waitpid(pids[i], &status, 0) == -1)
-            perror("waitpid");
-        if (i == num - 1)
-        {
-            if (WIFEXITED(status))
-                last_exit_code = WEXITSTATUS(status);
-            else if (WIFSIGNALED(status))
-                last_exit_code = 128 + WTERMSIG(status);
-            else
-                last_exit_code = 1;
-        }
-        i++;
-    }
-}
-
 void execute_pipeline(char **envp, char **segments)
 {
-    pid_t *pids;
+    int num = count_segments(segments);
+    pid_t *pids = malloc(sizeof(pid_t) * num);
+    int in_fd = STDIN_FILENO;
     int fd[2];
-    int in_fd;
-    int num;
     int i;
-    char **cmd;
 
-    num = count_segments(segments);
-    pids = malloc(sizeof(pid_t) * num);
     if (!pids)
-        return ;
-    in_fd = STDIN_FILENO;
-    i = 0;
-    while (i < num)
+        return;
+
+    for (i = 0; i < num; ++i)
     {
         if (i < num - 1 && pipe(fd) == -1)
         {
             perror("pipe");
-            break ;
+            break;
         }
-        cmd = ft_tokenize(segments[i], ' ', envp);
+
+        char **cmd = ft_tokenize(segments[i], ' ', envp);
         if (!cmd || !cmd[0])
         {
             free_cmd(cmd);
-            i++;
-            continue ;
+            if (i < num - 1)
+            {
+                close(fd[0]);
+                close(fd[1]);
+            }
+            continue;
         }
+
         pids[i] = fork();
         if (pids[i] == 0)
-            run_child(envp, cmd, in_fd, fd[1], i == num - 1);
-        else if (pids[i] < 0)
         {
-            perror("fork");
-            free_cmd(cmd);
-            break ;
+            // Child process
+            if (in_fd != STDIN_FILENO)
+            {
+                dup2(in_fd, STDIN_FILENO);
+                close(in_fd);
+            }
+            if (i < num - 1)
+            {
+                dup2(fd[1], STDOUT_FILENO);
+                close(fd[0]);
+                close(fd[1]);
+            }
+            execute_cmd(envp, cmd); // does not return
         }
+        // Parent process
         free_cmd(cmd);
         if (in_fd != STDIN_FILENO)
             close(in_fd);
@@ -126,11 +96,25 @@ void execute_pipeline(char **envp, char **segments)
             close(fd[1]);
             in_fd = fd[0];
         }
-        i++;
     }
     if (in_fd != STDIN_FILENO)
         close(in_fd);
-    wait_children(pids, i);
+
+    // Wait for all children and set exit code from the last
+    int status, last_status = 1;
+    for (int j = 0; j < i; ++j)
+    {
+        if (waitpid(pids[j], &status, 0) == -1)
+            perror("waitpid");
+        if (j == i - 1)
+        {
+            if (WIFEXITED(status))
+                last_exit_code = WEXITSTATUS(status);
+            else if (WIFSIGNALED(status))
+                last_exit_code = 128 + WTERMSIG(status);
+            else
+                last_exit_code = 1;
+        }
+    }
     free(pids);
 }
-

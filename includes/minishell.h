@@ -6,7 +6,7 @@
 /*   By: dimendon <dimendon@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/04 13:40:36 by dimendon          #+#    #+#             */
-/*   Updated: 2025/06/23 18:06:25 by dimendon         ###   ########.fr       */
+/*   Updated: 2025/06/25 18:13:07 by dimendon         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -44,7 +44,7 @@
 extern int  last_exit_code;
 
 // ==================== BUILTIN ====================
-short int   custom_cd(char **envp, char **args);
+short int   custom_cd(char ***envp, char **args);
 short int   custom_exit(char **args);
 short int   custom_echo(char **arg);
 short int   custom_pwd(void);
@@ -63,6 +63,7 @@ int         run_builtin(char ***envp, char **cmd);
 // ==================== HELPERS ====================
 int         execute_command(char *path, char **cmd, char **envp);
 void        execute_pipeline(char **envp, char **segments);
+char        **split_pipes(const char *line);
 short int   is_builtin(const char *cmd);
 char        **copy_envp(char **envp);
 int         env_size(char **env);

@@ -6,7 +6,7 @@
 /*   By: dimendon <dimendon@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/04 13:41:29 by dimendon          #+#    #+#             */
-/*   Updated: 2025/06/23 13:58:11 by dimendon         ###   ########.fr       */
+/*   Updated: 2025/06/25 16:02:31 by dimendon         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -51,6 +51,7 @@ int main(int argc, char **argv, char **envp)
         process_command(&env, line);
         free(line);
     }
+    free_cmd(env);
     return (0);
 }
 

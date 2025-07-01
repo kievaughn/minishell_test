@@ -1,15 +1,12 @@
 #include "minishell.h"
 #include "libft/libft.h"
+#include <stdlib.h>
 
 static size_t count_segments(const char *line)
 {
-    size_t i;
-    size_t count;
-    char quote;
-
-    i = 0;
-    count = 1;
-    quote = 0;
+    size_t i = 0;
+    size_t count = 1;
+    char quote = 0;
 
     while (line && line[i])
     {
@@ -21,26 +18,18 @@ static size_t count_segments(const char *line)
             count++;
         i++;
     }
-    return (count);
+    return count;
 }
 
-static void add_segment(char **arr, size_t *seg, size_t *start, size_t end, const char *line)
+char **split_pipes(const char *line)
 {
-    arr[*seg] = ft_substr(line, *start, end - *start);
-    *seg += 1;
-    *start = end + 1;
-}
+    size_t i = 0, start = 0, seg = 0;
+    char quote = 0;
+    size_t segments = count_segments(line);
+    char **arr = malloc(sizeof(char *) * (segments + 1));
+    if (!arr)
+        return NULL;
 
-static void fill_segments(char **arr, const char *line)
-{
-    size_t i;
-    size_t seg;
-    size_t start;
-    char quote;
-    i = 0;
-    seg = 0;
-    start = 0;
-    quote = 0;
     while (line && line[i])
     {
         if (!quote && (line[i] == '\'' || line[i] == '"'))
@@ -48,22 +37,13 @@ static void fill_segments(char **arr, const char *line)
         else if (quote && line[i] == quote)
             quote = 0;
         else if (!quote && line[i] == '|')
-            add_segment(arr, &seg, &start, i, line);
+        {
+            arr[seg++] = ft_substr(line, start, i - start);
+            start = i + 1;
+        }
         i++;
     }
     arr[seg++] = ft_substr(line, start, i - start);
     arr[seg] = NULL;
-}
-
-char **split_pipes(const char *line)
-{
-    size_t segments;
-    char **arr;
-
-    segments = count_segments(line);
-    arr = malloc(sizeof(char *) * (segments + 1));
-    if (!arr)
-        return (NULL);
-    fill_segments(arr, line);
-    return (arr);
+    return arr;
 }
