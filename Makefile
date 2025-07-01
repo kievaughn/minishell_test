@@ -39,10 +39,11 @@ SRCS =	        src/builtins/custom_export/export_check.c \
 				src/env/env_lookup.c \
 				src/env/env_utils.c \
 				src/misc/utils.c \
-				src/parsing/tokenize_command.c \
-				src/parsing/split_pipes.c \
-                src/piping/pipeline.c \
-                src/piping/pipeline_utils.c \
+src/parsing/tokenize_command.c \
+src/parsing/split_pipes.c \
+src/piping/pipeline.c \
+src/piping/redirections.c \
+src/piping/pipeline_utils.c \
 				src/cleanup.c \
 		        src/controller.c \
                 src/handlers.c \
