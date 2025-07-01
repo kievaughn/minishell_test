@@ -6,7 +6,7 @@
 /*   By: kievaughn <kievaughn@student.42.fr>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/04 13:40:36 by dimendon          #+#    #+#             */
-/*   Updated: 2025/07/01 18:08:01 by kievaughn        ###   ########.fr       */
+/*   Updated: 2025/07/01 19:48:47 by kievaughn        ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -81,6 +81,12 @@ void        execute_pipeline(char **envp, char **segments);
 char        **handle_redirections(char **cmd, int *in_fd, int *out_fd);
 
 // ==================== PARSING ====================
+void        remove_quotes(char *str);
+char        *append_literal(char *result, char *str, int start, int i);
+char        *expand_var(char *str, int *var_len);
+char        *append_expanded_var(char *result, char *str, int *i, char **envp);
+char        *build_expanded_str(char *str, char **envp);
+char        **split_redirs(char **arr);
 char        **tokenize_command(char const *s, char c, char **envp);
 char        **split_pipes(const char *line);
 

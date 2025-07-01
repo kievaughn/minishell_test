@@ -6,7 +6,7 @@
 #    By: kievaughn <kievaughn@student.42.fr>        +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2025/06/04 13:42:42 by dimendon          #+#    #+#              #
-#    Updated: 2025/07/01 18:06:15 by kievaughn        ###   ########.fr        #
+#    Updated: 2025/07/01 20:16:49 by kievaughn        ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -39,11 +39,14 @@ SRCS =	        src/builtins/custom_export/export_check.c \
 				src/env/env_lookup.c \
 				src/env/env_utils.c \
 				src/misc/utils.c \
-src/parsing/tokenize_command.c \
-src/parsing/split_pipes.c \
-src/piping/pipeline.c \
-src/piping/redirections.c \
-src/piping/pipeline_utils.c \
+				src/parsing/expander_utils.c \
+				src/parsing/expander.c \
+				src/parsing/redir_split.c \
+				src/parsing/split_pipes.c \
+				src/parsing/tokenize.c \
+				src/piping/pipeline.c \
+				src/piping/redirections.c \
+				src/piping/pipeline_utils.c \
 				src/cleanup.c \
 		        src/controller.c \
                 src/handlers.c \
