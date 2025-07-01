@@ -6,7 +6,7 @@
 /*   By: kievaughn <kievaughn@student.42.fr>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/13 18:22:38 by dimendon          #+#    #+#             */
-/*   Updated: 2025/07/01 15:25:32 by kievaughn        ###   ########.fr       */
+/*   Updated: 2025/07/01 17:37:56 by kievaughn        ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -39,15 +39,6 @@ int run_builtin(char ***envp, char **cmd)
     return (last_exit_code);
 }
 
-static int count_strings(char **arr)
-{
-    int i;
-
-    i = 0;
-    while (arr && arr[i])
-        i++;
-    return (i);
-}
 
 static void run_single(char ***envp, char *segment)
 {
@@ -56,7 +47,7 @@ static void run_single(char ***envp, char *segment)
     char *path;
     int     count;
   
-    cmd = ft_tokenize(segment, ' ', *envp);
+    cmd = tokenize_command(segment, ' ', *envp);
     segments = split_pipes(segment);
     if (!segments)
         return ;
@@ -69,7 +60,7 @@ static void run_single(char ***envp, char *segment)
         free_cmd(segments);
         return ;
     }
-    cmd = ft_tokenize(segments[0], ' ', *envp);
+    cmd = tokenize_command(segments[0], ' ', *envp);
     free_cmd(segments);
     if (!cmd || !cmd[0])
     {

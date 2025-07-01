@@ -3,17 +3,17 @@
 /*                                                        :::      ::::::::   */
 /*   custom_unset.c                                     :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: dimendon <dimendon@student.hive.fi>        +#+  +:+       +#+        */
+/*   By: kievaughn <kievaughn@student.42.fr>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/18 16:51:10 by dimendon          #+#    #+#             */
-/*   Updated: 2025/06/18 19:47:53 by dimendon         ###   ########.fr       */
+/*   Updated: 2025/07/01 17:29:17 by kievaughn        ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minishell.h"
 #include "../libft/libft.h"
 
-void remove_var(char ***envp, const char *var)
+static void remove_var(char ***envp, const char *var)
 {
     int i;
     int pos;

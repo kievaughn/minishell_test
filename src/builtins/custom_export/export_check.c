@@ -1,6 +1,6 @@
 #include "minishell.h"
 
-short int	check_update_env(char ***env, char **args)
+static short int	check_update_env(char ***env, char **args)
 {
 	int	arg_i;
 	short int	had_error;

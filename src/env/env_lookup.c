@@ -1,17 +1,17 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   utils.c                                            :+:      :+:    :+:   */
+/*   env_lookup.c                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: dimendon <dimendon@student.hive.fi>        +#+  +:+       +#+        */
+/*   By: kievaughn <kievaughn@student.42.fr>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/04 13:41:38 by dimendon          #+#    #+#             */
-/*   Updated: 2025/06/25 16:10:49 by dimendon         ###   ########.fr       */
+/*   Updated: 2025/07/01 18:08:13 by kievaughn        ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minishell.h"
-#include "libft/libft.h"
+#include "../libft/libft.h"
 
 char *get_env_value(char **envp, const char *name)
 {
@@ -29,7 +29,7 @@ char *get_env_value(char **envp, const char *name)
     return (NULL);
 }
 
-char **get_env_path(char **envp, const char *name)
+static char **split_path_dirs(char **envp, const char *name)
 {
     char *value;
 	
@@ -47,7 +47,7 @@ char *get_path(char **envp, char **cmd)
     char *tmp;
 
     finalpath = NULL;
-    paths = get_env_path(envp, "PATH");
+    paths = split_path_dirs(envp, "PATH");
     if (!paths)
         return NULL;
 

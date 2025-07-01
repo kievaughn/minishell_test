@@ -6,36 +6,34 @@
 /*   By: kievaughn <kievaughn@student.42.fr>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/04 13:40:36 by dimendon          #+#    #+#             */
-/*   Updated: 2025/07/01 15:21:52 by kievaughn        ###   ########.fr       */
+/*   Updated: 2025/07/01 18:08:01 by kievaughn        ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
-
-
 
 #ifndef MINISHELL_H
 # define MINISHELL_H
 
 // Standard C Library
-# include <stdio.h>             // printf, perror
-# include <stdlib.h>            // malloc, free, exit, getenv
-# include <string.h>            // strerror
+# include <stdio.h>    // printf, perror
+# include <stdlib.h>   // malloc, free, exit, getenv
+# include <string.h>   // strerror
 
 // POSIX System Calls
-# include <unistd.h>            // write, access, read, close, fork, getcwd, chdir, execve, dup, dup2, pipe, isatty, ttyname, ttyslot
-# include <sys/wait.h>          // wait, waitpid, wait3, wait4
-# include <sys/stat.h>          // stat, lstat, fstat
-# include <fcntl.h>             // open
-# include <sys/ioctl.h>         // ioctl
-# include <signal.h>            // signal, sigaction, sigemptyset, sigaddset, kill
+# include <unistd.h>   // write, access, read, close, fork, getcwd, chdir, execve, dup, dup2, pipe, isatty, ttyname, ttyslot
+# include <sys/wait.h> // wait, waitpid, wait3, wait4
+# include <sys/stat.h> // stat, lstat, fstat
+# include <fcntl.h>    // open
+# include <sys/ioctl.h>// ioctl
+# include <signal.h>   // signal, sigaction, sigemptyset, sigaddset, kill
 
 // Directory operations
-# include <dirent.h>            // opendir, readdir, closedir
+# include <dirent.h>   // opendir, readdir, closedir
 
 // Termcap Library
-# include <termcap.h>           // tgetent, tgetflag, tgetnum, tgetstr, tgoto, tputs
+# include <termcap.h>  // tgetent, tgetflag, tgetnum, tgetstr, tgoto, tputs
 
 // Terminal attributes
-# include <termios.h>           // tcsetattr, tcgetattr
+# include <termios.h>  // tcsetattr, tcgetattr
 
 // GNU Readline Library
 # include <readline/readline.h> // readline, add_history
@@ -43,55 +41,51 @@
 
 extern int  last_exit_code;
 
-// ==================== BUILTIN ====================
+// ==================== BUILTINS ====================
 short int   custom_cd(char ***envp, char **args);
-short int   custom_exit(char **args);
 short int   custom_echo(char **arg);
-short int   custom_pwd(void);
-short int	check_update_env(char ***env, char **args);
-short int	custom_export(char ***env, char **args);
-void	    print_env(char **env, int *index, int size);
-int         update_or_add_env(char ***env, char *arg);
-int         is_valid_name(const char *name);
-void	    sort_index(char **env, int *index, int size);
-void	    init_export_index(int *index, int size);
-short int   custom_unset(char ***envp, char **args);
 short int   custom_env(char **envp);
-// ==================== CLEANUP ====================
-void        free_cmd(char **cmd);
+short int   custom_exit(char **args);
+short int   custom_export(char ***env, char **args);
+short int   custom_pwd(void);
+short int   custom_unset(char ***envp, char **args);
+void        print_env(char **env, int *index, int size);
+void        sort_index(char **env, int *index, int size);
+void        init_export_index(int *index, int size);
+int         is_valid_name(const char *name);
+int         update_or_add_env(char ***env, char *arg);
 
 // ==================== CONTROLLER ====================
 void        process_command(char ***envp, char *line);
 
 // ==================== HANDLER ====================
 int         run_builtin(char ***envp, char **cmd);
-
-// ==================== HELPERS ====================
 int         execute_command(char *path, char **cmd, char **envp);
-void        execute_pipeline(char **envp, char **segments);
-char        **split_pipes(const char *line);
-short int   is_builtin(const char *cmd);
-char        **copy_envp(char **envp);
-int         env_size(char **env);
-char        **env_realloc_add(char **env);
-int         env_add(char ***env_ptr, const char *new_var);
-void        process_command(char ***envp, char *line);
 
-// ==================== HANDLER ====================
-int     execute_command(char *path, char **cmd, char **envp);
-
-// ==================== HELPERS ====================
-char    **copy_envp(char **envp);
-int     env_size(char **env);
-int     env_add(char ***env_ptr, const char *new_var);
-
-// ==================== UTILS ====================
+// ==================== ENV LOOKUP ====================
 char    *get_env_value(char **envp, const char *name);
-char    **get_env_path(char **envp, const char *name);
 char    *get_path(char **envp, char **cmd);
 
+// ==================== ENV UTILS ====================
+char    **copy_envp(char **envp);
+int      env_size(char **env);
+char    **env_realloc_add(char **env);
+int      env_add(char ***env_ptr, const char *new_var);
+
+// ==================== PIPING ====================
+void        execute_cmd(char **envp, char **cmd);
+void        close_pipe(int *fd);
+void        parent_cleanup(int *in_fd, int *fd, int i, int num);
+void        wait_for_all(pid_t *pids, int count);
+void        execute_pipeline(char **envp, char **segments);
+
 // ==================== PARSING ====================
-char    **ft_tokenize(char const *s, char c, char **envp);
-char    **split_pipes(const char *line);
+char        **tokenize_command(char const *s, char c, char **envp);
+char        **split_pipes(const char *line);
+
+// ==================== MISC ====================
+void        free_cmd(char **cmd);
+short int   is_builtin(const char *cmd);
+int         count_strings(char **arr);
 
 #endif

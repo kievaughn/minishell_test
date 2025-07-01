@@ -204,7 +204,7 @@ char *build_expanded_str(char *str, char **envp)
     return (result);
 }
 
-char    **ft_tokenize(char const *s, char c, char **envp)
+char    **tokenize_command(char const *s, char c, char **envp)
 {
         char    **arr;
         int             i;

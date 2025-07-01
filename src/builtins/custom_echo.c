@@ -6,14 +6,14 @@
 /*   By: kievaughn <kievaughn@student.42.fr>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/13 18:15:55 by dimendon          #+#    #+#             */
-/*   Updated: 2025/07/01 15:17:05 by kievaughn        ###   ########.fr       */
+/*   Updated: 2025/07/01 17:28:56 by kievaughn        ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minishell.h"
 #include "../libft/libft.h"
 
-int	skip_n_flags(char **arg, int start)
+static int	skip_n_flags(char **arg, int start)
 {
 	int	i;
 	int	j;
