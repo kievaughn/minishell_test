@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   controller.c                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: dimendon <dimendon@student.hive.fi>        +#+  +:+       +#+        */
+/*   By: kievaughn <kievaughn@student.42.fr>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/13 18:22:38 by dimendon          #+#    #+#             */
-/*   Updated: 2025/06/25 18:14:09 by dimendon         ###   ########.fr       */
+/*   Updated: 2025/07/01 15:25:32 by kievaughn        ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -57,7 +57,7 @@ static void run_single(char ***envp, char *segment)
     int     count;
   
     cmd = ft_tokenize(segment, ' ', *envp);
-    segments = split_pipes(line);
+    segments = split_pipes(segment);
     if (!segments)
         return ;
     count = 0;

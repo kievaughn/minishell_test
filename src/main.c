@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   main.c                                             :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: dimendon <dimendon@student.hive.fi>        +#+  +:+       +#+        */
+/*   By: kievaughn <kievaughn@student.42.fr>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/04 13:41:29 by dimendon          #+#    #+#             */
-/*   Updated: 2025/06/25 16:02:31 by dimendon         ###   ########.fr       */
+/*   Updated: 2025/07/01 15:25:44 by kievaughn        ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,7 +24,7 @@ void sigint_handler(int signum)
     write(STDOUT_FILENO, "\n", 1);
 
     rl_on_new_line();
-    rl_replace_line("", 0);
+//    rl_replace_line("", 0);
     rl_redisplay();
 }
 

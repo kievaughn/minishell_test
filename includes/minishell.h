@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   minishell.h                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: dimendon <dimendon@student.hive.fi>        +#+  +:+       +#+        */
+/*   By: kievaughn <kievaughn@student.42.fr>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/04 13:40:36 by dimendon          #+#    #+#             */
-/*   Updated: 2025/06/25 18:13:07 by dimendon         ###   ########.fr       */
+/*   Updated: 2025/07/01 15:21:52 by kievaughn        ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -48,7 +48,13 @@ short int   custom_cd(char ***envp, char **args);
 short int   custom_exit(char **args);
 short int   custom_echo(char **arg);
 short int   custom_pwd(void);
-short int   custom_export(char ***env, char **args);
+short int	check_update_env(char ***env, char **args);
+short int	custom_export(char ***env, char **args);
+void	    print_env(char **env, int *index, int size);
+int         update_or_add_env(char ***env, char *arg);
+int         is_valid_name(const char *name);
+void	    sort_index(char **env, int *index, int size);
+void	    init_export_index(int *index, int size);
 short int   custom_unset(char ***envp, char **args);
 short int   custom_env(char **envp);
 // ==================== CLEANUP ====================

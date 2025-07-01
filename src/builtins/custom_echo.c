@@ -3,74 +3,92 @@
 /*                                                        :::      ::::::::   */
 /*   custom_echo.c                                      :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: dimendon <dimendon@student.hive.fi>        +#+  +:+       +#+        */
+/*   By: kievaughn <kievaughn@student.42.fr>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/13 18:15:55 by dimendon          #+#    #+#             */
-/*   Updated: 2025/06/25 15:31:18 by dimendon         ###   ########.fr       */
+/*   Updated: 2025/07/01 15:17:05 by kievaughn        ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minishell.h"
 #include "../libft/libft.h"
 
-int skip_n_flags(char **arg, int start)
+int	skip_n_flags(char **arg, int start)
 {
-    int i;
-    int j;
-    int all_n;
-    
-    i = start;
-    while (arg[i] && ft_strncmp(arg[i], "-n", 2) == 0)
-    {
-        j = 1;
-        all_n = 1;
-        while (arg[i][j])
-        {
-            if (arg[i][j] != 'n')
-            {
-                all_n = 0;
-                break;
-            }
-            j++;
-        }
-        if (!all_n)
-            break;
-        i++;
-    }
-    return i;
+	int	i;
+	int	j;
+	int	all_n;
+
+	i = start;
+	while (arg[i] && ft_strncmp(arg[i], "-n", 2) == 0)
+	{
+		j = 1;
+		all_n = 1;
+		while (arg[i][j])
+		{
+			if (arg[i][j] != 'n')
+			{
+				all_n = 0;
+				break ;
+			}
+			j++;
+		}
+		if (!all_n)
+			break ;
+		i++;
+	}
+	return (i);
 }
 
-short int custom_echo(char **arg)
+/*
+** Writes one argument for echo, handling $?.
+*/
+static int	write_echo_arg(const char *arg)
 {
-    int i = 1;
-    int flag_newline = 1;
-    char *code;
+	char	*code;
 
-    i = skip_n_flags(arg, i);
-    if (i > 1)
-        flag_newline = 0;
+	if (ft_strncmp(arg, "$?", 3) == 0)
+	{
+		code = ft_itoa(last_exit_code);
+		if (!code)
+			return (1);
+		write(1, code, ft_strlen(code));
+		free(code);
+	}
+	else
+		write(1, arg, ft_strlen(arg));
+	return (0);
+}
 
-    while (arg[i])
-    {
-        if (ft_strncmp(arg[i], "$?", 3) == 0)
-        {
-            code = ft_itoa(last_exit_code);
-            if (!code)
-                return (1);
-            write(1, code, ft_strlen(code));
-            free(code);
-        }
-        else
-        {
-            write(1, arg[i], ft_strlen(arg[i]));
-        }
+static int	print_echo_args(char **arg, int start)
+{
+	int	i;
 
-        if (arg[i + 1])
-            write(1, " ", 1);
-        i++;
-    }
-    if (flag_newline)
-        write(1, "\n", 1);
+	i = start;
+	while (arg[i])
+	{
+		if (write_echo_arg(arg[i]))
+			return (1);
+		if (arg[i + 1])
+			write(1, " ", 1);
+		i++;
+	}
+	return (0);
+}
 
-    return (0);
+short int	custom_echo(char **arg)
+{
+	int		i;
+	int		flag_newline;
+
+	i = 1;
+	flag_newline = 1;
+	i = skip_n_flags(arg, i);
+	if (i > 1)
+		flag_newline = 0;
+	if (print_echo_args(arg, i))
+		return (1);
+	if (flag_newline)
+		write(1, "\n", 1);
+	return (0);
 }

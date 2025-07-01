@@ -3,10 +3,10 @@
 #                                                         :::      ::::::::    #
 #    Makefile                                           :+:      :+:    :+:    #
 #                                                     +:+ +:+         +:+      #
-#    By: dimendon <dimendon@student.hive.fi>        +#+  +:+       +#+         #
+#    By: kievaughn <kievaughn@student.42.fr>        +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2025/06/04 13:42:42 by dimendon          #+#    #+#              #
-#    Updated: 2025/06/25 18:13:44 by dimendon         ###   ########.fr        #
+#    Updated: 2025/07/01 15:17:51 by kievaughn        ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -30,7 +30,10 @@ SRCS =	        src/builtins/custom_cd.c \
 		            src/builtins/custom_echo.c \
                 src/builtins/custom_exit.c \
                 src/builtins/custom_pwd.c \
-                src/builtins/custom_export.c \
+                src/builtins/custom_export/export_check.c \
+				src/builtins/custom_export/export_env.c \
+				src/builtins/custom_export/export_print.c \
+				src/builtins/custom_export/export_utils.c \
                 src/builtins/custom_env.c \
                 src/builtins/custom_unset.c \
 				        src/parsing/ft_tokenize.c \
