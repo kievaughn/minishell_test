@@ -6,7 +6,7 @@
 /*   By: dimendon <dimendon@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/16 16:02:23 by dimendon          #+#    #+#             */
-/*   Updated: 2025/06/23 19:45:21 by dimendon         ###   ########.fr       */
+/*   Updated: 2025/06/25 13:08:47 by dimendon         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -103,7 +103,7 @@ short int check_update_env(char ***env, char **args)
     {
         if(!is_valid_name(args[arg_i]))
         {
-            fprintf(stderr, "export: not an identifier: %s \n", args[arg_i]);
+            fprintf(stderr, "minishell: export: `%s': not a valid identifier\n", args[arg_i]);
             had_error = -1;
             arg_i++;
             continue;

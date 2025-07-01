@@ -6,12 +6,13 @@
 /*   By: dimendon <dimendon@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/13 18:22:36 by dimendon          #+#    #+#             */
-/*   Updated: 2025/06/18 17:51:47 by dimendon         ###   ########.fr       */
+/*   Updated: 2025/06/25 13:35:04 by dimendon         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minishell.h"
 #include "libft/libft.h"
+#include <errno.h>
 
 int execute_command(char *path, char **cmd, char **envp)
 {
@@ -21,11 +22,9 @@ int execute_command(char *path, char **cmd, char **envp)
     pid = fork();
     if (pid == 0)
     {
-        if (execve(path, cmd, envp) == -1)
-        {
-            perror("execve");
-            _exit(127);
-        }
+        execve(path, cmd, envp);
+        perror("execve");
+        _exit(127);
     }
     else if (pid > 0)
     {
@@ -34,7 +33,6 @@ int execute_command(char *path, char **cmd, char **envp)
             perror("waitpid");
             return 1;
         }
-
         if (WIFEXITED(status))
             return WEXITSTATUS(status);
         else if (WIFSIGNALED(status))
@@ -47,5 +45,6 @@ int execute_command(char *path, char **cmd, char **envp)
         perror("fork");
         return 1;
     }
-        return 1;
 }
+
+

@@ -6,7 +6,7 @@
 /*   By: dimendon <dimendon@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/04 13:41:38 by dimendon          #+#    #+#             */
-/*   Updated: 2025/06/13 18:22:28 by dimendon         ###   ########.fr       */
+/*   Updated: 2025/06/25 16:10:49 by dimendon         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -46,17 +46,19 @@ char *get_path(char **envp, char **cmd)
     char *finalpath;
     char *tmp;
 
-	i = 0;
-	paths = get_env_path(envp, "PATH");
-	finalpath = NULL;
-	tmp = NULL;
-    while (paths && paths[i])
-    {
-        tmp = ft_strcatrealloc(paths[i], "/");
-        if (tmp)
-            tmp = ft_strcatrealloc(tmp, cmd[0]);
+    finalpath = NULL;
+    paths = get_env_path(envp, "PATH");
+    if (!paths)
+        return NULL;
 
-        if (tmp && access(tmp, F_OK) == 0)
+    i = 0;
+    while (paths[i])
+    {
+        tmp = NULL;
+        tmp = ft_strcatrealloc(tmp, paths[i]);
+        tmp = ft_strcatrealloc(tmp, "/");
+        tmp = ft_strcatrealloc(tmp, cmd[0]);
+        if (tmp && access(tmp, F_OK | X_OK) == 0)
         {
             finalpath = ft_strdup(tmp);
             free(tmp);
@@ -65,5 +67,11 @@ char *get_path(char **envp, char **cmd)
         free(tmp);
         i++;
     }
+    i = 0;
+    while (paths[i])
+        free(paths[i++]);
+    free(paths);
+
     return (finalpath);
 }
+

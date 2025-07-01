@@ -6,7 +6,7 @@
 #    By: dimendon <dimendon@student.hive.fi>        +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2025/06/04 13:42:42 by dimendon          #+#    #+#              #
-#    Updated: 2025/06/18 19:55:58 by dimendon         ###   ########.fr        #
+#    Updated: 2025/06/25 18:13:44 by dimendon         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -15,6 +15,10 @@
 
 CC      = cc
 CFLAGS  = -Wall -Wextra -Werror -I./includes -I./src/libft
+
+VALGRIND = valgrind --leak-check=full --track-origins=yes --trace-children-skip='*/bin/*,*/sbin/*,/usr/bin/*' \
+--trace-children=yes --track-fds=yes --suppressions=readline.supp
+
 LDFLAGS = -lreadline -lncurses
 
 TARGET      = minishell
@@ -35,7 +39,7 @@ SRCS =	        src/builtins/custom_cd.c \
                 src/handlers.c \
                 src/helpers.c \
                 src/pipeline.c \
-                src/split_pipes.c \
+				src/split_pipes.c \
                 src/main.c \
                 src/utils.c
 
@@ -62,6 +66,11 @@ $(TARGET): $(OBJS)
 $(LIBFT_LIB):
 	@$(MAKE) --no-print-directory -C $(LIBFT_DIR) build
 
+# Run with Valgrind
+run: $(TARGET)
+	@echo "$(YELLOW)Running with Valgrind...$(RESET)"
+	$(VALGRIND) ./$(TARGET)
+
 clean:
 	@printf "$(YELLOW)Cleaning object files (minishell)...$(RESET)\n"
 	@rm -f $(OBJS)
@@ -75,5 +84,5 @@ fclean: clean
 
 re: fclean all
 
-.PHONY: all clean fclean re
+.PHONY: all clean fclean re run
 

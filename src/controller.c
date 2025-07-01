@@ -6,7 +6,7 @@
 /*   By: dimendon <dimendon@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/13 18:22:38 by dimendon          #+#    #+#             */
-/*   Updated: 2025/06/23 18:08:34 by dimendon         ###   ########.fr       */
+/*   Updated: 2025/06/25 18:14:09 by dimendon         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,7 +18,7 @@ int run_builtin(char ***envp, char **cmd)
     if (!ft_strncmp(cmd[0], "echo", 5))
         last_exit_code = custom_echo(cmd);
     else if (!ft_strncmp(cmd[0], "cd", 3))
-        last_exit_code = custom_cd(*envp, cmd);
+        last_exit_code = custom_cd(envp, cmd);
     else if (!ft_strncmp(cmd[0], "pwd", 4))
         last_exit_code = custom_pwd();
     else if (!ft_strncmp(cmd[0], "export", 7))
