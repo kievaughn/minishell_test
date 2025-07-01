@@ -78,6 +78,7 @@ void        close_pipe(int *fd);
 void        parent_cleanup(int *in_fd, int *fd, int i, int num);
 void        wait_for_all(pid_t *pids, int count);
 void        execute_pipeline(char **envp, char **segments);
+char        **handle_redirections(char **cmd, int *in_fd, int *out_fd);
 
 // ==================== PARSING ====================
 char        **tokenize_command(char const *s, char c, char **envp);

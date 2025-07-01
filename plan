@@ -17,11 +17,11 @@ Phase 2: Command Parsing
 DONE:  
 - Basic tokenization by splitting input line on spaces (ft_split(line, ' ')).
 - Handle quotes (single ' and double ").
+- Parse and associate redirection operators (>, >>, <).
 
 TO DO:  
 - Implement escape sequences (\).  
 - Expand environment variables ($VAR).  
-- Parse and associate redirection operators (>, >>, <).  
 - Parse pipes (|) and correctly associate them with commands.  
 - Build internal data structures (linked lists/arrays) to represent parsed commands and operators.
 
@@ -67,17 +67,13 @@ TO DO:
 
 ------------------------------------------------------------------------------
 
-Phase 5: Redirections  
-DONE:  
-- None yet.
+Phase 5: Redirections
+DONE:
+- Implement input/output redirection using open(), dup2(), and close().
+- Support >, >>, and < operators with built-in and external commands.
 
-TO DO:  
-- Implement input/output redirection:  
-  - Output redirection > (overwrite)  
-  - Append output >>  
-  - Input redirection <  
-- Use open(), dup2(), and close() for file descriptor management.  
-- Support redirections alongside built-in and external commands.
+TO DO:
+- Expand test coverage for combined pipes and redirections.
 
 ------------------------------------------------------------------------------
 
