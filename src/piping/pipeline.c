@@ -1,22 +1,39 @@
 #include "minishell.h"
 
-static void	child_process(
-	char **envp, char **cmd, int in_fd, int *fd, int last
+static void     child_process(
+        char **envp, char **cmd, int in_fd, int *fd, int last
 )
 {
-	if (in_fd != STDIN_FILENO)
-	{
-		dup2(in_fd, STDIN_FILENO);
-		close(in_fd);
-	}
-	if (!last)
-	{
-		dup2(fd[1], STDOUT_FILENO);
-		close(fd[0]);
-		close(fd[1]);
-	}
-	execute_cmd(envp, cmd);
+        int     redir_in;
+        int     redir_out;
+
+        redir_in = STDIN_FILENO;
+        redir_out = STDOUT_FILENO;
+        cmd = handle_redirections(cmd, &redir_in, &redir_out);
+        if (redir_in != STDIN_FILENO)
+        {
+                dup2(redir_in, STDIN_FILENO);
+                close(redir_in);
+        }
+        else if (in_fd != STDIN_FILENO)
+        {
+                dup2(in_fd, STDIN_FILENO);
+                close(in_fd);
+        }
+        if (!last && redir_out == STDOUT_FILENO)
+                dup2(fd[1], STDOUT_FILENO);
+        else if (redir_out != STDOUT_FILENO)
+                dup2(redir_out, STDOUT_FILENO);
+        if (!last)
+        {
+                close(fd[0]);
+                close(fd[1]);
+        }
+        if (redir_out != STDOUT_FILENO)
+                close(redir_out);
+        execute_cmd(envp, cmd);
 }
+
 
 static int	pipeline_step(
 	char **envp, char **segments, pid_t *pids,
