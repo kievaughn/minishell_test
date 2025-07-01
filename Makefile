@@ -27,19 +27,19 @@ LIBFT_DIR   = src/libft
 LIBFT_LIB   = $(LIBFT_DIR)/libft.a
 
 SRCS =	        src/builtins/custom_cd.c \
-		        src/builtins/custom_echo.c \
+		            src/builtins/custom_echo.c \
                 src/builtins/custom_exit.c \
                 src/builtins/custom_pwd.c \
                 src/builtins/custom_export.c \
                 src/builtins/custom_env.c \
                 src/builtins/custom_unset.c \
-				src/parsing/ft_tokenize.c \
-		        src/cleanup.c \
-		        src/controller.c \
+				        src/parsing/ft_tokenize.c \
+		            src/cleanup.c \
+		            src/controller.c \
                 src/handlers.c \
                 src/helpers.c \
                 src/pipeline.c \
-				src/split_pipes.c \
+                src/split_pipes.c \
                 src/main.c \
                 src/utils.c
 

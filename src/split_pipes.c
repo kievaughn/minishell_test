@@ -1,5 +1,6 @@
 #include "minishell.h"
 #include "libft/libft.h"
+#include <stdlib.h>
 
 static size_t count_segments(const char *line)
 {
@@ -22,15 +23,13 @@ static size_t count_segments(const char *line)
 
 char **split_pipes(const char *line)
 {
-    size_t i = 0;
-    size_t start = 0;
-    size_t seg = 0;
+    size_t i = 0, start = 0, seg = 0;
     char quote = 0;
     size_t segments = count_segments(line);
     char **arr = malloc(sizeof(char *) * (segments + 1));
-
     if (!arr)
         return NULL;
+
     while (line && line[i])
     {
         if (!quote && (line[i] == '\'' || line[i] == '"'))

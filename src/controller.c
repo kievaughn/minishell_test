@@ -39,26 +39,24 @@ int run_builtin(char ***envp, char **cmd)
     return (last_exit_code);
 }
 
-short int is_builtin(const char *cmd)
+static int count_strings(char **arr)
 {
-    return (
-        ft_strncmp(cmd, "echo", 5) == 0 ||
-        ft_strncmp(cmd, "cd", 3) == 0 ||
-        ft_strncmp(cmd, "pwd", 4) == 0 ||
-        ft_strncmp(cmd, "export", 7) == 0 ||
-        ft_strncmp(cmd, "unset", 6) == 0 ||
-        ft_strncmp(cmd, "env", 4) == 0 ||
-        ft_strncmp(cmd, "exit", 5) == 0
-    );
+    int i;
+
+    i = 0;
+    while (arr && arr[i])
+        i++;
+    return (i);
 }
 
-void process_command(char ***envp, char *line)
+static void run_single(char ***envp, char *segment)
 {
     char **segments;
     char **cmd;
     char *path;
     int     count;
-
+  
+    cmd = ft_tokenize(segment, ' ', *envp);
     segments = split_pipes(line);
     if (!segments)
         return ;
@@ -76,7 +74,7 @@ void process_command(char ***envp, char *line)
     if (!cmd || !cmd[0])
     {
         free_cmd(cmd);
-        return;
+        return ;
     }
     if (is_builtin(cmd[0]))
         run_builtin(envp, cmd);
@@ -95,4 +93,33 @@ void process_command(char ***envp, char *line)
         }
     }
     free_cmd(cmd);
+}
+
+short int is_builtin(const char *cmd)
+{
+    return (
+        ft_strncmp(cmd, "echo", 5) == 0 ||
+        ft_strncmp(cmd, "cd", 3) == 0 ||
+        ft_strncmp(cmd, "pwd", 4) == 0 ||
+        ft_strncmp(cmd, "export", 7) == 0 ||
+        ft_strncmp(cmd, "unset", 6) == 0 ||
+        ft_strncmp(cmd, "env", 4) == 0 ||
+        ft_strncmp(cmd, "exit", 5) == 0
+    );
+}
+
+void process_command(char ***envp, char *line)
+{
+    char **segments;
+    int count;
+
+    segments = split_pipes(line);
+    if (!segments)
+        return ;
+    count = count_strings(segments);
+    if (count > 1)
+        execute_pipeline(*envp, segments);
+    else
+        run_single(envp, segments[0]);
+    free_cmd(segments);
 }
