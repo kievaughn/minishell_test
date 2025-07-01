@@ -42,31 +42,35 @@ int run_builtin(char ***envp, char **cmd)
 
 static void run_single(char ***envp, char *segment)
 {
-    char **segments;
     char **cmd;
     char *path;
-    int     count;
-  
+    int in_fd;
+    int out_fd;
+    int save_in;
+    int save_out;
+
+    in_fd = STDIN_FILENO;
+    out_fd = STDOUT_FILENO;
     cmd = tokenize_command(segment, ' ', *envp);
-    segments = split_pipes(segment);
-    if (!segments)
+    if (!cmd)
         return ;
-    count = 0;
-    while (segments[count])
-        count++;
-    if (count > 1)
-    {
-        execute_pipeline(*envp, segments);
-        free_cmd(segments);
-        return ;
-    }
-    cmd = tokenize_command(segments[0], ' ', *envp);
-    free_cmd(segments);
+    cmd = handle_redirections(cmd, &in_fd, &out_fd);
     if (!cmd || !cmd[0])
     {
         free_cmd(cmd);
         return ;
     }
+
+    save_in = dup(STDIN_FILENO);
+    save_out = dup(STDOUT_FILENO);
+    if (in_fd != STDIN_FILENO)
+    {
+        dup2(in_fd, STDIN_FILENO);
+        close(in_fd);
+    }
+    if (out_fd != STDOUT_FILENO)
+        dup2(out_fd, STDOUT_FILENO);
+
     if (is_builtin(cmd[0]))
         run_builtin(envp, cmd);
     else
@@ -83,6 +87,17 @@ static void run_single(char ***envp, char *segment)
             last_exit_code = 127;
         }
     }
+
+    if (out_fd != STDOUT_FILENO)
+    {
+        close(out_fd);
+        dup2(save_out, STDOUT_FILENO);
+    }
+    if (in_fd != STDIN_FILENO)
+        dup2(save_in, STDIN_FILENO);
+    close(save_in);
+    close(save_out);
+
     free_cmd(cmd);
 }
 
