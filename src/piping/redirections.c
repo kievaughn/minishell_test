@@ -1,7 +1,5 @@
 #include "minishell.h"
 #include "../libft/libft.h"
-#include <fcntl.h>
-#include <readline/readline.h>
 
 static void open_infile(char *file, int *in_fd)
 {
