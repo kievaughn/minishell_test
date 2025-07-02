@@ -92,16 +92,24 @@ char    **tokenize_command(char const *s, char c, char **envp)
                 arr[i] = ft_substr((char *)s, 0, len);
                 if (!arr[i])
                         return (free_arr(arr, i), NULL);
-                if(arr[i][0] != '\'')
-                {
-                        char *expanded = build_expanded_str(arr[i], envp);
-                        free(arr[i]);
-                        arr[i] = expanded;
-                }
-                remove_quotes(arr[i]);
-                i++;
-                s += len;
-        }
-        arr[i] = NULL;
-        return (split_redirs(arr));
+               if(arr[i][0] != '\'')
+               {
+                       char *expanded = build_expanded_str(arr[i], envp);
+                       free(arr[i]);
+                       arr[i] = expanded;
+               }
+               i++;
+               s += len;
+       }
+       arr[i] = NULL;
+       arr = split_redirs(arr);
+       if (!arr)
+               return (NULL);
+       i = 0;
+       while (arr[i])
+       {
+               remove_quotes(arr[i]);
+               i++;
+       }
+       return (arr);
 }
