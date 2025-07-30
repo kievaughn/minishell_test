@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   minishell.h                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: kievaughn <kievaughn@student.42.fr>        +#+  +:+       +#+        */
+/*   By: dimendon <dimendon@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/04 13:40:36 by dimendon          #+#    #+#             */
-/*   Updated: 2025/07/01 19:48:47 by kievaughn        ###   ########.fr       */
+/*   Updated: 2025/07/30 15:23:00 by dimendon         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -39,7 +39,7 @@
 # include <readline/readline.h> // readline, add_history
 # include <readline/history.h>  // rl_clear_history, rl_on_new_line, rl_replace_line, rl_redisplay
 
-extern int  last_exit_code;
+extern int  g_exit_code;
 
 // ==================== BUILTINS ====================
 short int   custom_cd(char ***envp, char **args);
@@ -57,20 +57,27 @@ int         update_or_add_env(char ***env, char *arg);
 
 // ==================== CONTROLLER ====================
 void        process_command(char ***envp, char *line);
+int         run_builtin(char ***envp, char **cmd);
+
+// ==================== CONTROLLER_HELPER ====================
+int         is_folder(char *arg);
+char        **prepare_command(char *segment, int *in_fd, int *out_fd, char ***envp);
+void        setup_redirections(int in_fd, int out_fd, int *save_in, int *save_out);
+void        restore_redirections(int in_fd, int out_fd, int save_in, int save_out);
+short int   is_builtin(const char *cmd);
 
 // ==================== HANDLER ====================
-int         run_builtin(char ***envp, char **cmd);
 int         execute_command(char *path, char **cmd, char **envp);
 
 // ==================== ENV LOOKUP ====================
-char    *get_env_value(char **envp, const char *name);
-char    *get_path(char **envp, char **cmd);
+char        *get_env_value(char **envp, const char *name);
+char        *get_path(char **envp, char **cmd);
 
 // ==================== ENV UTILS ====================
-char    **copy_envp(char **envp);
-int      env_size(char **env);
-char    **env_realloc_add(char **env);
-int      env_add(char ***env_ptr, const char *new_var);
+char        **copy_envp(char **envp);
+int         env_size(char **env);
+char        **env_realloc_add(char **env);
+int         env_add(char ***env_ptr, const char *new_var);
 
 // ==================== PIPING ====================
 void        execute_cmd(char **envp, char **cmd);

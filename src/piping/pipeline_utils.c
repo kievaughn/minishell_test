@@ -7,7 +7,7 @@ void execute_cmd(char **envp, char **cmd)
     {
         run_builtin(&envp, cmd);
         free_cmd(cmd);
-        exit(last_exit_code);
+        exit(g_exit_code);
     }
     path = get_path(envp, cmd);
     if (path)
@@ -15,15 +15,15 @@ void execute_cmd(char **envp, char **cmd)
         execve(path, cmd, envp);
         perror("execve");
         free(path);
-        last_exit_code = 126;
+        g_exit_code = 126;
     }
     else
     {
         fprintf(stderr, "Command not found: %s\n", cmd[0]);
-        last_exit_code = 127;
+        g_exit_code = 127;
     }
     free_cmd(cmd);
-    exit(last_exit_code);
+    exit(g_exit_code);
 }
 
 void close_pipe(int *fd)
@@ -56,11 +56,11 @@ void wait_for_all(pid_t *pids, int count)
         if (i == count - 1)
         {
             if (WIFEXITED(status))
-                last_exit_code = WEXITSTATUS(status);
+                g_exit_code = WEXITSTATUS(status);
             else if (WIFSIGNALED(status))
-                last_exit_code = 128 + WTERMSIG(status);
+                g_exit_code = 128 + WTERMSIG(status);
             else
-                last_exit_code = 1;
+                g_exit_code = 1;
         }
         i++;
     }

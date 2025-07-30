@@ -10,8 +10,15 @@ static void     child_process(
         redir_in = STDIN_FILENO;
         redir_out = STDOUT_FILENO;
         cmd = handle_redirections(cmd, &redir_in, &redir_out);
+		if (cmd == NULL)
+    		exit(1);
         if (redir_in != STDIN_FILENO)
         {
+			if (redir_in < 0)
+			{
+				perror("Input redirection");
+				exit(1);
+			}
                 dup2(redir_in, STDIN_FILENO);
                 close(redir_in);
         }
@@ -23,7 +30,14 @@ static void     child_process(
         if (!last && redir_out == STDOUT_FILENO)
                 dup2(fd[1], STDOUT_FILENO);
         else if (redir_out != STDOUT_FILENO)
-                dup2(redir_out, STDOUT_FILENO);
+		{
+			if (redir_out < 0)
+			{
+				perror("Output redirection");
+				exit(1);
+			}
+			dup2(redir_out, STDOUT_FILENO);
+		}
         if (!last)
         {
                 close(fd[0]);
@@ -47,6 +61,7 @@ static int	pipeline_step(
 		perror("pipe");
 		return (0);
 	}
+
 	cmd = tokenize_command(segments[i], ' ', envp);
 	if (!cmd || !cmd[0])
 	{

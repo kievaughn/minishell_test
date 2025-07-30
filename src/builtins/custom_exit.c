@@ -6,7 +6,7 @@
 /*   By: dimendon <dimendon@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/13 18:15:52 by dimendon          #+#    #+#             */
-/*   Updated: 2025/06/23 19:53:56 by dimendon         ###   ########.fr       */
+/*   Updated: 2025/07/30 13:45:21 by dimendon         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,7 +20,7 @@ short int custom_exit(char **args)
     if (args[1] && args[2])
     {
         fprintf(stderr, "exit: too many arguments\n");
-        last_exit_code = 1;
+        g_exit_code = 1;
         return (1);
     }
     printf("exit\n");
@@ -34,5 +34,5 @@ short int custom_exit(char **args)
         exit((unsigned char)value);
     }
 
-    exit(last_exit_code);
+    exit(g_exit_code);
 }

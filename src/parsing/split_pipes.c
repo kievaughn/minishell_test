@@ -1,7 +1,6 @@
 #include "minishell.h"
 #include "../libft/libft.h"
 
-
 static size_t count_segments(const char *line)
 {
     size_t i = 0;

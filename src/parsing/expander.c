@@ -16,7 +16,7 @@ static char    *append_exit_code(char *result, int *i, char *str, int *handled)
     if (!(result = append_literal(result, str, 0, *i)))
         return (NULL);
 
-    exit_code_str = ft_itoa(last_exit_code);
+    exit_code_str = ft_itoa(g_exit_code);
     if (!exit_code_str)
         return (free(result), NULL);
 

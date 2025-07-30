@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   custom_echo.c                                      :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: kievaughn <kievaughn@student.42.fr>        +#+  +:+       +#+        */
+/*   By: dimendon <dimendon@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/13 18:15:55 by dimendon          #+#    #+#             */
-/*   Updated: 2025/07/01 17:28:56 by kievaughn        ###   ########.fr       */
+/*   Updated: 2025/07/30 13:45:21 by dimendon         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -49,7 +49,7 @@ static int	write_echo_arg(const char *arg)
 
 	if (ft_strncmp(arg, "$?", 3) == 0)
 	{
-		code = ft_itoa(last_exit_code);
+		code = ft_itoa(g_exit_code);
 		if (!code)
 			return (1);
 		write(1, code, ft_strlen(code));
