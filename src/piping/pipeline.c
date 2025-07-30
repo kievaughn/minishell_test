@@ -36,20 +36,27 @@ static int      pipeline_step(t_step *st, char ***envp,
                 perror("pipe");
                 return (0);
         }
-        st->cmd = prepare_command(st->cmd[0], &st->in_fd, &st->out_fd,
-                        envp);
-        if (!st->cmd)
-        {
-                if (!last)
-                        close_pipe(st->pipe_fd);
-                return (1);
-        }
-        pid[0] = fork();
-        if (pid[0] == 0)
-                child_process(st, envp, last);
-        parent_cleanup(&st->in_fd, st->pipe_fd, 0, last ? 1 : 2);
-        free_cmd(st->cmd);
-        return (1);
+       st->cmd = prepare_command(st->cmd[0], &st->in_fd, &st->out_fd,
+                       envp);
+       if (!st->cmd)
+       {
+               if (!last)
+                       close_pipe(st->pipe_fd);
+               if (st->in_fd != STDIN_FILENO)
+                       close(st->in_fd);
+               if (st->out_fd != STDOUT_FILENO)
+                       close(st->out_fd);
+               pid[0] = -1;
+               return (1);
+       }
+       pid[0] = fork();
+       if (pid[0] == 0)
+               child_process(st, envp, last);
+       parent_cleanup(&st->in_fd, st->pipe_fd, 0, last ? 1 : 2);
+       if (st->out_fd != STDOUT_FILENO)
+               close(st->out_fd);
+       free_cmd(st->cmd);
+       return (1);
 }
 
 static void     pipeline_loop(
@@ -59,15 +66,18 @@ static void     pipeline_loop(
         t_step  st;
         int             i;
 
-        st.in_fd = STDIN_FILENO;
-        i = 0;
-        while (i < num)
-        {
-                st.cmd = &segments[i];
-                if (!pipeline_step(&st, envp, &pids[i], i == num - 1))
-                        break ;
-                i++;
-        }
+       st.in_fd = STDIN_FILENO;
+       i = 0;
+       while (i < num)
+       {
+               st.cmd = &segments[i];
+               st.out_fd = STDOUT_FILENO;
+               st.pipe_fd[0] = -1;
+               st.pipe_fd[1] = -1;
+               if (!pipeline_step(&st, envp, &pids[i], i == num - 1))
+                       break ;
+               i++;
+       }
         if (st.in_fd != STDIN_FILENO)
                 close(st.in_fd);
 }
