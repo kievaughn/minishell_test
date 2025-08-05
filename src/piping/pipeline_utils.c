@@ -51,9 +51,9 @@ void wait_for_all(pid_t *pids, int count)
     int status;
     while (i < count)
     {
-        if (pids[i] != -1 && waitpid(pids[i], &status, 0) == -1)
+        if (waitpid(pids[i], &status, 0) == -1)
             perror("waitpid");
-        if (i == count - 1 && pids[i] != -1)
+        if (i == count - 1)
         {
             if (WIFEXITED(status))
                 g_exit_code = WEXITSTATUS(status);

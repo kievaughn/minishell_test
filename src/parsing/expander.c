@@ -1,65 +1,81 @@
-#include "minishell.h"
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   expander.c                                         :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: kbrandon <kbrandon@student.hive.fi>        +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2025/08/05 16:18:47 by kbrandon          #+#    #+#             */
+/*   Updated: 2025/08/05 17:43:49 by kbrandon         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include "../libft/libft.h"
+#include "minishell.h"
 
-static char    *append_exit_code(char *result, int *i, char *str, int *handled)
+static int	is_exit_code(char *s, int i)
 {
-    char *exit_code_str;
-    char *tmp;
-
-    *handled = 0;
-
-    if (!(str[*i] == '$' && str[*i + 1] == '?'))
-        return (result);
-
-    *handled = 1;
-
-    if (!(result = append_literal(result, str, 0, *i)))
-        return (NULL);
-
-    exit_code_str = ft_itoa(g_exit_code);
-    if (!exit_code_str)
-        return (free(result), NULL);
-
-    tmp = ft_strcatrealloc(result, exit_code_str);
-    free(exit_code_str);
-    if (!tmp)
-        return (free(result), NULL);
-
-    result = tmp;
-    *i += 2;
-    return (result);
+	return (s[i] == '$' && s[i + 1] == '?');
 }
 
-char    *build_expanded_str(char *str, char **envp)
+static int	is_var(char *s, int i)
 {
-    int     i = 0;
-    int     start = 0;
-    char    *result = NULL;
-    int     handled;
-
-    while (str[i])
-    {
-        if (str[i] == '$')
-        {
-            if ((result = append_exit_code(result, &i, str, &handled)) && handled)
-            {
-                start = i;
-                continue;
-            }
-            if (ft_isalnum(str[i + 1]))
-            {
-                if (!(result = append_literal(result, str, start, i)))
-                    return (NULL);
-                if (!(result = append_expanded_var(result, str, &i, envp)))
-                    return (NULL);
-                start = i;
-                continue;
-            }
-        }
-        i++;
-    }
-    if (!(result = ft_strcatrealloc(result, str + start)))
-        return (NULL);
-
-    return (result);
+	return (s[i] == '$' && ft_isalnum((unsigned char)s[i + 1]));
 }
+
+static char	*append_remain(char *res, char *s, int start)
+{
+	return (ft_strcatrealloc(res, s + start));
+}
+
+char	*build_expanded_str(char *s, char **envp)
+{
+	int		i;
+	int		start;
+	char	*res;
+
+	i = 0;
+	start = 0;
+	res = NULL;
+	while (s[i])
+	{
+		if (is_exit_code(s, i))
+			res = expand_exit_code(res, &i, s);
+		else if (is_var(s, i))
+		{
+			res = append_literal(res, s, start, i);
+			if (!res)
+				return (NULL);
+			res = append_expanded_var(res, s, &i, envp);
+			if (!res)
+				return (NULL);
+		}
+		else
+			i++;
+		start = i;
+	}
+	return (append_remain(res, s, start));
+}
+
+/*
+char	*build_expanded_str(char *s, char **envp)
+{
+	int		i;
+	int		start;
+	char	*res;
+
+	i = 0;
+	start = 0;
+	res = NULL;
+	while (s[i])
+	{
+		if (is_exit_code(s, i))
+			res = expand_exit_code(res, &i, s);
+		else if (is_var(s, i))
+			res = expand_var(res, &i, s, envp);
+		else
+			i++;
+		start = i;
+	}
+	return (append_remain(res, s, start));
+}*/

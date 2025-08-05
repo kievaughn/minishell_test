@@ -1,104 +1,96 @@
-#include "minishell.h"
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   redir_split.c                                      :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: kbrandon <kbrandon@student.hive.fi>        +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2025/08/05 16:18:50 by kbrandon          #+#    #+#             */
+/*   Updated: 2025/08/05 16:25:10 by kbrandon         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include "../libft/libft.h"
+#include "minishell.h"
 
-static int part_count(char *tok)
+static void	update_quote_state(char c, char *quote)
 {
-    int i = 0;
-    int start = 0;
-    int count = 0;
-
-    while (tok[i])
-    {
-        if (tok[i] == '>' || tok[i] == '<')
-        {
-            if (i - start > 0)
-                count++;
-            if (tok[i] == '>' && tok[i + 1] == '>')
-            {
-                count++;
-                i += 2;
-            }
-            else
-            {
-                count++;
-                i++;
-            }
-            start = i;
-        }
-        else
-            i++;
-    }
-    if (i - start > 0)
-        count++;
-    return (count);
+	if (!*quote && (c == '\'' || c == '"'))
+		*quote = c;
+	else if (*quote && c == *quote)
+		*quote = 0;
 }
 
-static int total_parts(char **arr)
+static void	append_operator(char *str, char **out, int *idx, int *j)
 {
-    int total = 0;
-    int i = 0;
-    while (arr && arr[i])
-    {
-        total += part_count(arr[i]);
-        i++;
-    }
-    return (total);
+	char	op[2];
+
+	op[0] = str[*j];
+	op[1] = '\0';
+	if (str[*j] == '>' && str[*j + 1] == '>')
+	{
+		out[*idx] = ft_strdup(">>");
+		(*idx)++;
+		*j += 2;
+	}
+	else
+	{
+		out[*idx] = ft_strdup(op);
+		(*idx)++;
+		(*j)++;
+	}
 }
 
-char    **split_redirs(char **arr)
+static int	append_redir_parts(char *str, char **out, int idx)
 {
-    char    **out;
-    int     i;
-    int     j;
-    int     start;
-    int     idx;
-    char    quote;
+	int		j;
+	int		start;
+	char	quote;
 
-    out = malloc(sizeof(char *) * (total_parts(arr) + 1));
-    if (!out)
-        return (free_cmd(arr), NULL);
-    idx = 0;
-    i = 0;
-    while (arr[i])
-    {
-        j = 0;
-        start = 0;
-        quote = 0;
-        while (arr[i][j])
-        {
-            if (!quote && (arr[i][j] == '\'' || arr[i][j] == '"'))
-                quote = arr[i][j];
-            else if (quote && arr[i][j] == quote)
-                quote = 0;
+	j = 0;
+	start = 0;
+	quote = 0;
+	while (str[j])
+	{
+		update_quote_state(str[j], &quote);
+		if (!quote && (str[j] == '>' || str[j] == '<'))
+		{
+			if (j - start > 0)
+				out[idx++] = ft_substr(str, start, j - start);
+			append_operator(str, out, &idx, &j);
+			start = j;
+		}
+		else
+		{
+			j++;
+		}
+	}
+	if (j - start > 0)
+		out[idx++] = ft_substr(str, start, j - start);
+	return (idx);
+}
 
-            if (!quote && (arr[i][j] == '>' || arr[i][j] == '<'))
-            {
-                if (j - start > 0)
-                    out[idx++] = ft_substr(arr[i], start, j - start);
-                if (arr[i][j] == '>' && arr[i][j + 1] == '>')
-                {
-                    out[idx++] = ft_strdup(">>");
-                    j += 2;
-                }
-                else
-                {
-                    char    op[2];
-                    op[0] = arr[i][j];
-                    op[1] = '\0';
-                    out[idx++] = ft_strdup(op);
-                    j++;
-                }
-                start = j;
-            }
-            else
-                j++;
-        }
-        if (j - start > 0)
-            out[idx++] = ft_substr(arr[i], start, j - start);
-        free(arr[i]);
-        i++;
-    }
-    out[idx] = NULL;
-    free(arr);
-    return (out);
+char	**split_redirs(char **arr)
+{
+	char	**out;
+	int		i;
+	int		idx;
+
+	out = malloc(sizeof(char *) * (total_parts(arr) + 1));
+	if (!out)
+	{
+		free_cmd(arr);
+		return (NULL);
+	}
+	idx = 0;
+	i = 0;
+	while (arr[i])
+	{
+		idx = append_redir_parts(arr[i], out, idx);
+		free(arr[i]);
+		i++;
+	}
+	out[idx] = NULL;
+	free(arr);
+	return (out);
 }

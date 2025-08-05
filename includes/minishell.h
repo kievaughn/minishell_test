@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   minishell.h                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: dimendon <dimendon@student.hive.fi>        +#+  +:+       +#+        */
+/*   By: kbrandon <kbrandon@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/04 13:40:36 by dimendon          #+#    #+#             */
-/*   Updated: 2025/07/30 15:23:00 by dimendon         ###   ########.fr       */
+/*   Updated: 2025/08/05 16:18:01 by kbrandon         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -85,9 +85,6 @@ void        close_pipe(int *fd);
 void        parent_cleanup(int *in_fd, int *fd, int i, int num);
 void        wait_for_all(pid_t *pids, int count);
 void        execute_pipeline(char **envp, char **segments);
-int         open_infile(char *file, int *in_fd);
-int         open_outfile(char *file, int *out_fd);
-int         open_appendfile(char *file, int *out_fd);
 char        **handle_redirections(char **cmd, int *in_fd, int *out_fd);
 
 // ==================== PARSING ====================
@@ -95,8 +92,10 @@ void        remove_quotes(char *str);
 char        *append_literal(char *result, char *str, int start, int i);
 char        *expand_var(char *str, int *var_len);
 char        *append_expanded_var(char *result, char *str, int *i, char **envp);
+char        *expand_exit_code(char *res, int *i, char *s);
 char        *build_expanded_str(char *str, char **envp);
 char        **split_redirs(char **arr);
+int         total_parts(char **arr);
 char        **tokenize_command(char const *s, char c, char **envp);
 char        **split_pipes(const char *line);
 
