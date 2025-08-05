@@ -6,7 +6,7 @@
 /*   By: kbrandon <kbrandon@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/04 13:40:36 by dimendon          #+#    #+#             */
-/*   Updated: 2025/08/05 16:18:01 by kbrandon         ###   ########.fr       */
+/*   Updated: 2025/08/05 18:03:57 by kbrandon         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -92,7 +92,7 @@ void        remove_quotes(char *str);
 char        *append_literal(char *result, char *str, int start, int i);
 char        *expand_var(char *str, int *var_len);
 char        *append_expanded_var(char *result, char *str, int *i, char **envp);
-char        *expand_exit_code(char *res, int *i, char *s);
+char	    *expand_exit_code(char *res, int *i, const char *s, int start);
 char        *build_expanded_str(char *str, char **envp);
 char        **split_redirs(char **arr);
 int         total_parts(char **arr);

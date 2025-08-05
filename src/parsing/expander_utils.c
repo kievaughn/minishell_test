@@ -6,7 +6,7 @@
 /*   By: kbrandon <kbrandon@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/05 16:18:45 by kbrandon          #+#    #+#             */
-/*   Updated: 2025/08/05 16:18:46 by kbrandon         ###   ########.fr       */
+/*   Updated: 2025/08/05 18:02:52 by kbrandon         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -87,12 +87,12 @@ char	*append_expanded_var(char *result, char *str, int *i, char **envp)
 	return (tmp);
 }
 
-char	*expand_exit_code(char *res, int *i, char *s)
+char	*expand_exit_code(char *res, int *i, const char *s, int start)
 {
 	char	*code;
 	char	*tmp;
 
-	res = append_literal(res, s, 0, *i);
+	res = append_literal(res, (char *)s, start, *i);
 	if (!res)
 		return (NULL);
 	code = ft_itoa(g_exit_code);
@@ -108,3 +108,4 @@ char	*expand_exit_code(char *res, int *i, char *s)
 	*i += 2;
 	return (tmp);
 }
+

@@ -6,7 +6,7 @@
 /*   By: kbrandon <kbrandon@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/05 16:18:56 by kbrandon          #+#    #+#             */
-/*   Updated: 2025/08/05 17:44:30 by kbrandon         ###   ########.fr       */
+/*   Updated: 2025/08/05 17:57:46 by kbrandon         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -63,6 +63,7 @@ char	**split_pipes(const char *line)
 			arr[seg++] = ft_substr(line, start, i - start);
 			start = i + 1;
 		}
+		i++;
 	}
 	arr[seg++] = ft_substr(line, start, i - start);
 	arr[seg] = NULL;
