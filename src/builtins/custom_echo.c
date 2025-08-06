@@ -10,8 +10,8 @@
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "minishell.h"
 #include "../libft/libft.h"
+#include "minishell.h"
 
 static int	skip_n_flags(char **arg, int start)
 {
@@ -78,8 +78,8 @@ static int	print_echo_args(char **arg, int start)
 
 short int	custom_echo(char **arg)
 {
-	int		i;
-	int		flag_newline;
+	int	i;
+	int	flag_newline;
 
 	i = 1;
 	flag_newline = 1;

@@ -1,12 +1,23 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   utils.c                                            :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: dimendon <dimendon@student.hive.fi>        +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2025/08/05 17:38:39 by dimendon          #+#    #+#             */
+/*   Updated: 2025/08/05 17:38:40 by dimendon         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include "minishell.h"
 
-int count_strings(char **arr)
+int	count_strings(char **arr)
 {
-    int i;
+	int	i;
 
-    i = 0;
-    while (arr && arr[i])
-        i++;
-    return (i);
+	i = 0;
+	while (arr && arr[i])
+		i++;
+	return (i);
 }
-

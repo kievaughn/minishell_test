@@ -6,7 +6,7 @@
 #    By: dimendon <dimendon@student.hive.fi>        +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2025/06/04 13:42:42 by dimendon          #+#    #+#              #
-#    Updated: 2025/07/30 15:24:27 by dimendon         ###   ########.fr        #
+#    Updated: 2025/08/05 15:41:36 by dimendon         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -47,6 +47,7 @@ SRCS =	        src/builtins/custom_export/export_check.c \
 				src/piping/pipeline.c \
 				src/piping/redirections.c \
 				src/piping/pipeline_utils.c \
+				src/piping/redirections_utils.c \
 				src/cleanup.c \
 		        src/controller.c \
 				src/controller_helper.c \

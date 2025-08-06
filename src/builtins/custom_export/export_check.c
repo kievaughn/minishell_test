@@ -1,8 +1,20 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   export_check.c                                     :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: dimendon <dimendon@student.hive.fi>        +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2025/08/05 17:43:08 by dimendon          #+#    #+#             */
+/*   Updated: 2025/08/05 17:43:09 by dimendon         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include "minishell.h"
 
 static short int	check_update_env(char ***env, char **args)
 {
-	int	arg_i;
+	int			arg_i;
 	short int	had_error;
 
 	arg_i = 1;

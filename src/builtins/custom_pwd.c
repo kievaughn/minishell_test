@@ -10,21 +10,20 @@
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "minishell.h"
 #include "../libft/libft.h"
+#include "minishell.h"
 
-short int custom_pwd()
+short int	custom_pwd(void)
 {
-    char *cwd;
+	char	*cwd;
 
-    cwd = getcwd(NULL, 0);
-    if (!cwd)
-    {
-        perror("pwd");
-        return (1);
-    }
-
-    printf("%s\n", cwd);
-    free(cwd);
-    return (0);
+	cwd = getcwd(NULL, 0);
+	if (!cwd)
+	{
+		perror("pwd");
+		return (1);
+	}
+	printf("%s\n", cwd);
+	free(cwd);
+	return (0);
 }

@@ -1,86 +1,106 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   pipeline.c                                         :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: dimendon <dimendon@student.hive.fi>        +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2025/08/05 13:39:33 by dimendon          #+#    #+#             */
+/*   Updated: 2025/08/05 16:19:23 by dimendon         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include "minishell.h"
 
-static void     child_process(
-        char **envp, char **cmd, int in_fd, int *fd, int last
-)
+static void	handle_input_redirection(int redir_in, int *in_fd)
 {
-        int     redir_in;
-        int     redir_out;
-
-        redir_in = STDIN_FILENO;
-        redir_out = STDOUT_FILENO;
-        cmd = handle_redirections(cmd, &redir_in, &redir_out);
-		if (cmd == NULL)
-    		exit(1);
-        if (redir_in != STDIN_FILENO)
-        {
-			if (redir_in < 0)
-			{
-				perror("Input redirection");
-				exit(1);
-			}
-                dup2(redir_in, STDIN_FILENO);
-                close(redir_in);
-        }
-        else if (in_fd != STDIN_FILENO)
-        {
-                dup2(in_fd, STDIN_FILENO);
-                close(in_fd);
-        }
-        if (!last && redir_out == STDOUT_FILENO)
-                dup2(fd[1], STDOUT_FILENO);
-        else if (redir_out != STDOUT_FILENO)
+	if (redir_in != STDIN_FILENO)
+	{
+		if (redir_in < 0)
 		{
-			if (redir_out < 0)
-			{
-				perror("Output redirection");
-				exit(1);
-			}
-			dup2(redir_out, STDOUT_FILENO);
+			perror("Input redirection");
+			exit(1);
 		}
-        if (!last)
-        {
-                close(fd[0]);
-                close(fd[1]);
-        }
-        if (redir_out != STDOUT_FILENO)
-                close(redir_out);
-        execute_cmd(envp, cmd);
+		dup2(redir_in, STDIN_FILENO);
+		close(redir_in);
+	}
+	else if (*in_fd != STDIN_FILENO)
+	{
+		dup2(*in_fd, STDIN_FILENO);
+		close(*in_fd);
+	}
 }
 
-
-static int	pipeline_step(
-	char **envp, char **segments, pid_t *pids,
-	int *in_fd, int *fd, int i, int num
-)
+static void	handle_output_redirection(int redir_out, int *fd, int last)
 {
-	char	**cmd;
+	if (!last && redir_out == STDOUT_FILENO)
+	{
+		dup2(fd[1], STDOUT_FILENO);
+	}
+	else if (redir_out != STDOUT_FILENO)
+	{
+		if (redir_out < 0)
+		{
+			perror("Output redirection");
+			exit(1);
+		}
+		dup2(redir_out, STDOUT_FILENO);
+	}
+}
 
-	if (i < num - 1 && pipe(fd) == -1)
+static void	child_process(char **envp, char **cmd, t_pipe_info pipe_info)
+{
+	int	redir_in;
+	int	redir_out;
+
+	redir_in = STDIN_FILENO;
+	redir_out = STDOUT_FILENO;
+	cmd = handle_redirections(cmd, count_strings(cmd) + 1, &redir_in,
+			&redir_out);
+	if (cmd == NULL)
+		exit(1);
+	handle_input_redirection(redir_in, &pipe_info.in_fd);
+	handle_output_redirection(redir_out, pipe_info.fd, pipe_info.last);
+	if (!pipe_info.last)
+	{
+		close(pipe_info.fd[0]);
+		close(pipe_info.fd[1]);
+	}
+	if (redir_out != STDOUT_FILENO)
+		close(redir_out);
+	execute_cmd(envp, cmd);
+}
+
+static int	pipeline_step(t_pipeline_data *pipeline, int *in_fd, int *fd, int i)
+{
+	char		**cmd;
+	t_pipe_info	pipe_info;
+
+	if (i < pipeline->nbr_segments - 1 && pipe(fd) == -1)
 	{
 		perror("pipe");
 		return (0);
 	}
-
-	cmd = tokenize_command(segments[i], ' ', envp);
+	cmd = tokenize_command(pipeline->segments[i], ' ', pipeline->envp);
 	if (!cmd || !cmd[0])
 	{
 		free_cmd(cmd);
-		if (i < num - 1)
+		if (i < pipeline->nbr_segments - 1)
 			close_pipe(fd);
 		return (1);
 	}
-	pids[i] = fork();
-	if (pids[i] == 0)
-		child_process(envp, cmd, *in_fd, fd, i == num - 1);
+	pipe_info.in_fd = *in_fd;
+	pipe_info.fd = fd;
+	pipe_info.last = (i == pipeline->nbr_segments - 1);
+	pipeline->pids[i] = fork();
+	if (pipeline->pids[i] == 0)
+		child_process(pipeline->envp, cmd, pipe_info);
 	free_cmd(cmd);
-	parent_cleanup(in_fd, fd, i, num);
+	parent_cleanup(in_fd, fd, i, pipeline->nbr_segments);
 	return (1);
 }
 
-static void	pipeline_loop(
-	char **envp, char **segments, pid_t *pids, int num
-)
+void	pipeline_loop(t_pipeline_data *pipeline)
 {
 	int	in_fd;
 	int	fd[2];
@@ -88,26 +108,12 @@ static void	pipeline_loop(
 
 	in_fd = STDIN_FILENO;
 	i = 0;
-	while (i < num)
+	while (i < pipeline->nbr_segments)
 	{
-		if (!pipeline_step(envp, segments, pids, &in_fd, fd, i, num))
+		if (!pipeline_step(pipeline, &in_fd, fd, i))
 			break ;
 		i++;
 	}
 	if (in_fd != STDIN_FILENO)
 		close(in_fd);
-}
-
-void	execute_pipeline(char **envp, char **segments)
-{
-	int		num;
-	pid_t	*pids;
-
-	num = count_strings(segments);
-	pids = malloc(sizeof(pid_t) * num);
-	if (!pids)
-		return ;
-	pipeline_loop(envp, segments, pids, num);
-	wait_for_all(pids, num);
-	free(pids);
 }

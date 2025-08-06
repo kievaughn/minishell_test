@@ -10,8 +10,8 @@
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "minishell.h"
 #include "../libft/libft.h"
+#include "minishell.h"
 
 static char	*get_cd_target(char **envp, char **args)
 {
@@ -40,7 +40,7 @@ static char	*get_cd_target(char **envp, char **args)
 }
 
 static short int	update_pwd_vars(char ***envp, const char *oldpwd,
-						const char *newpwd)
+		const char *newpwd)
 {
 	char		*old_str;
 	char		*new_str;
@@ -62,7 +62,7 @@ static short int	update_pwd_vars(char ***envp, const char *oldpwd,
 }
 
 static short int	change_and_get_pwds(const char *target, char **oldpwd,
-						char **newpwd)
+		char **newpwd)
 {
 	*oldpwd = getcwd(NULL, 0);
 	if (!*oldpwd)
@@ -112,4 +112,3 @@ short int	custom_cd(char ***envp, char **args)
 	free(newpwd);
 	return (ret);
 }
-

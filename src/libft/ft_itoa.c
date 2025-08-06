@@ -14,8 +14,9 @@
 
 static unsigned int	getsize(long n)
 {
-	unsigned int	size = 0;
+	unsigned int	size;
 
+	size = 0;
 	if (n == 0)
 		return (1);
 	while (n != 0)

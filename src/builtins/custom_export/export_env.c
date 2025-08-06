@@ -1,10 +1,21 @@
-#include "minishell.h"
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   export_env.c                                       :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: dimendon <dimendon@student.hive.fi>        +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2025/08/05 17:43:11 by dimendon          #+#    #+#             */
+/*   Updated: 2025/08/05 17:43:12 by dimendon         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include "../libft/libft.h"
+#include "minishell.h"
 
 static int	compare_var_names(char *a, char *b, int size)
 {
-	if (ft_strncmp(a, b, size) == 0
-		&& (a[size] == '=' || a[size] == '\0'))
+	if (ft_strncmp(a, b, size) == 0 && (a[size] == '=' || a[size] == '\0'))
 		return (1);
 	return (0);
 }

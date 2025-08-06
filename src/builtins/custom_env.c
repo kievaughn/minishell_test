@@ -10,22 +10,20 @@
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "minishell.h"
 #include "../libft/libft.h"
+#include "minishell.h"
 
-short int custom_env(char **envp)
+short int	custom_env(char **envp)
 {
-    int i;
+	int	i;
 
-    if (!envp)
-        return (1);
-
-    i = 0;
-    while (envp[i] != NULL)
-    {
-        printf("%s\n", envp[i]);
-        i++;
-    }
-
-    return (0);
+	if (!envp)
+		return (1);
+	i = 0;
+	while (envp[i] != NULL)
+	{
+		printf("%s\n", envp[i]);
+		i++;
+	}
+	return (0);
 }

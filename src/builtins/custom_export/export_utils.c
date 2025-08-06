@@ -1,7 +1,19 @@
-#include "minishell.h"
-#include "../libft/libft.h"
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   export_utils.c                                     :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: dimendon <dimendon@student.hive.fi>        +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2025/08/05 17:43:16 by dimendon          #+#    #+#             */
+/*   Updated: 2025/08/05 17:43:43 by dimendon         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
 
-int     is_valid_name(const char *name)
+#include "../libft/libft.h"
+#include "minishell.h"
+
+int	is_valid_name(const char *name)
 {
 	int	i;
 

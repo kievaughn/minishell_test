@@ -6,7 +6,7 @@
 /*   By: dimendon <dimendon@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/04 13:40:36 by dimendon          #+#    #+#             */
-/*   Updated: 2025/07/30 15:23:00 by dimendon         ###   ########.fr       */
+/*   Updated: 2025/08/05 16:19:53 by dimendon         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -40,6 +40,22 @@
 # include <readline/history.h>  // rl_clear_history, rl_on_new_line, rl_replace_line, rl_redisplay
 
 extern int  g_exit_code;
+
+// Pipe data
+typedef struct s_pipeline_data
+{
+    char **envp;
+	char **segments;
+	pid_t *pids;
+	int nbr_segments;
+}	t_pipeline_data;
+
+typedef struct s_pipe_info
+{
+    int in_fd;
+    int *fd;
+    int last;
+} t_pipe_info;
 
 // ==================== BUILTINS ====================
 short int   custom_cd(char ***envp, char **args);
@@ -85,7 +101,9 @@ void        close_pipe(int *fd);
 void        parent_cleanup(int *in_fd, int *fd, int i, int num);
 void        wait_for_all(pid_t *pids, int count);
 void        execute_pipeline(char **envp, char **segments);
-char        **handle_redirections(char **cmd, int *in_fd, int *out_fd);
+char        **handle_redirections(char **cmd, int count, int *in_fd, int *out_fd);
+int	        handle_heredoc(const char *delim, int *in_fd);
+void        pipeline_loop(t_pipeline_data *pipeline);
 
 // ==================== PARSING ====================
 void        remove_quotes(char *str);

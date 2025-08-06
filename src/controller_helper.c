@@ -6,7 +6,7 @@
 /*   By: dimendon <dimendon@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/30 14:15:02 by dimendon          #+#    #+#             */
-/*   Updated: 2025/07/30 14:37:44 by dimendon         ###   ########.fr       */
+/*   Updated: 2025/08/05 16:20:53 by dimendon         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,15 +27,14 @@ int	is_folder(char *arg)
 	return (0);
 }
 
-char	**prepare_command(char *segment, int *in_fd, int *out_fd,
-		char ***envp)
+char	**prepare_command(char *segment, int *in_fd, int *out_fd, char ***envp)
 {
 	char	**cmd;
 
 	cmd = tokenize_command(segment, ' ', *envp);
 	if (!cmd)
 		return (NULL);
-	cmd = handle_redirections(cmd, in_fd, out_fd);
+	cmd = handle_redirections(cmd, count_strings(cmd) + 1, in_fd, out_fd);
 	if (!cmd || !cmd[0])
 	{
 		free_cmd(cmd);
@@ -44,8 +43,7 @@ char	**prepare_command(char *segment, int *in_fd, int *out_fd,
 	return (cmd);
 }
 
-void	setup_redirections(int in_fd, int out_fd, int *save_in,
-		int *save_out)
+void	setup_redirections(int in_fd, int out_fd, int *save_in, int *save_out)
 {
 	*save_in = dup(STDIN_FILENO);
 	*save_out = dup(STDOUT_FILENO);
@@ -58,8 +56,7 @@ void	setup_redirections(int in_fd, int out_fd, int *save_in,
 		dup2(out_fd, STDOUT_FILENO);
 }
 
-void	restore_redirections(int in_fd, int out_fd, int save_in,
-		int save_out)
+void	restore_redirections(int in_fd, int out_fd, int save_in, int save_out)
 {
 	if (out_fd != STDOUT_FILENO)
 	{
