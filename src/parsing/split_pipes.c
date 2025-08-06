@@ -6,66 +6,71 @@
 /*   By: kbrandon <kbrandon@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/05 16:18:56 by kbrandon          #+#    #+#             */
-/*   Updated: 2025/08/05 17:57:46 by kbrandon         ###   ########.fr       */
+/*   Updated: 2025/09/01 00:00:00 by kbrandon         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../libft/libft.h"
 #include "minishell.h"
 
-static void	handle_quote_state(char c, char *quote)
+static void handle_quote_state(char c, char *quote)
 {
-	if (!*quote && (c == '\'' || c == '"'))
-		*quote = c;
-	else if (*quote && c == *quote)
-		*quote = 0;
+    if (!*quote && (c == '\'' || c == '"'))
+        *quote = c;
+    else if (*quote && c == *quote)
+        *quote = 0;
 }
 
-static size_t	count_segments(const char *line)
+static size_t count_segments(const char *line)
 {
-	size_t	i;
-	size_t	count;
-	char	quote;
+    size_t  i;
+    size_t  count;
+    char    quote;
 
-	i = 0;
-	count = 1;
-	quote = 0;
-	while (line && line[i])
-	{
-		handle_quote_state(line[i], &quote);
-		if (!quote && line[i] == '|')
-			count++;
-		i++;
-	}
-	return (count);
+    i = 0;
+    count = 1;
+    quote = 0;
+    while (line && line[i])
+    {
+        handle_quote_state(line[i], &quote);
+        if (!quote && line[i] == '|')
+            count++;
+        i++;
+    }
+    return (count);
 }
 
-char	**split_pipes(const char *line)
+char    **split_pipes(const char *line)
 {
-	size_t	i;
-	size_t	start;
-	size_t	seg;
-	char	quote;
-	char	**arr;
+    size_t  i;
+    size_t  start;
+    size_t  seg;
+    char    quote;
+    size_t  segments;
+    char  **arr;
 
-	i = 0;
-	start = 0;
-	seg = 0;
-	quote = 0;
-	arr = malloc(sizeof(char *) * (count_segments(line) + 1));
-	if (!arr)
-		return (NULL);
-	while (line && line[i++])
-	{
-		handle_quote_state(line[i], &quote);
-		if (!quote && line[i] == '|')
-		{
-			arr[seg++] = ft_substr(line, start, i - start);
-			start = i + 1;
-		}
-		i++;
-	}
-	arr[seg++] = ft_substr(line, start, i - start);
-	arr[seg] = NULL;
-	return (arr);
+    if (!line)
+        return (NULL);
+    i = 0;
+    start = 0;
+    seg = 0;
+    quote = 0;
+    segments = count_segments(line);
+    arr = malloc(sizeof(char *) * (segments + 1));
+    if (!arr)
+        return (NULL);
+    while (line[i])
+    {
+        handle_quote_state(line[i], &quote);
+        if (!quote && line[i] == '|')
+        {
+            arr[seg++] = ft_substr(line, start, i - start);
+            start = i + 1;
+        }
+        i++;
+    }
+    arr[seg++] = ft_substr(line, start, i - start);
+    arr[seg] = NULL;
+    return (arr);
 }
+
