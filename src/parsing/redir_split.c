@@ -1,109 +1,91 @@
 #include "../libft/libft.h"
 #include "minishell.h"
 
-static int	part_count(char *tok)
+static void	extract_slice(char **out, t_redir *st, char *tok)
 {
-	int	i;
-	int	start;
-	int	count;
-
-	i = 0;
-	start = 0;
-	count = 0;
-	while (tok[i])
-	{
-		if (tok[i] == '>' || tok[i] == '<')
-		{
-			if (i - start > 0)
-				count++;
-			if (tok[i] == '>' && tok[i + 1] == '>')
-			{
-				count++;
-				i += 2;
-			}
-			else
-			{
-				count++;
-				i++;
-			}
-			start = i;
-		}
-		else
-			i++;
-	}
-	if (i - start > 0)
-		count++;
-	return (count);
+	if (st->j > st->start)
+		out[st->idx++] = ft_substr(tok, st->start,
+						  st->j - st->start);
 }
 
-static int	total_parts(char **arr)
+static void	handle_operator(char **out, t_redir *st, char *tok)
 {
-	int	total;
-	int	i;
+	char	op[2];
 
-	total = 0;
-	i = 0;
-	while (arr && arr[i])
+	if (tok[st->j] == '>' && tok[st->j + 1] == '>')
 	{
-		total += part_count(arr[i]);
+		out[st->idx++] = ft_strdup(">>");
+		st->j += 2;
+	}
+	else
+	{
+	op[0] = tok[st->j];
+	op[1] = '\0';
+		out[st->idx++] = ft_strdup(op);
+		st->j++;
+	}
+	st->start = st->j;
+}
+
+static int	process_redir_token(char **out, char *tok, int idx)
+{
+	t_redir	st;
+	char	quote;
+
+	st.j = 0;
+	st.start = 0;
+	st.idx = idx;
+	quote = 0;
+	while (tok[st.j])
+	{
+		if (!quote && (tok[st.j] == '\'' || tok[st.j] == '"'))
+			quote = tok[st.j++];
+		else if (quote && tok[st.j] == quote)
+			quote = 0, st.j++;
+		else if (!quote && (tok[st.j] == '>' || tok[st.j] == '<'))
+		{
+			extract_slice(out, &st, tok);
+			handle_operator(out, &st, tok);
+			continue ;
+		}
+		else
+			st.j++;
+	}
+	extract_slice(out, &st, tok);
+	return (st.idx);
+}
+
+static int	fill_redirs(char **out, char **arr)
+{
+	int	i;
+	int	idx;
+
+	i = 0;
+	idx = 0;
+	while (arr[i])
+	{
+		idx = process_redir_token(out, arr[i], idx);
+		free(arr[i]);
 		i++;
 	}
-	return (total);
+	return (idx);
 }
 
 char	**split_redirs(char **arr)
 {
 	char	**out;
-	int		i;
-	int		j;
-	int		start;
+	int		total;
 	int		idx;
-	char	quote;
-	char	op[2];
 
-	out = malloc(sizeof(char *) * (total_parts(arr) + 1));
+	if (!arr)
+		return (NULL);
+	total = total_parts(arr);
+	out = malloc((total + 1) * sizeof *out);
 	if (!out)
 		return (free_cmd(arr), NULL);
-	idx = 0;
-	i = 0;
-	while (arr[i])
-	{
-		j = 0;
-		start = 0;
-		quote = 0;
-		while (arr[i][j])
-		{
-			if (!quote && (arr[i][j] == '\'' || arr[i][j] == '"'))
-				quote = arr[i][j];
-			else if (quote && arr[i][j] == quote)
-				quote = 0;
-			if (!quote && (arr[i][j] == '>' || arr[i][j] == '<'))
-			{
-				if (j - start > 0)
-					out[idx++] = ft_substr(arr[i], start, j - start);
-				if (arr[i][j] == '>' && arr[i][j + 1] == '>')
-				{
-					out[idx++] = ft_strdup(">>");
-					j += 2;
-				}
-				else
-				{
-					op[0] = arr[i][j];
-					op[1] = '\0';
-					out[idx++] = ft_strdup(op);
-					j++;
-				}
-				start = j;
-			}
-			else
-				j++;
-		}
-		if (j - start > 0)
-			out[idx++] = ft_substr(arr[i], start, j - start);
-		free(arr[i]);
-		i++;
-	}
+	idx = fill_redirs(out, arr);
 	out[idx] = NULL;
 	free(arr);
 	return (out);
 }
+

@@ -70,47 +70,58 @@ static size_t	next_c(char *s, char c)
 	return (len);
 }
 
-char	**tokenize_command(char const *s, char c, char **envp)
+static int fill_tokens(char **arr, char const **ps, char c, char **envp)
 {
-	char	**arr;
-	int		i;
-	size_t	len;
-	char	*expanded;
+    int     i = 0;
+    size_t  len;
+    char   *tok;
+    char   *exp;
 
-	if (!s)
-		return (NULL);
-	arr = (char **)malloc((token_count(s, c) + 1) * sizeof(char *));
-	if (!arr)
-		return (NULL);
-	i = 0;
-	while (*s)
-	{
-		while (*s == c)
-			s++;
-		if (!*s)
-			break ;
-		len = next_c((char *)s, c);
-		arr[i] = ft_substr((char *)s, 0, len);
-		if (!arr[i])
-			return (free_arr(arr, i), NULL);
-		if (arr[i][0] != '\'')
-		{
-			expanded = build_expanded_str(arr[i], envp);
-			free(arr[i]);
-			arr[i] = expanded;
-		}
-		i++;
-		s += len;
-	}
-	arr[i] = NULL;
-	arr = split_redirs(arr);
-	if (!arr)
-		return (NULL);
-	i = 0;
-	while (arr[i])
-	{
-		remove_quotes(arr[i]);
-		i++;
-	}
-	return (arr);
+
+    while (**ps)
+    {
+        while (**ps == c) (*ps)++;
+        if (!**ps) break;
+        len = next_c((char *)*ps, c);
+        tok = ft_substr((char *)*ps, 0, len);
+        if (!tok) return (free_arr(arr, i), -1);
+        if (tok[0] != '\'')
+        {
+            exp = build_expanded_str(tok, envp);
+            free(tok);
+            tok = exp;
+        }
+        arr[i++] = tok;
+        *ps += len;
+    }
+    return i;
 }
+
+
+char **tokenize_command(char const *s, char c, char **envp)
+{
+    char **arr;
+    int    i;
+
+
+    if (!s) return NULL;
+    arr = malloc((token_count(s, c) + 1) * sizeof *arr);
+    if (!arr) return NULL;
+
+
+    i = fill_tokens(arr, &s, c, envp);
+    if (i < 0) return NULL;
+    arr[i] = NULL;
+
+
+    arr = split_redirs(arr);
+    if (!arr) return NULL;
+
+
+    for (i = 0; arr[i]; i++)
+        remove_quotes(arr[i]);
+    return arr;
+}
+
+
+

@@ -3,10 +3,10 @@
 #                                                         :::      ::::::::    #
 #    Makefile                                           :+:      :+:    :+:    #
 #                                                     +:+ +:+         +:+      #
-#    By: dimendon <dimendon@student.hive.fi>        +#+  +:+       +#+         #
+#    By: kbrandon <kbrandon@student.hive.fi>        +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2025/06/04 13:42:42 by dimendon          #+#    #+#              #
-#    Updated: 2025/08/05 15:41:36 by dimendon         ###   ########.fr        #
+#    Updated: 2025/08/07 22:02:26 by kbrandon         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -42,6 +42,7 @@ SRCS =	        src/builtins/custom_export/export_check.c \
 				src/parsing/expander_utils.c \
 				src/parsing/expander.c \
 				src/parsing/redir_split.c \
+				src/parsing/redir_utils.c \
 				src/parsing/split_pipes.c \
 				src/parsing/tokenize.c \
 				src/piping/pipeline.c \
