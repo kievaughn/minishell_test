@@ -1,15 +1,19 @@
 #include "../libft/libft.h"
 #include "minishell.h"
 
-static char	*append_exit_code(char *result, int *i, char *str, int *handled)
+typedef struct s_expand
+{
+	char	*str;
+	char	**envp;
+	char	*result;
+	int		start;
+}	t_expand;
+
+static char	*append_exit_code(char *result, char *str, int *i)
 {
 	char	*exit_code_str;
 	char	*tmp;
 
-	*handled = 0;
-	if (!(str[*i] == '$' && str[*i + 1] == '?'))
-		return (result);
-	*handled = 1;
 	result = append_literal(result, str, 0, *i);
 	if (!result)
 		return (NULL);
@@ -31,30 +35,27 @@ static char	*append_exit_code(char *result, int *i, char *str, int *handled)
 	return (result);
 }
 
-static int	handle_dollar(char **result, char *str, int *i,
-		int *start, char **envp)
+static int	handle_dollar(t_expand *d, int *i)
 {
-	int	handled;
-
-	if (str[*i] != '$')
+	if (d->str[*i] != '$')
 		return (0);
-	*result = append_exit_code(*result, i, str, &handled);
-	if (!*result)
-		return (-1);
-	if (handled)
+	if (d->str[*i + 1] == '?')
 	{
-		*start = *i;
+		d->result = append_exit_code(d->result, d->str, i);
+		if (!d->result)
+			return (-1);
+		d->start = *i;
 		return (1);
 	}
-	if (ft_isalnum(str[*i + 1]))
+	if (ft_isalnum(d->str[*i + 1]))
 	{
-		*result = append_literal(*result, str, *start, *i);
-		if (!*result)
+		d->result = append_literal(d->result, d->str, d->start, *i);
+		if (!d->result)
 			return (-1);
-		*result = append_expanded_var(*result, str, i, envp);
-		if (!*result)
+		d->result = append_expanded_var(d->result, d->str, i, d->envp);
+		if (!d->result)
 			return (-1);
-		*start = *i;
+		d->start = *i;
 		return (1);
 	}
 	return (0);
@@ -62,25 +63,27 @@ static int	handle_dollar(char **result, char *str, int *i,
 
 char	*build_expanded_str(char *str, char **envp)
 {
-	int		i;
-	int		start;
-	char	*result;
-	int		status;
+	int			i;
+	int			status;
+	t_expand	d;
 
 	i = 0;
-	start = 0;
-	result = NULL;
+	d.str = str;
+	d.envp = envp;
+	d.result = NULL;
+	d.start = 0;
 	while (str[i])
 	{
-		status = handle_dollar(&result, str, &i, &start, envp);
+		status = handle_dollar(&d, &i);
 		if (status == -1)
 			return (NULL);
 		if (status == 1)
 			continue ;
 		i++;
 	}
-	result = ft_strcatrealloc(result, str + start);
-	if (!result)
+	d.result = ft_strcatrealloc(d.result, str + d.start);
+	if (!d.result)
 		return (NULL);
-	return (result);
+	return (d.result);
 }
+
