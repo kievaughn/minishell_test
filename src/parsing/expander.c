@@ -1,89 +1,62 @@
 #include "../libft/libft.h"
 #include "minishell.h"
 
-typedef struct s_expand
-{
-	char	*str;
-	char	**envp;
-	char	*result;
-	int		start;
-}	t_expand;
-
-static char	*append_exit_code(char *result, char *str, int *i)
+static char	*append_exit_code(char *result, int *i, char *str, int *handled)
 {
 	char	*exit_code_str;
 	char	*tmp;
 
-	result = append_literal(result, str, 0, *i);
-	if (!result)
+	*handled = 0;
+	if (!(str[*i] == '$' && str[*i + 1] == '?'))
+		return (result);
+	*handled = 1;
+	if (!(result = append_literal(result, str, 0, *i)))
 		return (NULL);
 	exit_code_str = ft_itoa(g_exit_code);
 	if (!exit_code_str)
-	{
-		free(result);
-		return (NULL);
-	}
+		return (free(result), NULL);
 	tmp = ft_strcatrealloc(result, exit_code_str);
 	free(exit_code_str);
 	if (!tmp)
-	{
-		free(result);
-		return (NULL);
-	}
+		return (free(result), NULL);
 	result = tmp;
 	*i += 2;
 	return (result);
 }
 
-static int	handle_dollar(t_expand *d, int *i)
-{
-	if (d->str[*i] != '$')
-		return (0);
-	if (d->str[*i + 1] == '?')
-	{
-		d->result = append_exit_code(d->result, d->str, i);
-		if (!d->result)
-			return (-1);
-		d->start = *i;
-		return (1);
-	}
-	if (ft_isalnum(d->str[*i + 1]))
-	{
-		d->result = append_literal(d->result, d->str, d->start, *i);
-		if (!d->result)
-			return (-1);
-		d->result = append_expanded_var(d->result, d->str, i, d->envp);
-		if (!d->result)
-			return (-1);
-		d->start = *i;
-		return (1);
-	}
-	return (0);
-}
-
 char	*build_expanded_str(char *str, char **envp)
 {
-	int			i;
-	int			status;
-	t_expand	d;
+	int		i;
+	int		start;
+	char	*result;
+	int		handled;
 
 	i = 0;
-	d.str = str;
-	d.envp = envp;
-	d.result = NULL;
-	d.start = 0;
+	start = 0;
+	result = NULL;
 	while (str[i])
 	{
-		status = handle_dollar(&d, &i);
-		if (status == -1)
-			return (NULL);
-		if (status == 1)
-			continue ;
+		if (str[i] == '$')
+		{
+			if ((result = append_exit_code(result, &i, str, &handled))
+				&& handled)
+			{
+				start = i;
+				continue ;
+			}
+			if (ft_isalnum(str[i + 1]))
+			{
+				if (!(result = append_literal(result, str, start, i)))
+					return (NULL);
+				if (!(result = append_expanded_var(result, str, &i, envp)))
+					return (NULL);
+				start = i;
+				continue ;
+			}
+		}
 		i++;
 	}
-	d.result = ft_strcatrealloc(d.result, str + d.start);
-	if (!d.result)
+	if (!(result = ft_strcatrealloc(result, str + start)))
 		return (NULL);
-	return (d.result);
+	return (result);
 }
-
