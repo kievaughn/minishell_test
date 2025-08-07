@@ -17,15 +17,10 @@ static int	part_count(char *tok)
 			if (i - start > 0)
 				count++;
 			if (tok[i] == '>' && tok[i + 1] == '>')
-			{
-				count++;
 				i += 2;
-			}
 			else
-			{
-				count++;
 				i++;
-			}
+			count++;
 			start = i;
 		}
 		else
@@ -51,55 +46,78 @@ static int	total_parts(char **arr)
 	return (total);
 }
 
+static void	handle_redir(char **out, char *tok, int *j, int *idx, int *start)
+{
+	char	op[2];
+
+	if (*j - *start > 0)
+	{
+		out[*idx] = ft_substr(tok, *start, *j - *start);
+		(*idx)++;
+	}
+	if (tok[*j] == '>' && tok[*j + 1] == '>')
+	{
+		out[*idx] = ft_strdup(">>");
+		(*idx)++;
+		*j += 2;
+	}
+	else
+	{
+		op[0] = tok[*j];
+		op[1] = '\0';
+		out[*idx] = ft_strdup(op);
+		(*idx)++;
+		(*j)++;
+	}
+	*start = *j;
+}
+
+static void	process_token(char **out, char *tok, int *idx)
+{
+	int	j;
+	int	start;
+	char	quote;
+
+	j = 0;
+	start = 0;
+	quote = 0;
+	while (tok[j])
+	{
+		if (!quote && (tok[j] == '\'' || tok[j] == '"'))
+			quote = tok[j];
+		else if (quote && tok[j] == quote)
+			quote = 0;
+		else if (!quote && (tok[j] == '>' || tok[j] == '<'))
+		{
+			handle_redir(out, tok, &j, idx, &start);
+			continue ;
+		}
+		j++;
+	}
+	if (j - start > 0)
+	{
+		out[*idx] = ft_substr(tok, start, j - start);
+		(*idx)++;
+	}
+}
+
 char	**split_redirs(char **arr)
 {
 	char	**out;
-	int		i;
-	int		j;
-	int		start;
-	int		idx;
-	char	quote;
-	char	op[2];
+	int	i;
+	int	idx;
 
 	out = malloc(sizeof(char *) * (total_parts(arr) + 1));
 	if (!out)
-		return (free_cmd(arr), NULL);
+	{
+		free_cmd(arr);
+		return (NULL);
+	}
 	idx = 0;
 	i = 0;
 	while (arr[i])
 	{
-		j = 0;
-		start = 0;
-		quote = 0;
-		while (arr[i][j])
-		{
-			if (!quote && (arr[i][j] == '\'' || arr[i][j] == '"'))
-				quote = arr[i][j];
-			else if (quote && arr[i][j] == quote)
-				quote = 0;
-			if (!quote && (arr[i][j] == '>' || arr[i][j] == '<'))
-			{
-				if (j - start > 0)
-					out[idx++] = ft_substr(arr[i], start, j - start);
-				if (arr[i][j] == '>' && arr[i][j + 1] == '>')
-				{
-					out[idx++] = ft_strdup(">>");
-					j += 2;
-				}
-				else
-				{
-					op[0] = arr[i][j];
-					op[1] = '\0';
-					out[idx++] = ft_strdup(op);
-					j++;
-				}
-				start = j;
-			}
-			else
-				j++;
-		}
-		if (j - start > 0)
-			out[idx++] = ft_substr(arr[i], start, j - start);
+		process_token(out, arr[i], &idx);
 		free(arr[i]);
 		i++;
 	}

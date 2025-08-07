@@ -31,6 +31,12 @@ static void	handle_quote_state(char c, char *quote)
 		*quote = 0;
 }
 
+static void	add_segment(char **arr, size_t *seg, const char *line, size_t start, size_t end)
+{
+	arr[*seg] = ft_substr(line, start, end - start);
+	(*seg)++;
+}
+
 char	**split_pipes(const char *line)
 {
 	size_t	i;
@@ -51,12 +57,12 @@ char	**split_pipes(const char *line)
 		handle_quote_state(line[i], &quote);
 		if (!quote && line[i] == '|')
 		{
-			arr[seg++] = ft_substr(line, start, i - start);
+			add_segment(arr, &seg, line, start, i);
 			start = i + 1;
 		}
 		i++;
 	}
-	arr[seg++] = ft_substr(line, start, i - start);
+	add_segment(arr, &seg, line, start, i);
 	arr[seg] = NULL;
 	return (arr);
 }
