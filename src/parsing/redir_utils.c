@@ -18,6 +18,9 @@ static int	part_count(char *tok)
 	int	start;
 	int	count;
 
+	if (!tok[0])
+		return (1);
+
 	i = 0;
 	start = 0;
 	count = 0;

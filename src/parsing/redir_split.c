@@ -4,8 +4,8 @@
 static void	extract_slice(char **out, t_redir *st, char *tok)
 {
 	if (st->j > st->start)
-		out[st->idx++] = ft_substr(tok, st->start,
-						  st->j - st->start);
+	out[st->idx++] = ft_substr(tok, st->start,
+				st->j - st->start);
 }
 
 static void	handle_operator(char **out, t_redir *st, char *tok)
