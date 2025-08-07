@@ -9,7 +9,7 @@ typedef struct s_expand
 	int		start;
 }	t_expand;
 
-static char *append_exit_code(char *result, char *str, int *i)
+static char	*append_exit_code(char *result, char *str, int *i)
 {
 	char	*exit_code_str;
 	char	*tmp;
@@ -35,7 +35,7 @@ static char *append_exit_code(char *result, char *str, int *i)
 	return (result);
 }
 
-static int handle_dollar(t_expand *d, int *i)
+static int	handle_dollar(t_expand *d, int *i)
 {
 	if (d->str[*i] != '$')
 		return (0);
@@ -86,3 +86,4 @@ char	*build_expanded_str(char *str, char **envp)
 		return (NULL);
 	return (d.result);
 }
+

@@ -29,7 +29,7 @@ static size_t	count_segments(const char *line)
 	return (count);
 }
 
-static void handle_quote_state(char c, char *quote)
+static void	handle_quote_state(char c, char *quote)
 {
 	if (!*quote && (c == '\'' || c == '"'))
 		*quote = c;
@@ -37,7 +37,7 @@ static void handle_quote_state(char c, char *quote)
 		*quote = 0;
 }
 
-static void add_segment(t_pipe *p, const char *line, size_t start, size_t end)
+static void	add_segment(t_pipe *p, const char *line, size_t start, size_t end)
 {
 	p->arr[p->seg] = ft_substr(line, start, end - start);
 	p->seg++;
@@ -45,10 +45,10 @@ static void add_segment(t_pipe *p, const char *line, size_t start, size_t end)
 
 char	**split_pipes(const char *line)
 {
-	size_t	i;
-	size_t	start;
-	char	quote;
-	t_pipe	p;
+	size_t	 i;
+	size_t	 start;
+	char	 quote;
+	t_pipe	 p;
 
 	i = 0;
 	start = 0;
@@ -71,3 +71,4 @@ char	**split_pipes(const char *line)
 	p.arr[p.seg] = NULL;
 	return (p.arr);
 }
+

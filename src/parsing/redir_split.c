@@ -10,9 +10,9 @@ typedef struct s_redir
 
 static int	part_count(char *tok)
 {
-	int i;
-	int start;
-	int count;
+	int	i;
+	int	start;
+	int	count;
 
 	i = 0;
 	start = 0;
@@ -39,8 +39,8 @@ static int	part_count(char *tok)
 
 static int	total_parts(char **arr)
 {
-	int total;
-	int i;
+	int	total;
+	int	i;
 
 	total = 0;
 	i = 0;
@@ -52,9 +52,9 @@ static int	total_parts(char **arr)
 	return (total);
 }
 
-static void handle_redir(char **out, char *tok, t_redir *st)
+static void	handle_redir(char **out, char *tok, t_redir *st)
 {
-	char	op[2];
+	char	op[3];
 
 	if (st->j - st->start > 0)
 	{
@@ -77,9 +77,9 @@ static void handle_redir(char **out, char *tok, t_redir *st)
 	st->start = st->j;
 }
 
-static void process_token(char **out, char *tok, int *idx)
+static void	process_token(char **out, char *tok, int *idx)
 {
-	t_redir st;
+	t_redir	st;
 	char	quote;
 
 	st.j = 0;
@@ -131,3 +131,4 @@ char	**split_redirs(char **arr)
 	free(arr);
 	return (out);
 }
+
