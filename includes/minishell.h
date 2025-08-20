@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   minishell.h                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: kbrandon <kbrandon@student.hive.fi>        +#+  +:+       +#+        */
+/*   By: dimendon <dimendon@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/04 13:40:36 by dimendon          #+#    #+#             */
-/*   Updated: 2025/08/07 22:03:39 by kbrandon         ###   ########.fr       */
+/*   Updated: 2025/08/05 16:19:53 by dimendon         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -56,13 +56,6 @@ typedef struct s_pipe_info
     int *fd;
     int last;
 } t_pipe_info;
-
-typedef struct s_redir
-{
-	int	j;
-	int	idx;
-	int	start;
-}	t_redir;
 
 // ==================== BUILTINS ====================
 short int   custom_cd(char ***envp, char **args);
@@ -119,7 +112,6 @@ char        *expand_var(char *str, int *var_len);
 char        *append_expanded_var(char *result, char *str, int *i, char **envp);
 char        *build_expanded_str(char *str, char **envp);
 char        **split_redirs(char **arr);
-int         total_parts(char **arr);
 char        **tokenize_command(char const *s, char c, char **envp);
 char        **split_pipes(const char *line);
 

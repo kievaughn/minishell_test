@@ -52,19 +52,13 @@ static void	execute_command_with_path(char **cmd, char ***envp)
 	}
 	else
 	{
-                fprintf(stderr, ": command not found\n");
+		fprintf(stderr, "%s: command not found\n", cmd[0]);
 		g_exit_code = 127;
 	}
 }
 
 static void	run_external_command(char **cmd, char ***envp)
 {
-	if (cmd[0][0] == '\0')
-	{
-                fprintf(stderr, ": command not found\n");
-		g_exit_code = 127;
-		return ;
-	}
 	if (ft_strchr(cmd[0], '/'))
 	{
 		if (access(cmd[0], F_OK) != 0)

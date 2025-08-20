@@ -23,56 +23,40 @@ static size_t	count_segments(const char *line)
 	return (count);
 }
 
-static int	add_segment(char **arr, size_t *seg,
-						const char *start, size_t len)
+static void	handle_quote_state(char c, char *quote)
 {
-	arr[*seg] = ft_substr(start, 0, len);
-	if (!arr[*seg])
-		return (0);
-	(*seg)++;
-	return (1);
+	if (!*quote && (c == '\'' || c == '"'))
+		*quote = c;
+	else if (*quote && c == *quote)
+		*quote = 0;
 }
 
-static int	fill_pipes(char **arr, const char *line)
+char	**split_pipes(const char *line)
 {
 	size_t	i;
 	size_t	start;
 	size_t	seg;
 	char	quote;
+	char	**arr;
 
 	i = 0;
 	start = 0;
 	seg = 0;
 	quote = 0;
+	arr = malloc(sizeof(char *) * (count_segments(line) + 1));
+	if (!arr)
+		return (NULL);
 	while (line && line[i])
 	{
-		if (!quote && (line[i] == '\'' || line[i] == '"'))
-			quote = line[i];
-		else if (quote && line[i] == quote)
-			quote = 0;
+		handle_quote_state(line[i], &quote);
 		if (!quote && line[i] == '|')
 		{
-			if (!add_segment(arr, &seg, line + start, i - start))
-				return (-1);
+			arr[seg++] = ft_substr(line, start, i - start);
 			start = i + 1;
 		}
 		i++;
 	}
-	return (add_segment(arr, &seg, line + start, i - start) ? (int)seg : -1);
-}
-
-char	**split_pipes(const char *line)
-{
-	char	**arr;
-	int		seg_total;
-
-	arr = malloc(sizeof(char *) * (count_segments(line) + 1));
-	if (!arr)
-		return (NULL);
-	seg_total = fill_pipes(arr, line);
-	if (seg_total == -1)
-		return (free_cmd(arr), NULL);
-	arr[seg_total] = NULL;
+	arr[seg++] = ft_substr(line, start, i - start);
+	arr[seg] = NULL;
 	return (arr);
 }
-

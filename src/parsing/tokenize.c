@@ -67,155 +67,50 @@ static size_t	next_c(char *s, char c)
 			break ;
 		len++;
 	}
-        return (len);
+	return (len);
 }
 
-static char     **split_ifs(char *s)
+char	**tokenize_command(char const *s, char c, char **envp)
 {
-        char    *tmp;
-        char    **parts;
-        int             i;
+	char	**arr;
+	int		i;
+	size_t	len;
+	char	*expanded;
 
-        tmp = ft_strdup(s);
-        if (!tmp)
-                return (NULL);
-        i = 0;
-        while (tmp[i])
-        {
-                if (tmp[i] == '\t' || tmp[i] == '\n')
-                        tmp[i] = ' ';
-                i++;
-        }
-        parts = ft_split(tmp, ' ');
-        free(tmp);
-        if (!parts)
-                return (NULL);
-        if (!parts[0])
-        {
-                free(parts);
-                parts = malloc(2 * sizeof *parts);
-                if (!parts)
-                        return (NULL);
-                parts[0] = ft_strdup("");
-                if (!parts[0])
-                {
-                        free(parts);
-                        return (NULL);
-                }
-                parts[1] = NULL;
-        }
-        return (parts);
+	if (!s)
+		return (NULL);
+	arr = (char **)malloc((token_count(s, c) + 1) * sizeof(char *));
+	if (!arr)
+		return (NULL);
+	i = 0;
+	while (*s)
+	{
+		while (*s == c)
+			s++;
+		if (!*s)
+			break ;
+		len = next_c((char *)s, c);
+		arr[i] = ft_substr((char *)s, 0, len);
+		if (!arr[i])
+			return (free_arr(arr, i), NULL);
+		if (arr[i][0] != '\'')
+		{
+			expanded = build_expanded_str(arr[i], envp);
+			free(arr[i]);
+			arr[i] = expanded;
+		}
+		i++;
+		s += len;
+	}
+	arr[i] = NULL;
+	arr = split_redirs(arr);
+	if (!arr)
+		return (NULL);
+	i = 0;
+	while (arr[i])
+	{
+		remove_quotes(arr[i]);
+		i++;
+	}
+	return (arr);
 }
-
-static int      ensure_capacity(char ***arr, int *cap, int needed, int used)
-{
-        char    **tmp;
-        int             newcap;
-
-        if (used + needed + 1 <= *cap)
-                return (0);
-        newcap = *cap * 2;
-        while (used + needed + 1 > newcap)
-                newcap *= 2;
-        tmp = realloc(*arr, newcap * sizeof *tmp);
-        if (!tmp)
-                return (-1);
-        *arr = tmp;
-        *cap = newcap;
-        return (0);
-}
-
-static int      fill_tokens(char ***arr, char const **ps, char c, char **envp, int *cap)
-{
-    int     i;
-    size_t  len;
-    char   *tok;
-    char   *exp;
-    char    quote;
-    char  **parts;
-    int     k;
-
-    i = 0;
-    while (**ps)
-    {
-        while (**ps == c)
-            (*ps)++;
-        if (!**ps)
-            break ;
-        len = next_c((char *)*ps, c);
-        tok = ft_substr((char *)*ps, 0, len);
-        if (!tok)
-            return (free_arr(*arr, i), -1);
-        if (tok[0] != '\'')
-        {
-            quote = tok[0];
-            exp = build_expanded_str(tok, envp);
-            free(tok);
-            tok = exp;
-            if (!tok)
-                return (free_arr(*arr, i), -1);
-            if (quote != '"')
-            {
-                parts = split_ifs(tok);
-                free(tok);
-                if (!parts)
-                    return (free_arr(*arr, i), -1);
-                k = 0;
-                while (parts[k])
-                    k++;
-                if (ensure_capacity(arr, cap, k, i) < 0)
-                    return (free_cmd(parts), free_arr(*arr, i), -1);
-                k = 0;
-                while (parts[k])
-                    (*arr)[i++] = parts[k++];
-                free(parts);
-            }
-            else
-            {
-                if (ensure_capacity(arr, cap, 1, i) < 0)
-                    return (free(tok), free_arr(*arr, i), -1);
-                (*arr)[i++] = tok;
-            }
-        }
-        else
-        {
-            if (ensure_capacity(arr, cap, 1, i) < 0)
-                return (free(tok), free_arr(*arr, i), -1);
-            (*arr)[i++] = tok;
-        }
-        *ps += len;
-    }
-    return (i);
-}
-
-
-char **tokenize_command(char const *s, char c, char **envp)
-{
-    char **arr;
-    int    i;
-    int    cap;
-
-    if (!s)
-        return NULL;
-    cap = token_count(s, c) + 1;
-    arr = malloc(cap * sizeof *arr);
-    if (!arr)
-        return NULL;
-
-    i = fill_tokens(&arr, &s, c, envp, &cap);
-    if (i < 0)
-        return NULL;
-    arr[i] = NULL;
-
-
-    arr = split_redirs(arr);
-    if (!arr) return NULL;
-
-
-    for (i = 0; arr[i]; i++)
-        remove_quotes(arr[i]);
-    return arr;
-}
-
-
-
