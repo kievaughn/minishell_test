@@ -6,7 +6,7 @@
 /*   By: dimendon <dimendon@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/30 14:15:10 by dimendon          #+#    #+#             */
-/*   Updated: 2025/07/30 15:17:17 by dimendon         ###   ########.fr       */
+/*   Updated: 2025/08/20 12:37:51 by dimendon         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,7 +27,7 @@ int	run_builtin(char ***envp, char **cmd)
 	else if (!ft_strncmp(cmd[0], "unset", 6))
 		g_exit_code = custom_unset(envp, cmd);
 	else if (!ft_strncmp(cmd[0], "env", 4))
-		g_exit_code = custom_env(*envp);
+		g_exit_code = custom_env(*envp, cmd);
 	else if (!ft_strncmp(cmd[0], "exit", 5))
 	{
 		g_exit_code = custom_exit(cmd);
@@ -83,28 +83,28 @@ static void	run_external_command(char **cmd, char ***envp)
 		execute_command_with_path(cmd, envp);
 }
 
-static void	run_single(char ***envp, char *segment)
+static void run_single(char ***envp, char *segment)
 {
-	char	**cmd;
-	int		in_fd;
-	int		out_fd;
-	int		save_in;
-	int		save_out;
+    char **cmd;
+    int in_fd;
+    int out_fd;
+    int save_in;
+    int save_out;
 
-	in_fd = STDIN_FILENO;
-	out_fd = STDOUT_FILENO;
-	save_in = 0;
-	save_out = 0;
-	cmd = prepare_command(segment, &in_fd, &out_fd, envp);
-	if (!cmd)
-		return ;
-	setup_redirections(in_fd, out_fd, &save_in, &save_out);
-	if (is_builtin(cmd[0]))
-		run_builtin(envp, cmd);
-	else
-		run_external_command(cmd, envp);
-	restore_redirections(in_fd, out_fd, save_in, save_out);
-	free_cmd(cmd);
+    in_fd = STDIN_FILENO;
+    out_fd = STDOUT_FILENO;
+    save_in = 0;
+    save_out = 0;
+    cmd = prepare_command(segment, &in_fd, &out_fd, envp);
+    if (!cmd)
+        return ;
+    setup_redirections(in_fd, out_fd, &save_in, &save_out);
+    if (is_builtin(cmd[0]))
+        run_builtin(envp, cmd);
+    else
+        run_external_command(cmd, envp);
+    restore_redirections(save_in, save_out);
+    free_cmd(cmd);
 }
 
 void	process_command(char ***envp, char *line)

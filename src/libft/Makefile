@@ -3,10 +3,10 @@
 #                                                         :::      ::::::::    #
 #    Makefile                                           :+:      :+:    :+:    #
 #                                                     +:+ +:+         +:+      #
-#    By: kievaughn <kievaughn@student.42.fr>        +#+  +:+       +#+         #
+#    By: dimendon <dimendon@student.hive.fi>        +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/11/12 19:39:40 by dimendon          #+#    #+#              #
-#    Updated: 2025/07/01 21:11:20 by kievaughn        ###   ########.fr        #
+#    Updated: 2025/08/19 12:15:58 by dimendon         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -62,7 +62,7 @@ SRCS = \
 	ft_strtok.c \
 	ft_atoany.c \
 	ft_is_str_num.c \
-	ft_strcmp.c
+	ft_strcmp.c get_next_line_bonus.c get_next_line_utils_bonus.c
 
 OBJS = $(SRCS:.c=.o)
 HEADERS = libft.h

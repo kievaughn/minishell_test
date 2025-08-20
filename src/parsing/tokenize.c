@@ -1,11 +1,46 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   tokenize.c                                         :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: dimendon <dimendon@student.hive.fi>        +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2025/08/19 11:12:49 by dimendon          #+#    #+#             */
+/*   Updated: 2025/08/19 11:16:50 by dimendon         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include "../libft/libft.h"
 #include "minishell.h"
+
+static size_t	skip_token(char const *s, size_t i, char c)
+{
+	char	quote;
+
+	quote = 0;
+	while (s[i])
+	{
+		if (!quote && (s[i] == '"' || s[i] == '\''))
+		{
+			quote = s[i++];
+			while (s[i] && s[i] != quote)
+				i++;
+			if (s[i] == quote)
+				i++;
+			quote = 0;
+			continue ;
+		}
+		if (!quote && s[i] == c)
+			break ;
+		i++;
+	}
+	return (i);
+}
 
 static size_t	token_count(char const *s, char c)
 {
 	size_t	i;
 	size_t	count;
-	char	quote;
 
 	i = 0;
 	count = 0;
@@ -16,32 +51,9 @@ static size_t	token_count(char const *s, char c)
 		if (!s[i])
 			break ;
 		count++;
-		quote = 0;
-		while (s[i])
-		{
-			if (!quote && (s[i] == '"' || s[i] == '\''))
-			{
-				quote = s[i++];
-				while (s[i] && s[i] != quote)
-					i++;
-				if (s[i] == quote)
-					i++;
-				quote = 0;
-				continue ;
-			}
-			if (!quote && s[i] == c)
-				break ;
-			i++;
-		}
+		i = skip_token(s, i, c);
 	}
 	return (count);
-}
-
-static void	free_arr(char **arr, int i)
-{
-	while (i-- > 0)
-		free(arr[i]);
-	free(arr);
 }
 
 static size_t	next_c(char *s, char c)
@@ -70,18 +82,12 @@ static size_t	next_c(char *s, char c)
 	return (len);
 }
 
-char	**tokenize_command(char const *s, char c, char **envp)
+static int	fill_arr_from_string(char const *s, char c, char **arr, char **envp)
 {
-	char	**arr;
 	int		i;
 	size_t	len;
 	char	*expanded;
 
-	if (!s)
-		return (NULL);
-	arr = (char **)malloc((token_count(s, c) + 1) * sizeof(char *));
-	if (!arr)
-		return (NULL);
 	i = 0;
 	while (*s)
 	{
@@ -92,7 +98,7 @@ char	**tokenize_command(char const *s, char c, char **envp)
 		len = next_c((char *)s, c);
 		arr[i] = ft_substr((char *)s, 0, len);
 		if (!arr[i])
-			return (free_arr(arr, i), NULL);
+			return (-1);
 		if (arr[i][0] != '\'')
 		{
 			expanded = build_expanded_str(arr[i], envp);
@@ -102,7 +108,24 @@ char	**tokenize_command(char const *s, char c, char **envp)
 		i++;
 		s += len;
 	}
-	arr[i] = NULL;
+	return (i);
+}
+
+char	**tokenize_command(char const *s, char c, char **envp)
+{
+	char	**arr;
+	int		i;
+	int		token_num;
+
+	if (!s)
+		return (NULL);
+	arr = (char **)malloc((token_count(s, c) + 1) * sizeof(char *));
+	if (!arr)
+		return (NULL);
+	token_num = fill_arr_from_string(s, c, arr, envp);
+	if (token_num < 0)
+		return (free_cmd(arr), NULL);
+	arr[token_num] = NULL;
 	arr = split_redirs(arr);
 	if (!arr)
 		return (NULL);

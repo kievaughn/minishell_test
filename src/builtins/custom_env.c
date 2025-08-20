@@ -3,20 +3,25 @@
 /*                                                        :::      ::::::::   */
 /*   custom_env.c                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: kievaughn <kievaughn@student.42.fr>        +#+  +:+       +#+        */
+/*   By: dimendon <dimendon@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/18 16:41:47 by dimendon          #+#    #+#             */
-/*   Updated: 2025/07/01 14:56:49 by kievaughn        ###   ########.fr       */
+/*   Updated: 2025/08/19 13:45:02 by dimendon         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../libft/libft.h"
 #include "minishell.h"
 
-short int	custom_env(char **envp)
+short int	custom_env(char **envp, char **args)
 {
 	int	i;
-
+	if (args[1])
+	{
+		//fprintf(stderr, "env: too many arguments\n");
+		g_exit_code = 1;
+		return (1);
+	}
 	if (!envp)
 		return (1);
 	i = 0;

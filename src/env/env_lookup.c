@@ -6,7 +6,7 @@
 /*   By: dimendon <dimendon@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/04 13:41:38 by dimendon          #+#    #+#             */
-/*   Updated: 2025/08/05 17:41:44 by dimendon         ###   ########.fr       */
+/*   Updated: 2025/08/19 10:35:27 by dimendon         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -42,6 +42,7 @@ static char	**split_path_dirs(char **envp, const char *name)
 char	*check_and_construct_path(char *path, char **cmd)
 {
 	char	*tmp;
+	char	*res;
 
 	tmp = NULL;
 	tmp = ft_strcatrealloc(tmp, path);
@@ -49,7 +50,9 @@ char	*check_and_construct_path(char *path, char **cmd)
 	tmp = ft_strcatrealloc(tmp, cmd[0]);
 	if (tmp && access(tmp, F_OK | X_OK) == 0)
 	{
-		return (ft_strdup(tmp));
+		res = ft_strdup(tmp);
+		free(tmp);
+		return (res);
 	}
 	free(tmp);
 	return (NULL);

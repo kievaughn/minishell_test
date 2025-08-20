@@ -6,7 +6,7 @@
 /*   By: dimendon <dimendon@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/12 19:39:49 by dimendon          #+#    #+#             */
-/*   Updated: 2025/08/05 17:50:42 by dimendon         ###   ########.fr       */
+/*   Updated: 2025/08/19 12:15:05 by dimendon         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -70,5 +70,6 @@ char	*ft_strtok(char *str, const char delim);
 int		ft_is_str_num(const char *str);
 int		ft_atoany(const char *str, long long *out);
 int		ft_strcmp(char *s1, const char *s2);
+char	*get_next_line(int fd);
 
 #endif

@@ -24,12 +24,40 @@ static char	*append_exit_code(char *result, int *i, char *str, int *handled)
 	return (result);
 }
 
+static int	handle_exit_code_case(char **result, char *str, int *i, int *start)
+{
+	int	handled;
+
+	*result = append_exit_code(*result, i, str, &handled);
+	if (*result && handled)
+	{
+		*start = *i;
+		return (1);
+	}
+	return (0);
+}
+
+static int	handle_env_var_case(char **result, char *str, int *i, int *start,
+		char **envp)
+{
+	if (ft_isalnum(str[*i + 1]))
+	{
+		if (!(*result = append_literal(*result, str, *start, *i)))
+			return (-1);
+		if (!(*result = append_expanded_var(*result, str, i, envp)))
+			return (-1);
+		*start = *i;
+		return (1);
+	}
+	return (0);
+}
+
 char	*build_expanded_str(char *str, char **envp)
 {
 	int		i;
 	int		start;
 	char	*result;
-	int		handled;
+	int		env_result;
 
 	i = 0;
 	start = 0;
@@ -38,21 +66,13 @@ char	*build_expanded_str(char *str, char **envp)
 	{
 		if (str[i] == '$')
 		{
-			if ((result = append_exit_code(result, &i, str, &handled))
-				&& handled)
-			{
-				start = i;
+			if (handle_exit_code_case(&result, str, &i, &start))
 				continue ;
-			}
-			if (ft_isalnum(str[i + 1]))
-			{
-				if (!(result = append_literal(result, str, start, i)))
-					return (NULL);
-				if (!(result = append_expanded_var(result, str, &i, envp)))
-					return (NULL);
-				start = i;
+			env_result = handle_env_var_case(&result, str, &i, &start, envp);
+			if (env_result == -1)
+				return (NULL);
+			else if (env_result == 1)
 				continue ;
-			}
 		}
 		i++;
 	}

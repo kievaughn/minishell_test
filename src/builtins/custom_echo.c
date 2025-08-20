@@ -6,7 +6,7 @@
 /*   By: dimendon <dimendon@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/13 18:15:55 by dimendon          #+#    #+#             */
-/*   Updated: 2025/07/30 13:45:21 by dimendon         ###   ########.fr       */
+/*   Updated: 2025/08/19 11:09:15 by dimendon         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -40,9 +40,6 @@ static int	skip_n_flags(char **arg, int start)
 	return (i);
 }
 
-/*
-** Writes one argument for echo, handling $?.
-*/
 static int	write_echo_arg(const char *arg)
 {
 	char	*code;

@@ -6,7 +6,7 @@
 /*   By: dimendon <dimendon@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/05 15:34:05 by dimendon          #+#    #+#             */
-/*   Updated: 2025/08/05 15:42:05 by dimendon         ###   ########.fr       */
+/*   Updated: 2025/08/20 12:30:37 by dimendon         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,6 +18,7 @@ static int	open_heredoc(const char *delim)
 	int		pipefd[2];
 	char	*line;
 
+	line = NULL;
 	if (pipe(pipefd) == -1)
 	{
 		perror("pipe");
