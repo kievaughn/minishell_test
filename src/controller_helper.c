@@ -40,7 +40,18 @@ char    **prepare_command(char *segment, int *in_fd, int *out_fd, char ***envp)
         free(quoted);
         if (!cmd || !cmd[0])
         {
-                free_cmd(cmd);
+                if (cmd)
+                        free_cmd(cmd);
+                if (*in_fd != STDIN_FILENO)
+                {
+                        close(*in_fd);
+                        *in_fd = STDIN_FILENO;
+                }
+                if (*out_fd != STDOUT_FILENO)
+                {
+                        close(*out_fd);
+                        *out_fd = STDOUT_FILENO;
+                }
                 return (NULL);
         }
         return (cmd);
