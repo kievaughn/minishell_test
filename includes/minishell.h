@@ -101,8 +101,8 @@ void        close_pipe(int *fd);
 void        parent_cleanup(int *in_fd, int *fd, int i, int num);
 void        wait_for_all(pid_t *pids, int count);
 void        execute_pipeline(char **envp, char **segments);
-char        **handle_redirections(char **cmd, int count, int *in_fd, int *out_fd);
-int	        handle_heredoc(const char *delim, int *in_fd);
+char        **handle_redirections(char **cmd, int *quoted, int count, char **envp, int *in_fd, int *out_fd);
+int             handle_heredoc(const char *delim, int quoted, char **envp, int *in_fd);
 void        pipeline_loop(t_pipeline_data *pipeline);
 
 // ==================== PARSING ====================
@@ -113,7 +113,7 @@ char        *append_expanded_var(char *result, char *str, int *i, char **envp);
 char        *build_expanded_str(char *str, char **envp);
 char        **split_expanded_tokens(char **arr);
 char        **split_redirs(char **arr);
-char        **tokenize_command(char const *s, char c, char **envp);
+char        **tokenize_command(char const *s, char c, char **envp, int **quoted);
 char        **split_pipes(const char *line);
 
 // ==================== MISC ====================
