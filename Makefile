@@ -39,12 +39,13 @@ SRCS =	        src/builtins/custom_export/export_check.c \
 				src/env/env_lookup.c \
 				src/env/env_utils.c \
 				src/misc/utils.c \
-				src/parsing/expander_utils.c \
-				src/parsing/expander.c \
-				src/parsing/redir_split.c \
-				src/parsing/split_pipes.c \
-				src/parsing/tokenize.c \
-				src/piping/pipeline.c \
+src/parsing/expander_utils.c \
+src/parsing/expander.c \
+src/parsing/redir_split.c \
+src/parsing/split_pipes.c \
+src/parsing/tokenize.c \
+src/parsing/word_split.c \
+src/piping/pipeline.c \
 				src/piping/redirections.c \
 				src/piping/pipeline_utils.c \
 				src/piping/redirections_utils.c \

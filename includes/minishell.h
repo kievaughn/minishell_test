@@ -111,6 +111,7 @@ char        *append_literal(char *result, char *str, int start, int i);
 char        *expand_var(char *str, int *var_len);
 char        *append_expanded_var(char *result, char *str, int *i, char **envp);
 char        *build_expanded_str(char *str, char **envp);
+char        **split_expanded_tokens(char **arr);
 char        **split_redirs(char **arr);
 char        **tokenize_command(char const *s, char c, char **envp);
 char        **split_pipes(const char *line);

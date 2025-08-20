@@ -125,10 +125,13 @@ char	**tokenize_command(char const *s, char c, char **envp)
 	token_num = fill_arr_from_string(s, c, arr, envp);
 	if (token_num < 0)
 		return (free_cmd(arr), NULL);
-	arr[token_num] = NULL;
-	arr = split_redirs(arr);
-	if (!arr)
-		return (NULL);
+        arr[token_num] = NULL;
+        arr = split_expanded_tokens(arr);
+        if (!arr)
+                return (NULL);
+        arr = split_redirs(arr);
+        if (!arr)
+                return (NULL);
 	i = 0;
 	while (arr[i])
 	{
