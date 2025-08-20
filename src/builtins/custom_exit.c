@@ -17,21 +17,21 @@ short int	custom_exit(char **args)
 {
 	long long	value;
 
-	if (args[1] && args[2])
-	{
-		//fprintf(stderr, "exit: too many arguments\n");
-		g_exit_code = 1;
-		return (1);
-	}
-	//printf("exit\n");  only for tester
-	if (args[1])
-	{
-		if (!ft_atoany(args[1], &value))
-		{
-			//fprintf(stderr, "exit: %s: numeric argument required\n", args[1]);
-			exit(2);
-		}
-		exit((unsigned char)value);
-	}
-	exit(g_exit_code);
+        printf("exit\n");
+        if (args[1])
+        {
+                if (!ft_atoany(args[1], &value))
+                {
+                        fprintf(stderr, "exit: %s: numeric argument required\n", args[1]);
+                        exit(2);
+                }
+                if (args[2])
+                {
+                        fprintf(stderr, "exit: too many arguments\n");
+                        g_exit_code = 1;
+                        return (1);
+                }
+                exit((unsigned char)value);
+        }
+        exit(g_exit_code);
 }

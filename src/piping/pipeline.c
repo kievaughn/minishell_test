@@ -94,6 +94,11 @@ static int      pipeline_step(t_pipeline_data *pipeline, int *in_fd, int *fd, in
         {
                 free(quoted);
                 free_cmd(cmd);
+                if (*in_fd != STDIN_FILENO)
+                {
+                        close(*in_fd);
+                        *in_fd = STDIN_FILENO;
+                }
                 if (i < pipeline->nbr_segments - 1)
                         close_pipe(fd);
                 return (1);
