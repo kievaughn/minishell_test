@@ -12,6 +12,7 @@
 
 #include "minishell.h"
 #include "../libft/libft.h"
+#include <errno.h>
 
 void	execute_pipeline(char **envp, char **segments)
 {
@@ -22,10 +23,20 @@ void	execute_pipeline(char **envp, char **segments)
 	pipeline.nbr_segments = count_strings(segments);
         pipeline.pids = ft_calloc(pipeline.nbr_segments, sizeof(pid_t));
         if (!pipeline.pids)
+        {
+                g_exit_code = 1;
                 return ;
+        }
 	pipeline_loop(&pipeline);
 	wait_for_all(pipeline.pids, pipeline.nbr_segments);
 	free(pipeline.pids);
+}
+
+static int      exit_code_from_errno(void)
+{
+        if (errno == ENOENT)
+                return (127);
+        return (126);
 }
 
 void    execute_cmd(char **envp, char **cmd)
@@ -58,8 +69,8 @@ void    execute_cmd(char **envp, char **cmd)
                 else
                 {
                         execve(cmd[0], cmd, envp);
-                        perror("execve");
-                        g_exit_code = 126;
+                        perror(cmd[0]);
+                        g_exit_code = exit_code_from_errno();
                 }
         }
         else
@@ -68,9 +79,9 @@ void    execute_cmd(char **envp, char **cmd)
                 if (path)
                 {
                         execve(path, cmd, envp);
-                        perror("execve");
+                        perror(cmd[0]);
                         free(path);
-                        g_exit_code = 126;
+                        g_exit_code = exit_code_from_errno();
                 }
                 else
                 {
@@ -99,11 +110,15 @@ void	parent_cleanup(int *in_fd, int *fd, int i, int num)
 	}
 }
 
-void	wait_for_all(pid_t *pids, int count)
+void    wait_for_all(pid_t *pids, int count)
 {
-	int	i;
-	int	status;
+        int     i;
+        int     status;
+        int     last_status;
+        pid_t   last;
 
+        last_status = -1;
+        last = (count > 0) ? pids[count - 1] : -1;
         i = 0;
         while (i < count)
         {
@@ -111,13 +126,18 @@ void	wait_for_all(pid_t *pids, int count)
                 {
                         if (waitpid(pids[i], &status, 0) == -1)
                                 perror("waitpid");
-                        else if (WIFEXITED(status))
-                                g_exit_code = WEXITSTATUS(status);
-                        else if (WIFSIGNALED(status))
-                                g_exit_code = 128 + WTERMSIG(status);
-                        else
-                                g_exit_code = 1;
+                        else if (pids[i] == last)
+                                last_status = status;
                 }
                 i++;
         }
+        if (last_status == -1)
+                last_status = status;
+        if (WIFEXITED(last_status))
+                g_exit_code = WEXITSTATUS(last_status);
+        else if (WIFSIGNALED(last_status))
+                g_exit_code = 128 + WTERMSIG(last_status);
+        else
+                g_exit_code = 1;
 }
+
