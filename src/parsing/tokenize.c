@@ -38,6 +38,13 @@ static int  fully_quoted(const char *s)
     return (2);
 }
 
+static int  is_delim(char ch, char delim)
+{
+    if (delim == ' ')
+        return (ch == ' ' || ch == '\t');
+    return (ch == delim);
+}
+
 static size_t skip_token(const char *s, size_t i, char c)
 {
     char quote = 0;
@@ -54,7 +61,7 @@ static size_t skip_token(const char *s, size_t i, char c)
             quote = 0;
             continue;
         }
-        if (!quote && s[i] == c)
+        if (!quote && is_delim(s[i], c))
             break;
         i++;
     }
@@ -68,7 +75,7 @@ static size_t token_count(const char *s, char c)
 
     while (s[i])
     {
-        while (s[i] == c)
+        while (is_delim(s[i], c))
             i++;
         if (!s[i])
             break;
@@ -95,7 +102,7 @@ static size_t next_c(const char *s, char c)
             quote = 0;
             continue;
         }
-        if (!quote && s[i] == c)
+        if (!quote && is_delim(s[i], c))
             break;
         i++;
     }
@@ -120,7 +127,7 @@ static t_token **fill_arr_from_string(const char *s, char c)
     i = 0;
     while (*s)
     {
-        while (*s == c)
+        while (is_delim(*s, c))
             s++;
         if (!*s)
             break;
