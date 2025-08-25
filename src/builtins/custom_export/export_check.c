@@ -6,13 +6,13 @@
 /*   By: dimendon <dimendon@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/05 17:43:08 by dimendon          #+#    #+#             */
-/*   Updated: 2025/08/05 17:43:09 by dimendon         ###   ########.fr       */
+/*   Updated: 2025/08/25 11:54:29 by dimendon         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minishell.h"
 
-static short int	check_update_env(char ***env, char **args)
+static short int	check_update_env(char ***env, t_token **args)
 {
 	int			arg_i;
 	short int	had_error;
@@ -21,22 +21,22 @@ static short int	check_update_env(char ***env, char **args)
 	had_error = 0;
 	while (args[arg_i])
 	{
-		if (!is_valid_name(args[arg_i]))
+		if (!is_valid_name(args[arg_i]->str))
 		{
 			fprintf(stderr, "minishell: export: `%s': not a valid identifier\n",
-				args[arg_i]);
+				args[arg_i]->str);
 			had_error = -1;
 			arg_i++;
 			continue ;
 		}
-		if (update_or_add_env(env, args[arg_i]) == -1)
+		if (update_or_add_env(env, args[arg_i]->str) == -1)
 			return (-1);
 		arg_i++;
 	}
 	return (had_error);
 }
 
-short int	custom_export(char ***env, char **args)
+short int	custom_export(char ***env, t_token **args)
 {
 	int	size;
 	int	*index;
@@ -60,3 +60,4 @@ short int	custom_export(char ***env, char **args)
 	free(index);
 	return (0);
 }
+

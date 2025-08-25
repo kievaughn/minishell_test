@@ -6,7 +6,7 @@
 /*   By: dimendon <dimendon@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/04 13:40:36 by dimendon          #+#    #+#             */
-/*   Updated: 2025/08/05 16:19:53 by dimendon         ###   ########.fr       */
+/*   Updated: 2025/08/25 13:21:56 by dimendon         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -41,6 +41,14 @@
 
 extern int  g_exit_code;
 
+// Tokenizer
+typedef struct s_token
+{
+    char    *str;       // actual token text
+    int     quoted;     // 0 = unquoted, 1 = single, 2 = double
+    int     type;       // e.g. WORD, REDIR_IN, REDIR_OUT, HEREDOC, PIPE
+}   t_token;
+
 // Pipe data
 typedef struct s_pipeline_data
 {
@@ -58,13 +66,13 @@ typedef struct s_pipe_info
 } t_pipe_info;
 
 // ==================== BUILTINS ====================
-short int   custom_cd(char ***envp, char **args);
-short int   custom_echo(char **arg);
-short int   custom_env(char **envp);
-short int   custom_exit(char **args);
-short int   custom_export(char ***env, char **args);
+short int   custom_cd(char ***envp, t_token **args);
+short int   custom_echo(t_token **args);
+short int   custom_env(char **envp, t_token **args);
+short int   custom_exit(t_token **args);
+short int   custom_export(char ***env, t_token **args);
 short int   custom_pwd(void);
-short int   custom_unset(char ***envp, char **args);
+short int   custom_unset(char ***envp, t_token **args);
 void        print_env(char **env, int *index, int size);
 void        sort_index(char **env, int *index, int size);
 void        init_export_index(int *index, int size);
@@ -73,17 +81,17 @@ int         update_or_add_env(char ***env, char *arg);
 
 // ==================== CONTROLLER ====================
 void        process_command(char ***envp, char *line);
-int         run_builtin(char ***envp, char **cmd);
+int         run_builtin(char ***envp, t_token **cmd);
 
 // ==================== CONTROLLER_HELPER ====================
 int         is_folder(char *arg);
-char        **prepare_command(char *segment, int *in_fd, int *out_fd, char ***envp);
+t_token     **prepare_command(char *segment, int *in_fd, int *out_fd, char ***envp);
 void        setup_redirections(int in_fd, int out_fd, int *save_in, int *save_out);
-void        restore_redirections(int in_fd, int out_fd, int save_in, int save_out);
+void        restore_redirections(int save_in, int save_out);
 short int   is_builtin(const char *cmd);
 
 // ==================== HANDLER ====================
-int         execute_command(char *path, char **cmd, char **envp);
+int         execute_command(char *path, t_token **tokens, char **envp);
 
 // ==================== ENV LOOKUP ====================
 char        *get_env_value(char **envp, const char *name);
@@ -96,13 +104,13 @@ char        **env_realloc_add(char **env);
 int         env_add(char ***env_ptr, const char *new_var);
 
 // ==================== PIPING ====================
-void        execute_cmd(char **envp, char **cmd);
+void        execute_cmd(char **envp, t_token **cmd);
 void        close_pipe(int *fd);
 void        parent_cleanup(int *in_fd, int *fd, int i, int num);
 void        wait_for_all(pid_t *pids, int count);
 void        execute_pipeline(char **envp, char **segments);
-char        **handle_redirections(char **cmd, int count, int *in_fd, int *out_fd);
-int	        handle_heredoc(const char *delim, int *in_fd);
+t_token     **handle_redirections(t_token **cmd, char **envp, int *in_fd, int *out_fd);
+int         handle_heredoc(const char *delim, int quoted, char **envp, int *in_fd);
 void        pipeline_loop(t_pipeline_data *pipeline);
 
 // ==================== PARSING ====================
@@ -111,12 +119,17 @@ char        *append_literal(char *result, char *str, int start, int i);
 char        *expand_var(char *str, int *var_len);
 char        *append_expanded_var(char *result, char *str, int *i, char **envp);
 char        *build_expanded_str(char *str, char **envp);
-char        **split_redirs(char **arr);
-char        **tokenize_command(char const *s, char c, char **envp);
+t_token     **split_expanded_tokens(t_token **arr);
+t_token     **split_redirs(t_token **arr);
+t_token     **tokenize_command(char const *s, char c, char **envp);
 char        **split_pipes(const char *line);
+t_token     *new_token(const char *str, int quoted, int type);
+void        free_tokens(t_token **arr);
+char        **prepare_argv_from_tokens(t_token **tokens);
 
 // ==================== MISC ====================
 void        free_cmd(char **cmd);
+void        free_tokens(t_token **arr);
 short int   is_builtin(const char *cmd);
 int         count_strings(char **arr);
 

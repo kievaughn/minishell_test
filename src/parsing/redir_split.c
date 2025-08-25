@@ -36,74 +36,85 @@ static int	part_count(char *tok)
 	return (count);
 }
 
-static int	total_parts(char **arr)
+static int total_parts(t_token **arr)
 {
-	int	total;
-	int	i;
+    int total;
+    int i;
 
-	total = 0;
-	i = 0;
-	while (arr && arr[i])
-	{
-		total += part_count(arr[i]);
-		i++;
-	}
-	return (total);
+    total = 0;
+    i = 0;
+    while (arr && arr[i])
+    {
+        total += part_count(arr[i]->str);
+        i++;
+    }
+    return (total);
 }
 
-char	**split_redirs(char **arr)
-{
-	char	**out;
-	int		i;
-	int		j;
-	int		start;
-	int		idx;
-	char	quote;
-	char	op[2];
 
-	out = malloc(sizeof(char *) * (total_parts(arr) + 1));
-	if (!out)
-		return (free_cmd(arr), NULL);
-	idx = 0;
-	i = 0;
-	while (arr[i])
-	{
-		j = 0;
-		start = 0;
-		quote = 0;
-		while (arr[i][j])
-		{
-			if (!quote && (arr[i][j] == '\'' || arr[i][j] == '"'))
-				quote = arr[i][j];
-			else if (quote && arr[i][j] == quote)
-				quote = 0;
-			if (!quote && (arr[i][j] == '>' || arr[i][j] == '<'))
-			{
-				if (j - start > 0)
-					out[idx++] = ft_substr(arr[i], start, j - start);
-				if (arr[i][j] == '>' && arr[i][j + 1] == '>')
-				{
-					out[idx++] = ft_strdup(">>");
-					j += 2;
-				}
-				else
-				{
-					op[0] = arr[i][j];
-					op[1] = '\0';
-					out[idx++] = ft_strdup(op);
-					j++;
-				}
-				start = j;
-			}
-			else
-				j++;
-		}
-		if (j - start > 0)
-			out[idx++] = ft_substr(arr[i], start, j - start);
-		free(arr[i]);
-		i++;
-	}
-	out[idx] = NULL;
-	free(arr);
-	return (out);
+t_token **split_redirs(t_token **arr)
+{
+    t_token **out;
+    int i, j, idx, start;
+    char quote;
+
+    out = malloc(sizeof(t_token *) * (total_parts(arr) + 1));
+    if (!out)
+        return (free_tokens(arr), NULL);
+
+    idx = 0;
+    i = 0;
+    while (arr[i])
+    {
+        j = 0;
+        start = 0;
+        quote = 0;
+        while (arr[i]->str[j])
+        {
+            if (!quote && (arr[i]->str[j] == '\'' || arr[i]->str[j] == '"'))
+                quote = arr[i]->str[j];
+            else if (quote && arr[i]->str[j] == quote)
+                quote = 0;
+
+            if (!quote && (arr[i]->str[j] == '>' || arr[i]->str[j] == '<'))
+            {
+                if (j - start > 0)
+                    out[idx++] = new_token(ft_substr(arr[i]->str, start, j - start),
+                                           arr[i]->quoted, 0);
+                if (arr[i]->str[j] == '>' && arr[i]->str[j+1] == '>')
+                {
+                    out[idx++] = new_token(ft_strdup(">>"), 0, 1);
+                    j += 2;
+                }
+                else if (arr[i]->str[j] == '<' && arr[i]->str[j+1] == '<')
+                {
+                    out[idx++] = new_token(ft_strdup("<<"), 0, 2);
+                    j += 2;
+                }
+                else if (arr[i]->str[j] == '>')
+                {
+                    out[idx++] = new_token(ft_strdup(">"), 0, 3);
+                    j++;
+                }
+                else
+                {
+                    out[idx++] = new_token(ft_strdup("<"), 0, 4);
+                    j++;
+                }
+                start = j;
+            }
+            else
+                j++;
+        }
+        if (j - start > 0)
+            out[idx++] = new_token(ft_substr(arr[i]->str, start, j - start),
+                                   arr[i]->quoted, 0);
+        free(arr[i]->str);
+        free(arr[i]);
+        i++;
+    }
+    out[idx] = NULL;
+    free(arr);
+    return (out);
 }
+

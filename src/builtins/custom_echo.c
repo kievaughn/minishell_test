@@ -6,27 +6,27 @@
 /*   By: dimendon <dimendon@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/13 18:15:55 by dimendon          #+#    #+#             */
-/*   Updated: 2025/07/30 13:45:21 by dimendon         ###   ########.fr       */
+/*   Updated: 2025/08/25 11:56:08 by dimendon         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../libft/libft.h"
 #include "minishell.h"
 
-static int	skip_n_flags(char **arg, int start)
+static int	skip_n_flags(t_token **arg, int start)
 {
 	int	i;
 	int	j;
 	int	all_n;
 
 	i = start;
-	while (arg[i] && ft_strncmp(arg[i], "-n", 2) == 0)
+	while (arg[i] && ft_strncmp(arg[i]->str, "-n", 2) == 0)
 	{
 		j = 1;
 		all_n = 1;
-		while (arg[i][j])
+		while (arg[i]->str[j])
 		{
-			if (arg[i][j] != 'n')
+			if (arg[i]->str[j] != 'n')
 			{
 				all_n = 0;
 				break ;
@@ -40,9 +40,6 @@ static int	skip_n_flags(char **arg, int start)
 	return (i);
 }
 
-/*
-** Writes one argument for echo, handling $?.
-*/
 static int	write_echo_arg(const char *arg)
 {
 	char	*code;
@@ -60,14 +57,14 @@ static int	write_echo_arg(const char *arg)
 	return (0);
 }
 
-static int	print_echo_args(char **arg, int start)
+static int	print_echo_args(t_token **arg, int start)
 {
 	int	i;
 
 	i = start;
 	while (arg[i])
 	{
-		if (write_echo_arg(arg[i]))
+		if (write_echo_arg(arg[i]->str))
 			return (1);
 		if (arg[i + 1])
 			write(1, " ", 1);
@@ -76,7 +73,7 @@ static int	print_echo_args(char **arg, int start)
 	return (0);
 }
 
-short int	custom_echo(char **arg)
+short int	custom_echo(t_token **arg)
 {
 	int	i;
 	int	flag_newline;
@@ -92,3 +89,4 @@ short int	custom_echo(char **arg)
 		write(1, "\n", 1);
 	return (0);
 }
+

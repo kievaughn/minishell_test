@@ -1,116 +1,196 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   tokenize.c                                         :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: dimendon <dimendon@student.hive.fi>        +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2025/08/19 11:12:49 by dimendon          #+#    #+#             */
+/*   Updated: 2025/08/25 13:24:30 by dimendon         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include "../libft/libft.h"
 #include "minishell.h"
 
-static size_t	token_count(char const *s, char c)
+static size_t skip_token(const char *s, size_t i, char c)
 {
-	size_t	i;
-	size_t	count;
-	char	quote;
+    char quote = 0;
 
-	i = 0;
-	count = 0;
-	while (s[i])
-	{
-		while (s[i] == c)
-			i++;
-		if (!s[i])
-			break ;
-		count++;
-		quote = 0;
-		while (s[i])
-		{
-			if (!quote && (s[i] == '"' || s[i] == '\''))
-			{
-				quote = s[i++];
-				while (s[i] && s[i] != quote)
-					i++;
-				if (s[i] == quote)
-					i++;
-				quote = 0;
-				continue ;
-			}
-			if (!quote && s[i] == c)
-				break ;
-			i++;
-		}
-	}
-	return (count);
+    while (s[i])
+    {
+        if (!quote && (s[i] == '"' || s[i] == '\''))
+        {
+            quote = s[i++];
+            while (s[i] && s[i] != quote)
+                i++;
+            if (s[i] == quote)
+                i++;
+            quote = 0;
+            continue;
+        }
+        if (!quote && s[i] == c)
+            break;
+        i++;
+    }
+    return i;
 }
 
-static void	free_arr(char **arr, int i)
+static size_t token_count(const char *s, char c)
 {
-	while (i-- > 0)
-		free(arr[i]);
-	free(arr);
+    size_t i = 0;
+    size_t count = 0;
+
+    while (s[i])
+    {
+        while (s[i] == c)
+            i++;
+        if (!s[i])
+            break;
+        count++;
+        i = skip_token(s, i, c);
+    }
+    return count;
 }
 
-static size_t	next_c(char *s, char c)
+static size_t next_c(const char *s, char c)
 {
-	size_t	len;
-	char	quote;
+    size_t i = 0;
+    char quote = 0;
 
-	len = 0;
-	quote = 0;
-	while (s[len])
-	{
-		if (!quote && (s[len] == '"' || s[len] == '\''))
-		{
-			quote = s[len++];
-			while (s[len] && s[len] != quote)
-				len++;
-			if (s[len] == quote)
-				len++;
-			quote = 0;
-			continue ;
-		}
-		if (!quote && s[len] == c)
-			break ;
-		len++;
-	}
-	return (len);
+    while (s[i])
+    {
+        if (!quote && (s[i] == '"' || s[i] == '\''))
+        {
+            quote = s[i++];
+            while (s[i] && s[i] != quote)
+                i++;
+            if (s[i] == quote)
+                i++;
+            quote = 0;
+            continue;
+        }
+        if (!quote && s[i] == c)
+            break;
+        i++;
+    }
+    return i;
 }
 
-char	**tokenize_command(char const *s, char c, char **envp)
+static t_token **fill_arr_from_string(const char *s, char c, char **envp)
 {
-	char	**arr;
-	int		i;
-	size_t	len;
-	char	*expanded;
+    t_token **arr;
+    int token_num;
+    int i;
+    size_t len;
+    char *expanded;
+    int type;
+    int quoted;
 
-	if (!s)
-		return (NULL);
-	arr = (char **)malloc((token_count(s, c) + 1) * sizeof(char *));
-	if (!arr)
-		return (NULL);
-	i = 0;
-	while (*s)
-	{
-		while (*s == c)
-			s++;
-		if (!*s)
-			break ;
-		len = next_c((char *)s, c);
-		arr[i] = ft_substr((char *)s, 0, len);
-		if (!arr[i])
-			return (free_arr(arr, i), NULL);
-		if (arr[i][0] != '\'')
-		{
-			expanded = build_expanded_str(arr[i], envp);
-			free(arr[i]);
-			arr[i] = expanded;
-		}
-		i++;
-		s += len;
-	}
-	arr[i] = NULL;
-	arr = split_redirs(arr);
-	if (!arr)
-		return (NULL);
-	i = 0;
-	while (arr[i])
-	{
-		remove_quotes(arr[i]);
-		i++;
-	}
-	return (arr);
+    token_num = token_count(s, c);
+    arr = malloc(sizeof(t_token *) * (token_num + 1));
+    if (!arr)
+        return (NULL);
+
+    i = 0;
+    while (*s)
+    {
+        while (*s == c)
+            s++;
+        if (!*s)
+            break;
+
+        len = next_c(s, c);
+        char *substr = ft_substr(s, 0, len);
+        if (!substr)
+            return (free_tokens(arr), NULL);
+
+        // detect quotes
+        quoted = 0;
+        if (substr[0] == '\'' && substr[ft_strlen(substr) - 1] == '\'')
+            quoted = 1;
+        else if (substr[0] == '"' && substr[ft_strlen(substr) - 1] == '"')
+            quoted = 2;
+
+        // strip quotes before expansion
+        remove_quotes(substr);
+
+        // expand unless single-quoted
+        if (quoted != 1)
+        {
+            expanded = build_expanded_str(substr, envp);
+            free(substr);
+            if (!expanded)
+                return (free_tokens(arr), NULL);
+            substr = expanded;
+        }
+
+        type = 0;
+        arr[i++] = new_token(substr, quoted, type);
+        free(substr);
+
+        s += len;
+    }
+    arr[i] = NULL;
+    return arr;
 }
+
+t_token **tokenize_command(char const *s, char c, char **envp)
+{
+    t_token **arr;
+    int i;
+
+    if (!s)
+        return NULL;
+
+    arr = fill_arr_from_string(s, c, envp);
+    if (!arr)
+        return NULL;
+
+    for (i = 0; arr[i]; i++)
+    {
+        if (arr[i]->quoted != 1)  // not single quoted
+        {
+            char *expanded = build_expanded_str(arr[i]->str, envp);
+            if (!expanded)
+            {
+                free_tokens(arr);
+                return NULL;
+            }
+            free(arr[i]->str);
+            arr[i]->str = expanded;
+        }
+    }
+
+    // 3. Split expansions if needed
+    arr = split_expanded_tokens(arr);
+    if (!arr)
+        return NULL;
+
+    // 4. Handle redirections
+    arr = split_redirs(arr);
+    if (!arr)
+        return NULL;
+
+    return arr;
+}
+
+t_token *new_token(const char *str, int quoted, int type)
+{
+    t_token *tok = malloc(sizeof(t_token));
+    if (!tok)
+        return NULL;
+    tok->str = ft_strdup(str);
+    if (!tok->str)
+    {
+        free(tok);
+        return NULL;
+    }
+    tok->quoted = quoted;
+    tok->type = type;
+    return tok;
+}
+
+
+
+
