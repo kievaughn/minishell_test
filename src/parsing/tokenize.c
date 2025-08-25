@@ -129,7 +129,7 @@ static t_token **fill_arr_from_string(const char *s, char c)
         substr = ft_substr(s, 0, len);
         if (!substr)
         {
-            arr[i] = NULL;          // make free_tokens safe on partial fill
+            arr[i] = NULL;          // ensure free_tokens sees a terminator
             free_tokens(arr);
             return (NULL);
         }

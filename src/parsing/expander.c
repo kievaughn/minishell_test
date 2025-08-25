@@ -62,6 +62,14 @@ char *build_expanded_str(char *str, char **envp)
 
     while (str[i])
     {
+        if (!quote && str[i] == '$' && (str[i + 1] == '"'))
+        {
+            if (!(result = append_literal(result, str, start, i)))
+                return (NULL);
+            i++;            /* skip $ */
+            start = i;
+            continue;
+        }
         if (!quote && (str[i] == '\'' || str[i] == '"'))
             quote = str[i++];
         else if (quote && str[i] == quote)
