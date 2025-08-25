@@ -92,7 +92,7 @@ t_token **split_redirs(t_token **arr)
                                            arr[i]->quoted, 0);
                 if (arr[i]->str[j] == '>' && arr[i]->str[j + 1] == '>')
                 {
-                    out[idx++] = new_token(ft_strdup(">>"), 0, 1);
+                    out[idx++] = new_token(ft_strdup(">>"), 0, 4);
                     j += 2;
                 }
                 else if (arr[i]->str[j] == '<' && arr[i]->str[j + 1] == '<')
@@ -107,7 +107,7 @@ t_token **split_redirs(t_token **arr)
                 }
                 else
                 {
-                    out[idx++] = new_token(ft_strdup("<"), 0, 4);
+                    out[idx++] = new_token(ft_strdup("<"), 0, 1);
                     j++;
                 }
                 start = j;
