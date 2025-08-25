@@ -9,7 +9,6 @@
 /*   Updated: 2025/08/25 13:24:30 by dimendon         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
-
 #include "../libft/libft.h"
 #include "minishell.h"
 
@@ -129,9 +128,13 @@ static t_token **fill_arr_from_string(const char *s, char c)
         len = next_c(s, c);
         substr = ft_substr(s, 0, len);
         if (!substr)
-            return (free_tokens(arr), NULL);
+        {
+            arr[i] = NULL;          // ensure free_tokens sees a terminator
+            free_tokens(arr);
+            return (NULL);
+        }
 
-        // detect if the whole token is wrapped in a single pair of quotes
+        // use the robust detector
         quoted = fully_quoted(substr);
 
         type = 0;
