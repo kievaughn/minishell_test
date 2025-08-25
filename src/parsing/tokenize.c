@@ -9,9 +9,34 @@
 /*   Updated: 2025/08/25 13:24:30 by dimendon         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
-
 #include "../libft/libft.h"
 #include "minishell.h"
+
+static int  fully_quoted(const char *s)
+{
+    size_t  len;
+    size_t  i;
+    char    quote;
+
+    if (!s)
+        return (0);
+    len = ft_strlen(s);
+    if (len < 2)
+        return (0);
+    quote = s[0];
+    if ((quote != '\'' && quote != '"') || s[len - 1] != quote)
+        return (0);
+    i = 1;
+    while (i < len - 1)
+    {
+        if (s[i] == quote)
+            return (0);
+        i++;
+    }
+    if (quote == '\'')
+        return (1);
+    return (2);
+}
 
 static size_t skip_token(const char *s, size_t i, char c)
 {
@@ -103,14 +128,14 @@ static t_token **fill_arr_from_string(const char *s, char c)
         len = next_c(s, c);
         substr = ft_substr(s, 0, len);
         if (!substr)
-            return (free_tokens(arr), NULL);
+        {
+            arr[i] = NULL;          // make free_tokens safe on partial fill
+            free_tokens(arr);
+            return (NULL);
+        }
 
-        // detect if the whole token is wrapped in quotes
-        quoted = 0;
-        if (substr[0] == '\'' && substr[ft_strlen(substr) - 1] == '\'')
-            quoted = 1;
-        else if (substr[0] == '"' && substr[ft_strlen(substr) - 1] == '"')
-            quoted = 2;
+        // use the robust detector
+        quoted = fully_quoted(substr);
 
         type = 0;
         arr[i++] = new_token(substr, quoted, type);
