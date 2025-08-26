@@ -14,6 +14,29 @@
 #include "minishell.h"
 #include <errno.h>
 
+static void free_token(t_token *tok)
+{
+    if (!tok)
+        return;
+    free(tok->str);
+    free(tok);
+}
+
+static void free_token_array(t_token **arr, int count)
+{
+    int k = 0;
+
+    if (!arr)
+        return;
+    while (k < count)
+    {
+        if (arr[k])
+            free_token(arr[k]);
+        k++;
+    }
+    free(arr);
+}
+
 int count_tokens(t_token **arr)
 {
     int i = 0;
@@ -90,76 +113,103 @@ int     open_appendfile(char *file, int *out_fd)
 static int handle_redirection_logic(t_token **cmd, char **envp,
                                     int *in_fd, int *out_fd, int *i)
 {
-    char *filename;
+    char    *filename;
+    int     quoted;
 
-    if (cmd[*i]->type == 1 || cmd[*i]->type == 2
-        || cmd[*i]->type == 3 || cmd[*i]->type == 4)
+    /* not a redirection token */
+    if (!(cmd[*i] && (cmd[*i]->type == 1 || cmd[*i]->type == 2
+                   || cmd[*i]->type == 3 || cmd[*i]->type == 4)))
+        return (0);
+
+    filename = NULL;
+    quoted = 0;
+
+    /* validate/collect filename (or allow empty for heredoc) */
+    if (cmd[*i + 1] && cmd[*i + 1]->type == 0)
     {
-        if (!cmd[*i + 1] || cmd[*i + 1]->type != 0)
-            return (-1);
-
         filename = cmd[*i + 1]->str;
-
-        if (cmd[*i]->type == 1)
-        {
-            if (open_infile(filename, in_fd) == -1)
-                return (-1);
-        }
-        else if (cmd[*i]->type == 2)
-        {
-            // use token->type instead of quoted[]
-            int quoted = (cmd[*i + 1]->type == 11
-                       || cmd[*i + 1]->type == 22);
-            if (handle_heredoc(filename, quoted, envp, in_fd) == -1)
-                return (-1);
-        }
-        else if (cmd[*i]->type == 3)
-        {
-            if (open_outfile(filename, out_fd) == -1)
-                return (-1);
-        }
-        else if (cmd[*i]->type == 4)
-        {
-            if (open_appendfile(filename, out_fd) == -1)
-                return (-1);
-        }
-        *i += 2;
-        return (1);
+        quoted = (cmd[*i + 1]->quoted != 0);
     }
-    return (0);
-}
+    else if (!cmd[*i + 1] && cmd[*i]->type != 2)
+        return (-1);
+    else if (cmd[*i + 1] && cmd[*i + 1]->type != 0)
+        return (-1);
 
+    if (cmd[*i]->type == 1) /* < */
+    {
+        if (!filename || filename[0] == '\0'
+            || open_infile(filename, in_fd) == -1)
+            return (-1);
+    }
+    else if (cmd[*i]->type == 2) /* << */
+    {
+        if (handle_heredoc(filename ? filename : "", quoted, envp, in_fd) == -1)
+            return (-1);
+    }
+    else if (cmd[*i]->type == 3) /* > */
+    {
+        if (!filename || filename[0] == '\0'
+            || open_outfile(filename, out_fd) == -1)
+            return (-1);
+    }
+    else if (cmd[*i]->type == 4) /* >> */
+    {
+        if (!filename || filename[0] == '\0'
+            || open_appendfile(filename, out_fd) == -1)
+            return (-1);
+    }
+
+    /* consume and free the redirection operator (and its filename if any) */
+    free_token(cmd[*i]);
+    cmd[*i] = NULL;
+    if (cmd[*i + 1])
+    {
+        free_token(cmd[*i + 1]);
+        cmd[*i + 1] = NULL;
+    }
+    *i += filename ? 2 : 1;
+    return (1);
+}
 
 t_token **handle_redirections(t_token **cmd, char **envp,
                 int *in_fd, int *out_fd)
 {
     int i = 0, j = 0;
-    t_token **clean;
     int count = count_tokens(cmd);
+    t_token **clean = malloc(sizeof(t_token *) * (count + 1));
 
-    clean = malloc(sizeof(t_token *) * (count + 1));
     if (!clean)
+    {
+        free_token_array(cmd, count);
         return (NULL);
+    }
 
-    while (cmd[i])
+    while (i < count && cmd[i])
     {
         int res = handle_redirection_logic(cmd, envp, in_fd, out_fd, &i);
         if (res == -1)
         {
-            free_tokens(clean);
+            free_token_array(cmd, count);
+            free_token_array(clean, j);
             return (NULL);
         }
         else if (res == 0)
-            clean[j++] = cmd[i++];
+        {
+            clean[j++] = cmd[i];
+            cmd[i] = NULL;
+            i++;
+        }
+        /* res == 1: redirection consumed; continue */
     }
+
     clean[j] = NULL;
     free(cmd);
     if (j == 0)
     {
-        free(clean);
+        free_token_array(clean, j);
         return (NULL);
     }
-    return clean;
+    return (clean);
 }
 
 

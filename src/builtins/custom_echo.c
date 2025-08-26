@@ -6,7 +6,7 @@
 /*   By: dimendon <dimendon@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/13 18:15:55 by dimendon          #+#    #+#             */
-/*   Updated: 2025/08/25 11:56:08 by dimendon         ###   ########.fr       */
+/*   Updated: 2025/08/26 14:27:31 by dimendon         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -40,10 +40,16 @@ static int	skip_n_flags(t_token **arg, int start)
 	return (i);
 }
 
-static int	write_echo_arg(const char *arg)
+static int	write_echo_arg(t_token *tok)
 {
 	char	*code;
+	const char *arg = tok->str;
 
+	if (tok->quoted == 1)
+	{
+		write(1, arg, ft_strlen(arg));
+		return (0);
+	}
 	if (ft_strncmp(arg, "$?", 3) == 0)
 	{
 		code = ft_itoa(g_exit_code);
@@ -57,14 +63,14 @@ static int	write_echo_arg(const char *arg)
 	return (0);
 }
 
+
 static int	print_echo_args(t_token **arg, int start)
 {
-	int	i;
+	int	i = start;
 
-	i = start;
 	while (arg[i])
 	{
-		if (write_echo_arg(arg[i]->str))
+		if (write_echo_arg(arg[i]))
 			return (1);
 		if (arg[i + 1])
 			write(1, " ", 1);

@@ -6,7 +6,7 @@
 /*   By: dimendon <dimendon@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/04 17:35:05 by dimendon          #+#    #+#             */
-/*   Updated: 2025/08/25 10:59:56 by dimendon         ###   ########.fr       */
+/*   Updated: 2025/08/26 15:19:29 by dimendon         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -37,5 +37,4 @@ void free_tokens(t_token **arr)
         free(arr[i]);
         i++;
     }
-    free(arr);
 }

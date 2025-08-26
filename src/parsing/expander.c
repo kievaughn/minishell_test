@@ -40,7 +40,7 @@ static int      handle_exit_code_case(char **result, char *str, int *i, int *sta
 static int      handle_env_var_case(char **result, char *str, int *i, int *start,
                 char **envp)
 {
-        if (ft_isalnum(str[*i + 1]))
+        if (ft_isalnum(str[*i + 1]) || str[*i + 1] == '_')
         {
                 if (!(*result = append_literal(*result, str, *start, *i)))
                         return (-1);
@@ -62,6 +62,14 @@ char *build_expanded_str(char *str, char **envp)
 
     while (str[i])
     {
+        if (!quote && str[i] == '$' && (str[i + 1] == '"'))
+        {
+            if (!(result = append_literal(result, str, start, i)))
+                return (NULL);
+            i++;            /* skip $ */
+            start = i;
+            continue;
+        }
         if (!quote && (str[i] == '\'' || str[i] == '"'))
             quote = str[i++];
         else if (quote && str[i] == quote)

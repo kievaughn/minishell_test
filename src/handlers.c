@@ -51,9 +51,13 @@ char **prepare_argv_from_tokens(t_token **tokens)
         argv[i] = ft_strdup(tokens[i]->str);
         if (!argv[i])
             return (free_cmd(argv), NULL);
-
-        // finally strip quotes now
-        remove_quotes(argv[i]);
+        /*
+         * Quotes that affected tokenisation have already been removed during
+         * parsing.  Any remaining quotes in the token are meant to be literal
+         * characters (e.g. the command `echo '"$USER"'` should pass the
+         * string "\"$USER\"" to echo).  Stripping quotes here would modify
+         * the intended argument and lead to behaviour that differs from Bash.
+         */
     }
     argv[count] = NULL;
     return argv;

@@ -1,18 +1,30 @@
 #include "../libft/libft.h"
 #include "minishell.h"
 
-// Only removes surrounding quotes if both ends match
+// Remove all quoting characters that affected parsing while preserving
+// characters that were meant to be literal (e.g. quotes inside single quotes).
 void remove_quotes(char *str)
 {
-    size_t len = ft_strlen(str);
+    char    quote;
+    size_t  i;
+    size_t  j;
 
-    if (len >= 2 &&
-        ((str[0] == '"' && str[len - 1] == '"') ||
-         (str[0] == '\'' && str[len - 1] == '\'')))
+    quote = 0;
+    i = 0;
+    j = 0;
+    while (str[i])
     {
-        memmove(str, str + 1, len - 2);  // shift left
-        str[len - 2] = '\0';
+        if (!quote && (str[i] == '\'' || str[i] == '"'))
+            quote = str[i++];
+        else if (quote && str[i] == quote)
+        {
+            quote = 0;
+            i++;
+        }
+        else
+            str[j++] = str[i++];
     }
+    str[j] = '\0';
 }
 
 
@@ -36,7 +48,7 @@ char	*expand_var(char *str, int *var_len)
 	int	i;
 
 	i = 0;
-	while (str[i] != '\0' && ft_isalnum(str[i]))
+	while (str[i] != '\0' && (ft_isalnum(str[i]) || str[i] == '_'))
 		i++;
 	*var_len = i;
 	if (i > 0)

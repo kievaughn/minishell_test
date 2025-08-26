@@ -16,7 +16,9 @@
 t_token *make_token(char *str)
 {
     t_token *tok = malloc(sizeof(t_token));
-    tok->str = ft_strdup(str);
+    if (!tok)
+        return (NULL);
+    tok->str = (str ? ft_strdup(str) : NULL);
     tok->type = 0;
     return tok;
 }
@@ -28,7 +30,7 @@ static char	*get_cd_target(char **envp, t_token **args)
 
 	oldpwd = NULL;
 	home = NULL;
-	if (args[1] && ft_strncmp(args[1]->str, "-", 2) == 0)
+	if (args[1] && args[1]->str && ft_strncmp(args[1]->str, "-", 2) == 0)
 	{
 		oldpwd = get_env_value(envp, "OLDPWD");
 		if (!oldpwd)
@@ -37,7 +39,7 @@ static char	*get_cd_target(char **envp, t_token **args)
 			printf("%s\n", oldpwd);
 		return (oldpwd);
 	}
-	if (!args[1] || ft_strlen(args[1]->str) == 0)
+	if (!args[1] || !args[1]->str || ft_strlen(args[1]->str) == 0)
 	{
 		home = get_env_value(envp, "HOME");
 		if (!home)
@@ -58,7 +60,7 @@ static short int	update_pwd_vars(char ***envp, const char *oldpwd,
 	old_str = ft_strjoin("OLDPWD=", oldpwd);
 	new_str = ft_strjoin("PWD=", newpwd);
 
-	export_args[0] = make_token("export");   // you need a helper that mallocs + sets ->str
+	export_args[0] = make_token("export");
 	export_args[1] = make_token(old_str);
 	export_args[2] = make_token(new_str);
 	export_args[3] = NULL;
@@ -69,7 +71,7 @@ static short int	update_pwd_vars(char ***envp, const char *oldpwd,
 
 	free(old_str);
 	free(new_str);
-	free_tokens(export_args); // free the temporary t_token* array
+	free_tokens(export_args); // make sure this frees ->str and the t_token itself
 	return (res);
 }
 
@@ -124,4 +126,5 @@ short int	custom_cd(char ***envp, t_token **args)
 	free(newpwd);
 	return (ret);
 }
+
 
