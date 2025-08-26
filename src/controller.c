@@ -90,30 +90,33 @@ static void	run_external_command(t_token **cmd, char ***envp)
 
 static void run_single(char ***envp, char *segment)
 {
-	t_token **cmd;
-	int in_fd;
-	int out_fd;
-	int save_in;
-	int save_out;
+        t_token **cmd;
+        int in_fd;
+        int out_fd;
+        int save_in;
+        int save_out;
+        t_tty tty;
 
-	in_fd = STDIN_FILENO;
-	out_fd = STDOUT_FILENO;
-	save_in = 0;
-	save_out = 0;
+        in_fd = STDIN_FILENO;
+        out_fd = STDOUT_FILENO;
+        save_in = 0;
+        save_out = 0;
+        if (tty_open(&tty) != 0)
+                return;
+        cmd = prepare_command(segment, &in_fd, &out_fd, envp, &tty);
+        tty_close(&tty);
+        if (!cmd || !cmd[0] || !cmd[0]->str)
+                return;
 
-	cmd = prepare_command(segment, &in_fd, &out_fd, envp);
-	if (!cmd || !cmd[0] || !cmd[0]->str)
-		return;
+        setup_redirections(in_fd, out_fd, &save_in, &save_out);
 
-	setup_redirections(in_fd, out_fd, &save_in, &save_out);
-	
-	if (is_builtin(cmd[0]->str))
-		run_builtin(envp, cmd);
-	else
-		run_external_command(cmd, envp);
+        if (is_builtin(cmd[0]->str))
+                run_builtin(envp, cmd);
+        else
+                run_external_command(cmd, envp);
 
-	restore_redirections(save_in, save_out);
-	free_tokens(cmd);
+        restore_redirections(save_in, save_out);
+        free_tokens(cmd);
 }
 
 void	process_command(char ***envp, char *line)

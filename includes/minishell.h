@@ -50,13 +50,36 @@ typedef struct s_token
 }   t_token;
 
 // Pipe data
-typedef struct s_pipeline_data
-{
-    char **envp;
-	char **segments;
-	pid_t *pids;
-	int nbr_segments;
-}	t_pipeline_data;
+typedef struct s_tty {
+    int in_fd;
+    int out_fd;
+}   t_tty;
+
+typedef struct s_heredoc {
+    char   *delim;
+    int     quoted;
+    char   *temp_path;
+}   t_heredoc;
+
+typedef struct s_command {
+    t_token **tokens;
+    int     in_fd;
+    int     out_fd;
+}   t_command;
+
+typedef struct s_pipeline_data {
+    char        **envp;
+    t_command   *cmds;
+    pid_t       *pids;
+    int         nbr_segments;
+    t_tty       tty;
+}       t_pipeline_data;
+
+int         tty_open(t_tty *tty);
+void        tty_close(t_tty *tty);
+void        tty_push_readline(const t_tty *tty, const char *prompt, char **out_line);
+int         expand_line_for_heredoc(char **line, int do_expand, int last_status, char **envp);
+int         collect_heredoc(const t_tty *tty, t_heredoc *hd, volatile sig_atomic_t *sigint_flag);
 
 typedef struct s_pipe_info
 {
@@ -85,7 +108,7 @@ int         run_builtin(char ***envp, t_token **cmd);
 
 // ==================== CONTROLLER_HELPER ====================
 int         is_folder(char *arg);
-t_token     **prepare_command(char *segment, int *in_fd, int *out_fd, char ***envp);
+t_token     **prepare_command(char *segment, int *in_fd, int *out_fd, char ***envp, const t_tty *tty);
 void        setup_redirections(int in_fd, int out_fd, int *save_in, int *save_out);
 void        restore_redirections(int save_in, int save_out);
 short int   is_builtin(const char *cmd);
@@ -106,11 +129,11 @@ int         env_add(char ***env_ptr, const char *new_var);
 // ==================== PIPING ====================
 void        execute_cmd(char **envp, t_token **cmd);
 void        close_pipe(int *fd);
-void        parent_cleanup(int *in_fd, int *fd, int i, int num);
+void        parent_cleanup(int *in_fd, int *fd, int i, int num, t_command *cmds);
 void        wait_for_all(pid_t *pids, int count);
 void        execute_pipeline(char **envp, char **segments);
-t_token     **handle_redirections(t_token **cmd, char **envp, int *in_fd, int *out_fd);
-int         handle_heredoc(const char *delim, int quoted, char **envp, int *in_fd);
+t_token     **handle_redirections(t_token **cmd, const t_tty *tty, char **envp, int *in_fd, int *out_fd);
+int         handle_heredoc(const t_tty *tty, const char *delim, int quoted, char **envp, int *in_fd);
 void        pipeline_loop(t_pipeline_data *pipeline);
 
 // ==================== PARSING ====================

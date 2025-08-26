@@ -110,7 +110,7 @@ int     open_appendfile(char *file, int *out_fd)
         return (0);
 }
 
-static int handle_redirection_logic(t_token **cmd, char **envp,
+static int handle_redirection_logic(t_token **cmd, const t_tty *tty, char **envp,
                                     int *in_fd, int *out_fd, int *i)
 {
     char    *filename;
@@ -143,7 +143,7 @@ static int handle_redirection_logic(t_token **cmd, char **envp,
     }
     else if (cmd[*i]->type == 2) /* << */
     {
-        if (handle_heredoc(filename ? filename : "", quoted, envp, in_fd) == -1)
+        if (handle_heredoc(tty, filename ? filename : "", quoted, envp, in_fd) == -1)
             return (-1);
     }
     else if (cmd[*i]->type == 3) /* > */
@@ -171,7 +171,7 @@ static int handle_redirection_logic(t_token **cmd, char **envp,
     return (1);
 }
 
-t_token **handle_redirections(t_token **cmd, char **envp,
+t_token **handle_redirections(t_token **cmd, const t_tty *tty, char **envp,
                 int *in_fd, int *out_fd)
 {
     int i = 0, j = 0;
@@ -186,7 +186,7 @@ t_token **handle_redirections(t_token **cmd, char **envp,
 
     while (i < count && cmd[i])
     {
-        int res = handle_redirection_logic(cmd, envp, in_fd, out_fd, &i);
+        int res = handle_redirection_logic(cmd, tty, envp, in_fd, out_fd, &i);
         if (res == -1)
         {
             free_token_array(cmd, count);

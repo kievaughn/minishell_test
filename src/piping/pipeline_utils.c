@@ -5,8 +5,8 @@
 /*                                                    +:+ +:+         +:+     */
 /*   By: dimendon <dimendon@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2025/08/05 13:39:38 by dimendon          #+#    #+#             */
-/*   Updated: 2025/08/25 11:53:10 by dimendon         ###   ########.fr       */
+/*   Created: 2025/08/25 14:30:00 by dimendon          #+#    #+#             */
+/*   Updated: 2025/08/25 14:30:00 by dimendon         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,61 +14,99 @@
 #include "../libft/libft.h"
 #include <errno.h>
 
-void	execute_pipeline(char **envp, char **segments)
+void    execute_pipeline(char **envp, char **segments)
 {
-	t_pipeline_data	pipeline;
+    t_pipeline_data pipeline;
+    int             i;
 
-	pipeline.envp = envp;
-	pipeline.segments = segments;
-	pipeline.nbr_segments = count_strings(segments);
-        pipeline.pids = ft_calloc(pipeline.nbr_segments, sizeof(pid_t));
-        if (!pipeline.pids)
-        {
-                g_exit_code = 1;
-                return ;
-        }
-	pipeline_loop(&pipeline);
-	wait_for_all(pipeline.pids, pipeline.nbr_segments);
-	free(pipeline.pids);
+    pipeline.envp = envp;
+    pipeline.nbr_segments = count_strings(segments);
+    pipeline.pids = ft_calloc(pipeline.nbr_segments, sizeof(pid_t));
+    pipeline.cmds = ft_calloc(pipeline.nbr_segments, sizeof(t_command));
+    if (!pipeline.pids || !pipeline.cmds || tty_open(&pipeline.tty) != 0)
+    {
+        g_exit_code = 1;
+        free(pipeline.pids);
+        free(pipeline.cmds);
+        return ;
+    }
+    i = 0;
+    while (i < pipeline.nbr_segments)
+    {
+        pipeline.cmds[i].in_fd = STDIN_FILENO;
+        pipeline.cmds[i].out_fd = STDOUT_FILENO;
+        pipeline.cmds[i].tokens = tokenize_command(segments[i], ' ', envp);
+        if (!pipeline.cmds[i].tokens)
+            break ;
+        pipeline.cmds[i].tokens = handle_redirections(pipeline.cmds[i].tokens,
+                &pipeline.tty, envp, &pipeline.cmds[i].in_fd, &pipeline.cmds[i].out_fd);
+        if (!pipeline.cmds[i].tokens)
+            break ;
+        i++;
+    }
+    if (i != pipeline.nbr_segments)
+    {
+        while (i-- > 0)
+            free_tokens(pipeline.cmds[i].tokens);
+        tty_close(&pipeline.tty);
+        free(pipeline.cmds);
+        free(pipeline.pids);
+        return ;
+    }
+    pipeline_loop(&pipeline);
+    wait_for_all(pipeline.pids, pipeline.nbr_segments);
+    i = 0;
+    while (i < pipeline.nbr_segments)
+    {
+        free_tokens(pipeline.cmds[i].tokens);
+        i++;
+    }
+    tty_close(&pipeline.tty);
+    free(pipeline.cmds);
+    free(pipeline.pids);
 }
 
-static int      exit_code_from_errno(void)
+static int  exit_code_from_errno(void)
 {
-        if (errno == ENOENT)
-                return (127);
-        return (126);
+    if (errno == ENOENT)
+        return (127);
+    return (126);
 }
 
-char **tokens_to_argv(t_token **cmd)
+char    **tokens_to_argv(t_token **cmd)
 {
-    int count = 0;
+    int     count;
+    char    **argv;
+    int     i;
+
+    count = 0;
     while (cmd && cmd[count])
         count++;
-
-    char **argv = malloc((count + 1) * sizeof(char *));
+    argv = malloc((count + 1) * sizeof(char *));
     if (!argv)
-        return NULL;
-
-    for (int i = 0; i < count; i++)
-        argv[i] = ft_strdup(cmd[i]->str); // duplicate string from token
-
+        return (NULL);
+    i = 0;
+    while (i < count)
+    {
+        argv[i] = ft_strdup(cmd[i]->str);
+        i++;
+    }
     argv[count] = NULL;
-    return argv;
+    return (argv);
 }
 
-void execute_cmd(char **envp, t_token **cmd)
+void    execute_cmd(char **envp, t_token **cmd)
 {
-    char *path;
+    char    *path;
+    char    **argv;
 
-    char **argv = tokens_to_argv(cmd);
+    argv = tokens_to_argv(cmd);
     if (!argv || !argv[0])
     {
         free_cmd(argv);
         free_tokens(cmd);
         exit(0);
     }
-
-    // Builtins
     if (is_builtin(argv[0]))
     {
         run_builtin(&envp, cmd);
@@ -76,8 +114,6 @@ void execute_cmd(char **envp, t_token **cmd)
         free_tokens(cmd);
         exit(g_exit_code);
     }
-
-    // Path with slash
     if (ft_strchr(argv[0], '/'))
     {
         if (access(argv[0], F_OK) != 0)
@@ -118,57 +154,60 @@ void execute_cmd(char **envp, t_token **cmd)
             g_exit_code = 127;
         }
     }
-
     free_cmd(argv);
     free_tokens(cmd);
     exit(g_exit_code);
 }
 
-void	close_pipe(int *fd)
+void    close_pipe(int *fd)
 {
-	close(fd[0]);
-	close(fd[1]);
+    close(fd[0]);
+    close(fd[1]);
 }
 
-void	parent_cleanup(int *in_fd, int *fd, int i, int num)
+void    parent_cleanup(int *in_fd, int *fd, int i, int num, t_command *cmds)
 {
-	if (*in_fd != STDIN_FILENO)
-		close(*in_fd);
-	if (i < num - 1)
-	{
-		close(fd[1]);
-		*in_fd = fd[0];
-	}
+    if (*in_fd != STDIN_FILENO)
+        close(*in_fd);
+    if (cmds[i].in_fd != STDIN_FILENO)
+        close(cmds[i].in_fd);
+    if (cmds[i].out_fd != STDOUT_FILENO)
+        close(cmds[i].out_fd);
+    if (i < num - 1)
+    {
+        close(fd[1]);
+        *in_fd = fd[0];
+    }
 }
 
 void    wait_for_all(pid_t *pids, int count)
 {
-        int     i;
-        int     status;
-        int     last_status;
-        pid_t   last;
+    int     i;
+    int     status;
+    int     last_status;
+    pid_t   last;
 
-        last_status = -1;
-        last = (count > 0) ? pids[count - 1] : -1;
-        i = 0;
-        while (i < count)
+    last_status = -1;
+    last = (count > 0) ? pids[count - 1] : -1;
+    i = 0;
+    while (i < count)
+    {
+        if (pids[i] > 0)
         {
-                if (pids[i] > 0)
-                {
-                        if (waitpid(pids[i], &status, 0) == -1)
-                                perror("waitpid");
-                        else if (pids[i] == last)
-                                last_status = status;
-                }
-                i++;
-        }
-        if (last_status == -1)
+            if (waitpid(pids[i], &status, 0) == -1)
+                perror("waitpid");
+            else if (pids[i] == last)
                 last_status = status;
-        if (WIFEXITED(last_status))
-                g_exit_code = WEXITSTATUS(last_status);
-        else if (WIFSIGNALED(last_status))
-                g_exit_code = 128 + WTERMSIG(last_status);
-        else
-                g_exit_code = 1;
+        }
+        i++;
+    }
+    if (last_status == -1)
+        last_status = status;
+    if (WIFEXITED(last_status))
+        g_exit_code = WEXITSTATUS(last_status);
+    else if (WIFSIGNALED(last_status))
+        g_exit_code = 128 + WTERMSIG(last_status);
+    else
+        g_exit_code = 1;
 }
 

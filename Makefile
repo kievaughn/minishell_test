@@ -45,10 +45,10 @@ SRCS =	        src/builtins/custom_export/export_check.c \
 				src/parsing/split_pipes.c \
 				src/parsing/tokenize.c \
 				src/parsing/word_split.c \
-				src/piping/pipeline.c \
-				src/piping/redirections.c \
-				src/piping/pipeline_utils.c \
-				src/piping/redirections_utils.c \
+                                 src/piping/pipeline.c \
+                                 src/piping/redirections.c \
+                                 src/piping/pipeline_utils.c \
+                                 src/piping/heredoc.c \
 				src/cleanup.c \
 		        src/controller.c \
 				src/controller_helper.c \

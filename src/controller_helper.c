@@ -27,7 +27,7 @@ int     is_folder(char *arg)
         return (0);
 }
 
-t_token **prepare_command(char *segment, int *in_fd, int *out_fd, char ***envp)
+t_token **prepare_command(char *segment, int *in_fd, int *out_fd, char ***envp, const t_tty *tty)
 {
     t_token **cmd;
     
@@ -35,7 +35,7 @@ t_token **prepare_command(char *segment, int *in_fd, int *out_fd, char ***envp)
     if (!cmd)
         return (NULL);
 
-    cmd = handle_redirections(cmd, *envp, in_fd, out_fd);
+    cmd = handle_redirections(cmd, tty, *envp, in_fd, out_fd);
     if (!cmd || !cmd[0])
     {
         if (cmd)
