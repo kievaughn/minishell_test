@@ -49,6 +49,15 @@ typedef struct s_token
     int     type;       // e.g. WORD, REDIR_IN, REDIR_OUT, HEREDOC, PIPE
 }   t_token;
 
+typedef struct s_command
+{
+    t_token **tokens;
+    int     in_fd;
+    int     out_fd;
+    int     cmd_type;
+    int     has_heredoc;
+}   t_command;
+
 // Pipe data
 typedef struct s_pipeline_data
 {
@@ -56,6 +65,7 @@ typedef struct s_pipeline_data
 	char **segments;
 	pid_t *pids;
 	int nbr_segments;
+	t_command *cmds;
 }	t_pipeline_data;
 
 typedef struct s_pipe_info

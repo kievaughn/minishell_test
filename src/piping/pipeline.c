@@ -6,7 +6,7 @@
 /*   By: dimendon <dimendon@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/05 13:39:33 by dimendon          #+#    #+#             */
-/*   Updated: 2025/08/25 11:23:18 by dimendon         ###   ########.fr       */
+/*   Updated: 2025/08/26 16:00:00 by dimendon         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -53,24 +53,10 @@ static void     handle_output_redirection(int redir_out, int *fd, int last)
         }
 }
 
-static void child_process(char **envp, char *segment, t_pipe_info pipe_info)
+static void child_process(char **envp, t_command *cmd, t_pipe_info pipe_info)
 {
-    int redir_in = STDIN_FILENO;
-    int redir_out = STDOUT_FILENO;
-
-    // Tokenize input line
-    t_token **cmd = tokenize_command(segment, ' ', envp);
-    if (!cmd)
-        exit(1);
-
-    // Handle <, >, <<, >>
-    cmd = handle_redirections(cmd, envp, &redir_in, &redir_out);
-    if (!cmd)
-        exit(1);
-
-    // Setup input/output redirection
-    handle_input_redirection(redir_in, &pipe_info.in_fd);
-    handle_output_redirection(redir_out, pipe_info.fd, pipe_info.last);
+    handle_input_redirection(cmd->in_fd, &pipe_info.in_fd);
+    handle_output_redirection(cmd->out_fd, pipe_info.fd, pipe_info.last);
 
     if (!pipe_info.last)
     {
@@ -78,11 +64,8 @@ static void child_process(char **envp, char *segment, t_pipe_info pipe_info)
         close(pipe_info.fd[1]);
     }
 
-    // Execute command
-    execute_cmd(envp, cmd);
-
-    free_tokens(cmd);
-    exit(0); // make sure child exits
+    execute_cmd(envp, cmd->tokens);
+    exit(0);
 }
 
 static int pipeline_step(t_pipeline_data *pipeline, int *in_fd, int *fd, int i)
@@ -99,12 +82,14 @@ static int pipeline_step(t_pipeline_data *pipeline, int *in_fd, int *fd, int i)
     pipe_info.fd = fd;
     pipe_info.last = (i == pipeline->nbr_segments - 1);
 
-    pipeline->pids[i] = fork();
-    if (pipeline->pids[i] == 0)
+    if (pipeline->cmds[i].tokens)
     {
-        // Child takes care of tokenizing the segment
-        child_process(pipeline->envp, pipeline->segments[i], pipe_info);
+        pipeline->pids[i] = fork();
+        if (pipeline->pids[i] == 0)
+            child_process(pipeline->envp, &pipeline->cmds[i], pipe_info);
     }
+    else
+        pipeline->pids[i] = -1;
 
     // Parent cleanup
     parent_cleanup(in_fd, fd, i, pipeline->nbr_segments);
