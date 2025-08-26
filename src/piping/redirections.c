@@ -116,12 +116,15 @@ static int handle_redirection_logic(t_token **cmd, char **envp,
     char    *filename;
     int     quoted;
 
-    if (!(cmd[*i]->type == 1 || cmd[*i]->type == 2
-            || cmd[*i]->type == 3 || cmd[*i]->type == 4))
+    /* not a redirection token */
+    if (!(cmd[*i] && (cmd[*i]->type == 1 || cmd[*i]->type == 2
+                   || cmd[*i]->type == 3 || cmd[*i]->type == 4)))
         return (0);
 
     filename = NULL;
     quoted = 0;
+
+    /* validate/collect filename (or allow empty for heredoc) */
     if (cmd[*i + 1] && cmd[*i + 1]->type == 0)
     {
         filename = cmd[*i + 1]->str;
@@ -132,30 +135,31 @@ static int handle_redirection_logic(t_token **cmd, char **envp,
     else if (cmd[*i + 1] && cmd[*i + 1]->type != 0)
         return (-1);
 
-    if (cmd[*i]->type == 1)
+    if (cmd[*i]->type == 1) /* < */
     {
         if (!filename || filename[0] == '\0'
             || open_infile(filename, in_fd) == -1)
             return (-1);
     }
-    else if (cmd[*i]->type == 2)
+    else if (cmd[*i]->type == 2) /* << */
     {
         if (handle_heredoc(filename ? filename : "", quoted, envp, in_fd) == -1)
             return (-1);
     }
-    else if (cmd[*i]->type == 3)
+    else if (cmd[*i]->type == 3) /* > */
     {
         if (!filename || filename[0] == '\0'
             || open_outfile(filename, out_fd) == -1)
             return (-1);
     }
-    else if (cmd[*i]->type == 4)
+    else if (cmd[*i]->type == 4) /* >> */
     {
         if (!filename || filename[0] == '\0'
             || open_appendfile(filename, out_fd) == -1)
             return (-1);
     }
 
+    /* consume and free the redirection operator (and its filename if any) */
     free_token(cmd[*i]);
     cmd[*i] = NULL;
     if (cmd[*i + 1])
@@ -166,7 +170,6 @@ static int handle_redirection_logic(t_token **cmd, char **envp,
     *i += filename ? 2 : 1;
     return (1);
 }
-
 
 t_token **handle_redirections(t_token **cmd, char **envp,
                 int *in_fd, int *out_fd)
@@ -196,6 +199,7 @@ t_token **handle_redirections(t_token **cmd, char **envp,
             cmd[i] = NULL;
             i++;
         }
+        /* res == 1: redirection consumed; continue */
     }
 
     clean[j] = NULL;
