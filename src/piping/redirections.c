@@ -45,6 +45,16 @@ static int  count_tokens(t_token **arr)
     return i;
 }
 
+static t_token  **alloc_clean_array(int count)
+{
+    t_token **clean;
+
+    clean = malloc(sizeof(t_token *) * (count + 1));
+    if (!clean)
+        return (NULL);
+    return (clean);
+}
+
 static int handle_redirection_logic(t_token **cmd, char **envp,
                                     int *in_fd, int *out_fd, int *i)
 {
@@ -108,13 +118,36 @@ static int handle_redirection_logic(t_token **cmd, char **envp,
     return (1);
 }
 
+static int  process_token(t_token **cmd, t_token **clean, int *i, int *j,
+                        char **envp, int *in_fd, int *out_fd)
+{
+    int res;
+
+    res = handle_redirection_logic(cmd, envp, in_fd, out_fd, i);
+    if (res == -1)
+        return (-1);
+    if (res == 0)
+    {
+        clean[*j] = cmd[*i];
+        cmd[*i] = NULL;
+        (*j)++;
+        (*i)++;
+    }
+    return (0);
+}
+
 t_token **handle_redirections(t_token **cmd, char **envp,
                 int *in_fd, int *out_fd)
 {
-    int i = 0, j = 0;
-    int count = count_tokens(cmd);
-    t_token **clean = malloc(sizeof(t_token *) * (count + 1));
+    int     i;
+    int     j;
+    int     count;
+    t_token **clean;
 
+    i = 0;
+    j = 0;
+    count = count_tokens(cmd);
+    clean = alloc_clean_array(count);
     if (!clean)
     {
         free_token_array(cmd, count);
@@ -122,18 +155,11 @@ t_token **handle_redirections(t_token **cmd, char **envp,
     }
     while (i < count && cmd[i])
     {
-        int res = handle_redirection_logic(cmd, envp, in_fd, out_fd, &i);
-        if (res == -1)
+        if (process_token(cmd, clean, &i, &j, envp, in_fd, out_fd) == -1)
         {
             free_token_array(cmd, count);
             free_token_array(clean, j);
             return (NULL);
-        }
-        else if (res == 0)
-        {
-            clean[j++] = cmd[i];
-            cmd[i] = NULL;
-            i++;
         }
     }
     clean[j] = NULL;
