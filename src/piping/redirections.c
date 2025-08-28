@@ -6,7 +6,7 @@
 /*   By: dimendon <dimendon@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/05 13:39:36 by dimendon          #+#    #+#             */
-/*   Updated: 2025/08/25 11:30:28 by dimendon         ###   ########.fr       */
+/*   Updated: 2025/08/26 16:00:00 by dimendon         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -37,77 +37,12 @@ static void free_token_array(t_token **arr, int count)
     free(arr);
 }
 
-int count_tokens(t_token **arr)
+static int  count_tokens(t_token **arr)
 {
     int i = 0;
     while (arr && arr[i])
         i++;
     return i;
-}
-
-int     open_infile(char *file, int *in_fd)
-{
-        int     fd;
-
-        fd = 0;
-        if (*in_fd != STDIN_FILENO)
-                close(*in_fd);
-        fd = open(file, O_RDONLY);
-        if (fd < 0)
-        {
-                perror(file);
-                if (errno == EACCES)
-                        g_exit_code = 126;
-                else if (errno == ENOENT)
-                        g_exit_code = 127;
-                else
-                        g_exit_code = 1;
-                return (-1);
-        }
-        *in_fd = fd;
-        return (0);
-}
-
-int     open_outfile(char *file, int *out_fd)
-{
-        int     fd;
-
-        fd = 0;
-        if (*out_fd != STDOUT_FILENO)
-                close(*out_fd);
-        fd = open(file, O_WRONLY | O_CREAT | O_TRUNC, 0644);
-        if (fd < 0)
-        {
-                perror(file);
-                if (errno == EACCES)
-                        g_exit_code = 126;
-                else
-                        g_exit_code = 1;
-                return (-1);
-        }
-        *out_fd = fd;
-        return (0);
-}
-
-int     open_appendfile(char *file, int *out_fd)
-{
-        int     fd;
-
-        fd = 0;
-        if (*out_fd != STDOUT_FILENO)
-                close(*out_fd);
-        fd = open(file, O_WRONLY | O_CREAT | O_APPEND, 0644);
-        if (fd < 0)
-        {
-                perror(file);
-                if (errno == EACCES)
-                        g_exit_code = 126;
-                else
-                        g_exit_code = 1;
-                return (-1);
-        }
-        *out_fd = fd;
-        return (0);
 }
 
 static int handle_redirection_logic(t_token **cmd, char **envp,
@@ -116,15 +51,11 @@ static int handle_redirection_logic(t_token **cmd, char **envp,
     char    *filename;
     int     quoted;
 
-    /* not a redirection token */
     if (!(cmd[*i] && (cmd[*i]->type == 1 || cmd[*i]->type == 2
                    || cmd[*i]->type == 3 || cmd[*i]->type == 4)))
         return (0);
-
     filename = NULL;
     quoted = 0;
-
-    /* validate/collect filename (or allow empty for heredoc) */
     if (cmd[*i + 1] && cmd[*i + 1]->type == 0)
     {
         filename = cmd[*i + 1]->str;
@@ -134,14 +65,13 @@ static int handle_redirection_logic(t_token **cmd, char **envp,
         return (-1);
     else if (cmd[*i + 1] && cmd[*i + 1]->type != 0)
         return (-1);
-
-    if (cmd[*i]->type == 1) /* < */
+    if (cmd[*i]->type == 1)
     {
         if (!filename || filename[0] == '\0'
             || open_infile(filename, in_fd) == -1)
             return (-1);
     }
-    else if (cmd[*i]->type == 2) /* << */
+    else if (cmd[*i]->type == 2)
     {
         const char  *name;
 
@@ -152,20 +82,18 @@ static int handle_redirection_logic(t_token **cmd, char **envp,
         if (handle_heredoc(name, quoted, envp, in_fd) == -1)
             return (-1);
     }
-    else if (cmd[*i]->type == 3) /* > */
+    else if (cmd[*i]->type == 3)
     {
         if (!filename || filename[0] == '\0'
             || open_outfile(filename, out_fd) == -1)
             return (-1);
     }
-    else if (cmd[*i]->type == 4) /* >> */
+    else if (cmd[*i]->type == 4)
     {
         if (!filename || filename[0] == '\0'
             || open_appendfile(filename, out_fd) == -1)
             return (-1);
     }
-
-    /* consume and free the redirection operator (and its filename if any) */
     free_token(cmd[*i]);
     cmd[*i] = NULL;
     if (cmd[*i + 1])
@@ -192,7 +120,6 @@ t_token **handle_redirections(t_token **cmd, char **envp,
         free_token_array(cmd, count);
         return (NULL);
     }
-
     while (i < count && cmd[i])
     {
         int res = handle_redirection_logic(cmd, envp, in_fd, out_fd, &i);
@@ -208,9 +135,7 @@ t_token **handle_redirections(t_token **cmd, char **envp,
             cmd[i] = NULL;
             i++;
         }
-        /* res == 1: redirection consumed; continue */
     }
-
     clean[j] = NULL;
     free(cmd);
     if (j == 0)
@@ -220,7 +145,4 @@ t_token **handle_redirections(t_token **cmd, char **envp,
     }
     return (clean);
 }
-
-
-
 

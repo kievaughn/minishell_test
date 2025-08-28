@@ -9,7 +9,7 @@
 /*   Updated: 2025/08/25 13:24:30 by dimendon         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
-#include "../libft/libft.h"
+#include "../../libft/libft.h"
 #include "minishell.h"
 
 static int  fully_quoted(const char *s)

@@ -1,4 +1,4 @@
-#include "../libft/libft.h"
+#include "../../libft/libft.h"
 #include "minishell.h"
 
 static char     *append_exit_code(char *result, int *i, char *str, int *handled)

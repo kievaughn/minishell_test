@@ -1,4 +1,4 @@
-#include "../libft/libft.h"
+#include "../../libft/libft.h"
 #include "minishell.h"
 
 static int  is_whitespace(char c)
