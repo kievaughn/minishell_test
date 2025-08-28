@@ -13,20 +13,24 @@
 #include "minishell.h"
 #include "token_utils.h"
 
-static t_token **fill_arr_from_string(const char *s, char c)
+static t_token **alloc_token_array(const char *s, char c, int *token_num)
 {
     t_token **arr;
-    int     token_num;
+
+    *token_num = token_count(s, c);
+    arr = malloc(sizeof(t_token *) * (*token_num + 1));
+    if (!arr)
+        return (NULL);
+    return (arr);
+}
+
+static int populate_tokens(t_token **arr, const char *s, char c)
+{
     int     i;
     size_t  len;
     int     type;
     int     quoted;
     char    *substr;
-
-    token_num = token_count(s, c);
-    arr = malloc(sizeof(t_token *) * (token_num + 1));
-    if (!arr)
-        return (NULL);
 
     i = 0;
     while (*s)
@@ -35,23 +39,40 @@ static t_token **fill_arr_from_string(const char *s, char c)
             s++;
         if (!*s)
             break;
-
         len = next_c(s, c);
         substr = ft_substr(s, 0, len);
         if (!substr)
         {
             arr[i] = NULL;
-            free_tokens(arr);
-            return (NULL);
+            return (1);
         }
-
         quoted = fully_quoted(substr);
         type = 0;
-        arr[i++] = new_token(substr, quoted, type);
+        arr[i] = new_token(substr, quoted, type);
         free(substr);
+        if (!arr[i])
+            return (1);
         s += len;
+        i++;
     }
     arr[i] = NULL;
+    return (0);
+}
+
+static t_token **fill_arr_from_string(const char *s, char c)
+{
+    t_token **arr;
+    int     token_num;
+
+    arr = alloc_token_array(s, c, &token_num);
+    if (!arr)
+        return (NULL);
+    (void)token_num;
+    if (populate_tokens(arr, s, c))
+    {
+        free_tokens(arr);
+        return (NULL);
+    }
     return (arr);
 }
 
