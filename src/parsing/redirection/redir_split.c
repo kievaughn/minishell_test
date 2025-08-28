@@ -1,11 +1,35 @@
 #include "../../libft/libft.h"
 #include "minishell.h"
 
+static int advance_redirect(char *str, int *i, int *count)
+{
+    if (str[*i] == '>' && str[*i + 1] == '>')
+    {
+        (*count)++;
+        *i += 2;
+        return (1);
+    }
+    if (str[*i] == '<' && str[*i + 1] == '<')
+    {
+        (*count)++;
+        *i += 2;
+        return (1);
+    }
+    if (str[*i] == '>' || str[*i] == '<')
+    {
+        (*count)++;
+        (*i)++;
+        return (1);
+    }
+    return (0);
+}
+
 static int part_count(t_token *tok)
 {
     int i;
     int start;
     int count;
+    int prev;
 
     if (tok->quoted)
         return (1);
@@ -14,20 +38,11 @@ static int part_count(t_token *tok)
     count = 0;
     while (tok->str[i])
     {
-        if (tok->str[i] == '>' || tok->str[i] == '<')
+        prev = i;
+        if (advance_redirect(tok->str, &i, &count))
         {
-            if (i - start > 0)
+            if (prev - start > 0)
                 count++;
-            if (tok->str[i] == '>' && tok->str[i + 1] == '>')
-            {
-                count++;
-                i += 2;
-            }
-            else
-            {
-                count++;
-                i++;
-            }
             start = i;
         }
         else
