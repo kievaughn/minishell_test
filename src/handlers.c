@@ -46,7 +46,8 @@ char **prepare_argv_from_tokens(t_token **tokens)
     if (!argv)
         return (NULL);
 
-    for (int i = 0; i < count; i++)
+    int i = 0;
+    while (i < count)
     {
         argv[i] = ft_strdup(tokens[i]->str);
         if (!argv[i])
@@ -58,6 +59,7 @@ char **prepare_argv_from_tokens(t_token **tokens)
          * string "\"$USER\"" to echo).  Stripping quotes here would modify
          * the intended argument and lead to behaviour that differs from Bash.
          */
+        i++;
     }
     argv[count] = NULL;
     return argv;

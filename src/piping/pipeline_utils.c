@@ -111,8 +111,12 @@ char **tokens_to_argv(t_token **cmd)
     if (!argv)
         return NULL;
 
-    for (int i = 0; i < count; i++)
+    int i = 0;
+    while (i < count)
+    {
         argv[i] = ft_strdup(cmd[i]->str); // duplicate string from token
+        i++;
+    }
 
     argv[count] = NULL;
     return argv;
@@ -211,7 +215,10 @@ void    wait_for_all(pid_t *pids, int count)
         pid_t   last;
 
         last_status = -1;
-        last = (count > 0) ? pids[count - 1] : -1;
+        if (count > 0)
+                last = pids[count - 1];
+        else
+                last = -1;
         i = 0;
         while (i < count)
         {
