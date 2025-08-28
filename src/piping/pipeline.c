@@ -53,24 +53,24 @@ static void     handle_output_redirection(int redir_out, int *fd, int last)
         }
 }
 
-static void child_process(char **envp, t_command *cmd, t_pipe_info pipe_info)
+static void child_process(char **envp, t_command *cmd, t_pipe_context pipe_ctx)
 {
-    handle_input_redirection(cmd->in_fd, &pipe_info.in_fd);
-    handle_output_redirection(cmd->out_fd, pipe_info.fd, pipe_info.last);
+    handle_input_redirection(cmd->in_fd, &pipe_ctx.in_fd);
+    handle_output_redirection(cmd->out_fd, pipe_ctx.fd, pipe_ctx.last);
 
-    if (!pipe_info.last)
+    if (!pipe_ctx.last)
     {
-        close(pipe_info.fd[0]);
-        close(pipe_info.fd[1]);
+        close(pipe_ctx.fd[0]);
+        close(pipe_ctx.fd[1]);
     }
 
     execute_cmd(envp, cmd->tokens);
     exit(0);
 }
 
-static int pipeline_step(t_pipeline_data *pipeline, int *in_fd, int *fd, int i)
+static int pipeline_step(t_pipeline *pipeline, int *in_fd, int *fd, int i)
 {
-    t_pipe_info pipe_info;
+    t_pipe_context pipe_ctx;
 
     if (i < pipeline->nbr_segments - 1 && pipe(fd) == -1)
     {
@@ -78,15 +78,15 @@ static int pipeline_step(t_pipeline_data *pipeline, int *in_fd, int *fd, int i)
         return (0);
     }
 
-    pipe_info.in_fd = *in_fd;
-    pipe_info.fd = fd;
-    pipe_info.last = (i == pipeline->nbr_segments - 1);
+    pipe_ctx.in_fd = *in_fd;
+    pipe_ctx.fd = fd;
+    pipe_ctx.last = (i == pipeline->nbr_segments - 1);
 
     if (pipeline->cmds[i].tokens)
     {
         pipeline->pids[i] = fork();
         if (pipeline->pids[i] == 0)
-            child_process(pipeline->envp, &pipeline->cmds[i], pipe_info);
+            child_process(pipeline->envp, &pipeline->cmds[i], pipe_ctx);
     }
     else
         pipeline->pids[i] = -1;
@@ -97,7 +97,7 @@ static int pipeline_step(t_pipeline_data *pipeline, int *in_fd, int *fd, int i)
 }
 
 
-void pipeline_loop(t_pipeline_data *pipeline)
+void pipeline_loop(t_pipeline *pipeline)
 {
     int in_fd = STDIN_FILENO;
     int fd[2];

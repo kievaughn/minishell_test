@@ -14,7 +14,7 @@
 #include "../libft/libft.h"
 #include <errno.h>
 
-static void cleanup_commands(t_pipeline_data *pipeline, int count)
+static void cleanup_commands(t_pipeline *pipeline, int count)
 {
     int i = 0;
     while (i < count)
@@ -31,7 +31,7 @@ static void cleanup_commands(t_pipeline_data *pipeline, int count)
 
 void    execute_pipeline(char **envp, char **segments)
 {
-    t_pipeline_data pipeline;
+    t_pipeline pipeline;
     int             i;
 
     pipeline.envp = envp;
