@@ -126,11 +126,21 @@ void restore_redirections(int save_in, int save_out)
     }
 }
 
-short int is_builtin(const char *cmd)
+short int	is_builtin(const char *cmd)
 {
-    return (ft_strncmp(cmd, "echo", 5) == 0 || ft_strncmp(cmd, "cd", 3) == 0
-        || ft_strncmp(cmd, "pwd", 4) == 0 || ft_strncmp(cmd, "export", 7) == 0
-        || ft_strncmp(cmd, "unset", 6) == 0 || ft_strncmp(cmd, "env", 4) == 0
-        || ft_strncmp(cmd, "exit", 5) == 0);
+	char		*trimmed;
+	short int	result;
+
+	if (!cmd)
+		return (0);
+	trimmed = ft_strtrim(cmd, " \t\n\r\v\f");
+	if (!trimmed)
+		return (0);
+	result = (!ft_strcmp(trimmed, "echo") || !ft_strcmp(trimmed, "cd")
+		|| !ft_strcmp(trimmed, "pwd") || !ft_strcmp(trimmed, "export")
+		|| !ft_strcmp(trimmed, "unset") || !ft_strcmp(trimmed, "env")
+		|| !ft_strcmp(trimmed, "exit"));
+	free(trimmed);
+	return (result);
 }
 
