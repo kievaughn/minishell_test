@@ -55,29 +55,19 @@ static t_token **fill_arr_from_string(const char *s, char c)
     return (arr);
 }
 
-t_token **tokenize_command(char const *s, char c, char **envp)
+static int expand_all(t_token **arr, char **envp)
 {
-    t_token **arr;
     int     i;
-
-    if (!s)
-        return (NULL);
-
-    arr = fill_arr_from_string(s, c);
-    if (!arr)
-        return (NULL);
+    char    *expanded;
 
     i = 0;
-    while (arr[i])
+    while (arr && arr[i])
     {
         if (arr[i]->quoted != 1)
         {
-            char *expanded = build_expanded_str(arr[i]->str, envp);
+            expanded = build_expanded_str(arr[i]->str, envp);
             if (!expanded)
-            {
-                free_tokens(arr);
-                return (NULL);
-            }
+                return (1);
             free(arr[i]->str);
             arr[i]->str = expanded;
         }
@@ -85,15 +75,35 @@ t_token **tokenize_command(char const *s, char c, char **envp)
             remove_quotes(arr[i]->str);
         i++;
     }
+    return (0);
+}
+
+static t_token **post_process_tokens(t_token **arr)
+{
     arr = split_expanded_tokens(arr);
     if (!arr)
         return (NULL);
-
     arr = split_redirs(arr);
     if (!arr)
         return (NULL);
-
     return (arr);
+}
+
+t_token **tokenize_command(char const *s, char c, char **envp)
+{
+    t_token **arr;
+
+    if (!s)
+        return (NULL);
+    arr = fill_arr_from_string(s, c);
+    if (!arr)
+        return (NULL);
+    if (expand_all(arr, envp))
+    {
+        free_tokens(arr);
+        return (NULL);
+    }
+    return (post_process_tokens(arr));
 }
 
 t_token *new_token(const char *str, int quoted, int type)
