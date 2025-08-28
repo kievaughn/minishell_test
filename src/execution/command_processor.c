@@ -14,26 +14,32 @@
 #include "minishell.h"
 #include <fcntl.h>
 
-int	run_builtin(char ***envp, t_token **cmd)
+int     run_builtin(char ***envp, t_token **cmd)
 {
 	char	*name;
+	char	*trimmed;
 
 	if (!cmd || !cmd[0] || !cmd[0]->str)
 		return (127);
+	trimmed = ft_strtrim(cmd[0]->str, " \t\n\r\v\f");
+	if (!trimmed)
+		return (127);
+	free(cmd[0]->str);
+	cmd[0]->str = trimmed;
 	name = cmd[0]->str;
-	if (!ft_strncmp(name, "echo", 5))
+	if (!ft_strcmp(name, "echo"))
 		g_exit_code = custom_echo(cmd);
-	else if (!ft_strncmp(name, "cd", 3))
+	else if (!ft_strcmp(name, "cd"))
 		g_exit_code = custom_cd(envp, cmd);
-	else if (!ft_strncmp(name, "pwd", 4))
+	else if (!ft_strcmp(name, "pwd"))
 		g_exit_code = custom_pwd();
-	else if (!ft_strncmp(name, "export", 7))
+	else if (!ft_strcmp(name, "export"))
 		g_exit_code = custom_export(envp, cmd);
-	else if (!ft_strncmp(name, "unset", 6))
+	else if (!ft_strcmp(name, "unset"))
 		g_exit_code = custom_unset(envp, cmd);
-	else if (!ft_strncmp(name, "env", 4))
+	else if (!ft_strcmp(name, "env"))
 		g_exit_code = custom_env(*envp, cmd);
-	else if (!ft_strncmp(name, "exit", 5))
+	else if (!ft_strcmp(name, "exit"))
 	{
 		g_exit_code = custom_exit(cmd);
 		if (g_exit_code != 1)
