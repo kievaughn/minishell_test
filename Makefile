@@ -47,6 +47,7 @@ SRCS = \
     src/parsing/redirection/redir_split.c \
     src/parsing/tokenization/split_pipes.c \
     src/parsing/tokenization/tokenize.c \
+    src/parsing/tokenization/token_utils.c \
     src/piping/pipeline.c \
     src/piping/redirections.c \
     src/piping/pipeline_setup.c \
@@ -60,7 +61,7 @@ SRCS = \
     src/main.c
 
 OBJS = $(SRCS:src/%.c=$(OBJ_PATH)%.o)
-HEADERS = includes/minishell.h
+HEADERS = includes/minishell.h includes/token_utils.h
 
 GREEN  = \033[0;32m
 YELLOW = \033[1;33m
