@@ -45,15 +45,15 @@ SRCS =	        src/builtins/custom_export/export_check.c \
 				src/parsing/split_pipes.c \
 				src/parsing/tokenize.c \
 				src/parsing/word_split.c \
-				src/piping/pipeline.c \
-				src/piping/redirections.c \
-				src/piping/pipeline_utils.c \
-				src/piping/redirections_utils.c \
-				src/cleanup.c \
-		        src/controller.c \
-				src/controller_helper.c \
-                src/handlers.c \
-                src/main.c
+                               src/piping/pipeline.c \
+                               src/piping/redirections.c \
+                               src/piping/pipeline_utils.c \
+                               src/piping/redirections_utils.c \
+                               src/cleanup.c \
+                       src/command_processor.c \
+                               src/command_utils.c \
+               src/command_execution.c \
+               src/main.c
 
 OBJS = $(SRCS:src/%.c=$(OBJ_PATH)%.o)
 HEADERS = includes/minishell.h

@@ -58,22 +58,22 @@ typedef struct s_command
     int     has_heredoc;
 }   t_command;
 
-// Pipe data
-typedef struct s_pipeline_data
+// Pipeline context
+typedef struct s_pipeline
 {
     char **envp;
 	char **segments;
 	pid_t *pids;
 	int nbr_segments;
 	t_command *cmds;
-}	t_pipeline_data;
+}	t_pipeline;
 
-typedef struct s_pipe_info
+typedef struct s_pipe_context
 {
     int in_fd;
     int *fd;
     int last;
-} t_pipe_info;
+} t_pipe_context;
 
 // ==================== BUILTINS ====================
 short int   custom_cd(char ***envp, t_token **args);
@@ -89,18 +89,18 @@ void        init_export_index(int *index, int size);
 int         is_valid_name(const char *name);
 int         update_or_add_env(char ***env, char *arg);
 
-// ==================== CONTROLLER ====================
+// ==================== COMMAND PROCESSOR ====================
 void        process_command(char ***envp, char *line);
 int         run_builtin(char ***envp, t_token **cmd);
 
-// ==================== CONTROLLER_HELPER ====================
+// ==================== COMMAND UTILS ====================
 int         is_folder(char *arg);
 t_token     **prepare_command(char *segment, int *in_fd, int *out_fd, char ***envp);
 void        setup_redirections(int in_fd, int out_fd, int *save_in, int *save_out);
 void        restore_redirections(int save_in, int save_out);
 short int   is_builtin(const char *cmd);
 
-// ==================== HANDLER ====================
+// ==================== COMMAND EXECUTION ====================
 int         execute_command(char *path, t_token **tokens, char **envp);
 
 // ==================== ENV LOOKUP ====================
@@ -121,7 +121,7 @@ void        wait_for_all(pid_t *pids, int count);
 void        execute_pipeline(char **envp, char **segments);
 t_token     **handle_redirections(t_token **cmd, char **envp, int *in_fd, int *out_fd);
 int         handle_heredoc(const char *delim, int quoted, char **envp, int *in_fd);
-void        pipeline_loop(t_pipeline_data *pipeline);
+void        pipeline_loop(t_pipeline *pipeline);
 
 // ==================== PARSING ====================
 void        remove_quotes(char *str);
