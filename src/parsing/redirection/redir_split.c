@@ -53,75 +53,82 @@ static int total_parts(t_token **arr)
     return (total);
 }
 
+static void copy_literal(t_token *tok, t_token **out, int *idx, int start, int end)
+{
+    char    *part;
+
+    if (end - start <= 0)
+        return ;
+    part = ft_substr(tok->str, start, end - start);
+    if (!part)
+        return ;
+    out[(*idx)++] = new_token(part, tok->quoted, 0);
+    free(part);
+}
+
+static void emit_operator(const char *str, int *j, t_token **out, int *idx)
+{
+    if (str[*j] == '>' && str[*j + 1] == '>')
+    {
+        out[(*idx)++] = new_token(">>", 0, 4);
+        *j += 2;
+    }
+    else if (str[*j] == '<' && str[*j + 1] == '<')
+    {
+        out[(*idx)++] = new_token("<<", 0, 2);
+        *j += 2;
+    }
+    else if (str[*j] == '>')
+    {
+        out[(*idx)++] = new_token(">", 0, 3);
+        (*j)++;
+    }
+    else
+    {
+        out[(*idx)++] = new_token("<", 0, 1);
+        (*j)++;
+    }
+}
+
+static void split_token(t_token *tok, t_token **out, int *idx)
+{
+    int j = 0;
+    int start = 0;
+    char quote = 0;
+    if (tok->quoted) { out[(*idx)++] = tok; return ; }
+    while (tok->str[j])
+    {
+        if (!quote && (tok->str[j] == '\'' || tok->str[j] == '"'))
+            quote = tok->str[j];
+        else if (quote && tok->str[j] == quote)
+            quote = 0;
+        else if (!quote && (tok->str[j] == '>' || tok->str[j] == '<'))
+        {
+            copy_literal(tok, out, idx, start, j);
+            emit_operator(tok->str, &j, out, idx);
+            start = j;
+            continue ;
+        }
+        j++;
+    }
+    copy_literal(tok, out, idx, start, j);
+    free(tok->str);
+    free(tok);
+}
+
 t_token **split_redirs(t_token **arr)
 {
     t_token **out;
-    int i;
-    int j;
-    int idx;
-    int start;
-    char quote;
+    int     i;
+    int     idx;
 
     out = malloc(sizeof(t_token *) * (total_parts(arr) + 1));
     if (!out)
         return (free_tokens(arr), NULL);
-
-    idx = 0;
     i = 0;
-    while (arr[i])
-    {
-        if (arr[i]->quoted)
-        {
-            out[idx++] = arr[i++];
-            continue;
-        }
-        j = 0;
-        start = 0;
-        quote = 0;
-        while (arr[i]->str[j])
-        {
-            if (!quote && (arr[i]->str[j] == '\'' || arr[i]->str[j] == '"'))
-                quote = arr[i]->str[j];
-            else if (quote && arr[i]->str[j] == quote)
-                quote = 0;
-
-            if (!quote && (arr[i]->str[j] == '>' || arr[i]->str[j] == '<'))
-            {
-                if (j - start > 0)
-                    out[idx++] = new_token(ft_substr(arr[i]->str, start, j - start),
-                                           arr[i]->quoted, 0);
-                if (arr[i]->str[j] == '>' && arr[i]->str[j + 1] == '>')
-                {
-                    out[idx++] = new_token(ft_strdup(">>"), 0, 4);
-                    j += 2;
-                }
-                else if (arr[i]->str[j] == '<' && arr[i]->str[j + 1] == '<')
-                {
-                    out[idx++] = new_token(ft_strdup("<<"), 0, 2);
-                    j += 2;
-                }
-                else if (arr[i]->str[j] == '>')
-                {
-                    out[idx++] = new_token(ft_strdup(">"), 0, 3);
-                    j++;
-                }
-                else
-                {
-                    out[idx++] = new_token(ft_strdup("<"), 0, 1);
-                    j++;
-                }
-                start = j;
-            }
-            else
-                j++;
-        }
-        if (j - start > 0)
-            out[idx++] = new_token(ft_substr(arr[i]->str, start, j - start),
-                                   arr[i]->quoted, 0);
-        free(arr[i]->str);
-        free(arr[i]);
-        i++;
-    }
+    idx = 0;
+    while (arr && arr[i])
+        split_token(arr[i++], out, &idx);
     out[idx] = NULL;
     free(arr);
     return (out);
