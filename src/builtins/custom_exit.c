@@ -13,28 +13,28 @@
 #include "../libft/libft.h"
 #include "minishell.h"
 
-short int custom_exit(t_token **args)
+short int	custom_exit(t_token **args)
 {
-    long long value;
+	long long	value;
 
-    fprintf(stderr, "exit\n");
-    if (args[1] && args[2])
-    {
-        fprintf(stderr, "exit: too many arguments\n");
-        g_exit_code = 1;
-        return 1;
-    }
-    if (args[1])
-    {
-        if (!ft_atoany(args[1]->str, &value))
-        {
-            fprintf(stderr, "exit: %s: numeric argument required\n", args[1]->str);
-            g_exit_code = 2;
-            exit(g_exit_code);
-        }
-        g_exit_code = (unsigned char)value;
-        exit(g_exit_code);
-    }
-    exit(g_exit_code);
+	fprintf(stderr, "exit\n");
+	if (args[1] && args[2])
+	{
+		fprintf(stderr, "exit: too many arguments\n");
+		g_exit_code = 1;
+		return (1);
+	}
+	if (args[1])
+	{
+		if (!ft_atoany(args[1]->str, &value))
+		{
+			fprintf(stderr, "exit: %s: numeric argument required\n",
+				args[1]->str);
+			g_exit_code = 2;
+			exit(g_exit_code);
+		}
+		g_exit_code = (unsigned char)value;
+		exit(g_exit_code);
+	}
+	exit(g_exit_code);
 }
-

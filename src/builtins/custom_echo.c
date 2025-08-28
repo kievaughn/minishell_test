@@ -42,8 +42,8 @@ static int	skip_n_flags(t_token **arg, int start)
 
 static int	write_echo_arg(t_token *tok)
 {
-	char	*code;
-	const char *arg = tok->str;
+	char		*code;
+	const char	*arg = tok->str;
 
 	if (tok->quoted == 1)
 	{
@@ -63,11 +63,11 @@ static int	write_echo_arg(t_token *tok)
 	return (0);
 }
 
-
 static int	print_echo_args(t_token **arg, int start)
 {
-	int	i = start;
+	int	i;
 
+	i = start;
 	while (arg[i])
 	{
 		if (write_echo_arg(arg[i]))
@@ -95,4 +95,3 @@ short int	custom_echo(t_token **arg)
 		write(1, "\n", 1);
 	return (0);
 }
-

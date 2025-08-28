@@ -13,28 +13,29 @@
 #include "../libft/libft.h"
 #include "minishell.h"
 
-static void remove_var(char ***envp, const char *var)
+static void	remove_var(char ***envp, const char *var)
 {
-    int i = 0;
-    int pos;
+	int	i;
+	int	pos;
 
-    while ((*envp)[i])
-    {
-        if (ft_strncmp((*envp)[i], var, ft_strlen(var)) == 0
-            && (*envp)[i][ft_strlen(var)] == '=')
-        {
-            free((*envp)[i]);
-            pos = i;
-            while ((*envp)[pos + 1])
-            {
-                (*envp)[pos] = (*envp)[pos + 1];
-                pos++;
-            }
-            (*envp)[pos] = NULL;
-        }
-        else
-            i++;
-    }
+	i = 0;
+	while ((*envp)[i])
+	{
+		if (ft_strncmp((*envp)[i], var, ft_strlen(var)) == 0
+			&& (*envp)[i][ft_strlen(var)] == '=')
+		{
+			free((*envp)[i]);
+			pos = i;
+			while ((*envp)[pos + 1])
+			{
+				(*envp)[pos] = (*envp)[pos + 1];
+				pos++;
+			}
+			(*envp)[pos] = NULL;
+		}
+		else
+			i++;
+	}
 }
 
 short int	custom_unset(char ***envp, t_token **args)
@@ -50,4 +51,3 @@ short int	custom_unset(char ***envp, t_token **args)
 	g_exit_code = 0;
 	return (0);
 }
-

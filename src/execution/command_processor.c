@@ -16,11 +16,11 @@
 
 int	run_builtin(char ***envp, t_token **cmd)
 {
+	char	*name;
+
 	if (!cmd || !cmd[0] || !cmd[0]->str)
 		return (127);
-
-	char *name = cmd[0]->str;
-
+	name = cmd[0]->str;
 	if (!ft_strncmp(name, "echo", 5))
 		g_exit_code = custom_echo(cmd);
 	else if (!ft_strncmp(name, "cd", 3))
@@ -41,8 +41,7 @@ int	run_builtin(char ***envp, t_token **cmd)
 	}
 	else
 		g_exit_code = 127;
-
-	return g_exit_code;
+	return (g_exit_code);
 }
 
 static void	execute_command_with_path(t_token **cmd, char ***envp)
@@ -88,30 +87,26 @@ static void	run_external_command(t_token **cmd, char ***envp)
 		execute_command_with_path(cmd, envp);
 }
 
-static void run_single(char ***envp, char *segment)
+static void	run_single(char ***envp, char *segment)
 {
-	t_token **cmd;
-	int in_fd;
-	int out_fd;
-	int save_in;
-	int save_out;
+	t_token	**cmd;
+	int		in_fd;
+	int		out_fd;
+	int		save_in;
+	int		save_out;
 
 	in_fd = STDIN_FILENO;
 	out_fd = STDOUT_FILENO;
 	save_in = 0;
 	save_out = 0;
-
 	cmd = prepare_command(segment, &in_fd, &out_fd, envp);
 	if (!cmd || !cmd[0] || !cmd[0]->str)
-		return;
-
+		return ;
 	setup_redirections(in_fd, out_fd, &save_in, &save_out);
-	
 	if (is_builtin(cmd[0]->str))
 		run_builtin(envp, cmd);
 	else
 		run_external_command(cmd, envp);
-
 	restore_redirections(save_in, save_out);
 	free_tokens(cmd);
 }

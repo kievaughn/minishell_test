@@ -1,30 +1,29 @@
 #include "../../libft/libft.h"
 #include "minishell.h"
 
-void remove_quotes(char *str)
+void	remove_quotes(char *str)
 {
-    char    quote;
-    size_t  i;
-    size_t  j;
+	char	quote;
+	size_t	i;
+	size_t	j;
 
-    quote = 0;
-    i = 0;
-    j = 0;
-    while (str[i])
-    {
-        if (!quote && (str[i] == '\'' || str[i] == '"'))
-            quote = str[i++];
-        else if (quote && str[i] == quote)
-        {
-            quote = 0;
-            i++;
-        }
-        else
-            str[j++] = str[i++];
-    }
-    str[j] = '\0';
+	quote = 0;
+	i = 0;
+	j = 0;
+	while (str[i])
+	{
+		if (!quote && (str[i] == '\'' || str[i] == '"'))
+			quote = str[i++];
+		else if (quote && str[i] == quote)
+		{
+			quote = 0;
+			i++;
+		}
+		else
+			str[j++] = str[i++];
+	}
+	str[j] = '\0';
 }
-
 
 char	*append_literal(char *result, char *str, int start, int i)
 {

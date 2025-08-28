@@ -60,4 +60,3 @@ short int	custom_export(char ***env, t_token **args)
 	free(index);
 	return (0);
 }
-

@@ -12,7 +12,7 @@
 
 #include "get_next_line_bonus.h"
 
-ssize_t	ft_strlen_buf(const char	*str)
+ssize_t	ft_strlen_buf(const char *str)
 {
 	ssize_t	i;
 
@@ -63,9 +63,9 @@ char	*ft_extract_line(char *stack)
 
 char	*ft_strlcat_buf(char *stack, char *buffer, ssize_t bytes_read)
 {
-	ssize_t		i;
-	ssize_t		j;
-	char		*new_stack;
+	ssize_t	i;
+	ssize_t	j;
+	char	*new_stack;
 
 	i = 0;
 	j = 0;
