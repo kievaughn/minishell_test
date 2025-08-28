@@ -24,27 +24,38 @@ static char     *append_exit_code(char *result, int *i, char *str, int *handled)
         return (result);
 }
 
-static int      handle_exit_code_case(char **result, char *str, int *i, int *start)
+static void     update_quote(char c, char *quote, int *i)
+{
+        if (!*quote && (c == '\'' || c == '"'))
+        {
+                *quote = c;
+                (*i)++;
+        }
+        else if (*quote && c == *quote)
+        {
+                *quote = 0;
+                (*i)++;
+        }
+}
+
+static int      process_dollar(char **res, char *str, int *i, int *start,
+                char **envp)
 {
         int     handled;
 
-        *result = append_exit_code(*result, i, str, &handled);
-        if (*result && handled)
+        *res = append_exit_code(*res, i, str, &handled);
+        if (!*res)
+                return (-1);
+        if (handled)
         {
                 *start = *i;
                 return (1);
         }
-        return (0);
-}
-
-static int      handle_env_var_case(char **result, char *str, int *i, int *start,
-                char **envp)
-{
         if (ft_isalnum(str[*i + 1]) || str[*i + 1] == '_')
         {
-                if (!(*result = append_literal(*result, str, *start, *i)))
+                if (!(*res = append_literal(*res, str, *start, *i)))
                         return (-1);
-                if (!(*result = append_expanded_var(*result, str, i, envp)))
+                if (!(*res = append_expanded_var(*res, str, i, envp)))
                         return (-1);
                 *start = *i;
                 return (1);
@@ -58,7 +69,7 @@ char *build_expanded_str(char *str, char **envp)
     int start = 0;
     char quote = 0;
     char *result = NULL;
-    int env_result;
+    int handled;
 
     while (str[i])
     {
@@ -70,23 +81,19 @@ char *build_expanded_str(char *str, char **envp)
             start = i;
             continue;
         }
-        if (!quote && (str[i] == '\'' || str[i] == '"'))
-            quote = str[i++];
-        else if (quote && str[i] == quote)
-            quote = 0, i++;
-        else if (str[i] == '$' && quote != '\'')
+        handled = i;
+        update_quote(str[i], &quote, &i);
+        if (i != handled)
+            continue;
+        if (str[i] == '$' && quote != '\'')
         {
-            if (handle_exit_code_case(&result, str, &i, &start))
-                continue;
-            env_result = handle_env_var_case(&result, str, &i, &start, envp);
-            if (env_result == -1)
+            handled = process_dollar(&result, str, &i, &start, envp);
+            if (handled == -1)
                 return (NULL);
-            else if (env_result == 1)
+            if (handled)
                 continue;
-            i++;
         }
-        else
-            i++;
+        i++;
     }
     if (!(result = ft_strcatrealloc(result, str + start)))
         return (NULL);
