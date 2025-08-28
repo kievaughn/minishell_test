@@ -18,7 +18,7 @@ static void     handle_input_redirection(int redir_in, int *in_fd)
         {
                 if (redir_in < 0)
                 {
-                        perror("Input redirection");
+                        error_perror("Input redirection");
                         exit(1);
                 }
                 dup2(redir_in, STDIN_FILENO);
@@ -46,7 +46,7 @@ static void     handle_output_redirection(int redir_out, int *fd, int last)
         {
                 if (redir_out < 0)
                 {
-                        perror("Output redirection");
+                        error_perror("Output redirection");
                         exit(1);
                 }
                 dup2(redir_out, STDOUT_FILENO);
@@ -74,7 +74,7 @@ static int pipeline_step(t_pipeline *pipeline, int *in_fd, int *fd, int i)
 
     if (i < pipeline->nbr_segments - 1 && pipe(fd) == -1)
     {
-        perror("pipe");
+        error_perror("pipe");
         return (0);
     }
 

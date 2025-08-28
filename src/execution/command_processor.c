@@ -10,7 +10,7 @@
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "libft/libft.h"
+#include "../libft/libft.h"
 #include "minishell.h"
 #include <fcntl.h>
 
@@ -57,7 +57,7 @@ static void	execute_command_with_path(t_token **cmd, char ***envp)
 	}
 	else
 	{
-		fprintf(stderr, "%s: command not found\n", cmd[0]->str);
+		error_msg(cmd[0]->str, "command not found");
 		g_exit_code = 127;
 	}
 }
@@ -68,17 +68,17 @@ static void	run_external_command(t_token **cmd, char ***envp)
 	{
 		if (access(cmd[0]->str, F_OK) != 0)
 		{
-			perror(cmd[0]->str);
+			error_perror(cmd[0]->str);
 			g_exit_code = 127;
 		}
 		else if (is_folder(cmd[0]->str))
 		{
-			fprintf(stderr, "%s: Is a directory\n", cmd[0]->str);
+			error_msg(cmd[0]->str, "Is a directory");
 			g_exit_code = 126;
 		}
 		else if (access(cmd[0]->str, X_OK) != 0)
 		{
-			perror(cmd[0]->str);
+			error_perror(cmd[0]->str);
 			g_exit_code = 126;
 		}
 		else

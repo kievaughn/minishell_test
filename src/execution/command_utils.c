@@ -10,7 +10,7 @@
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "libft/libft.h"
+#include "../libft/libft.h"
 #include "minishell.h"
 #include <fcntl.h>
 
@@ -64,9 +64,9 @@ void    setup_redirections(int in_fd, int out_fd, int *save_in, int *save_out)
         {
                 *save_in = dup(STDIN_FILENO);
                 if (*save_in == -1)
-                        perror("dup");
+                        error_perror("dup");
                 if (dup2(in_fd, STDIN_FILENO) == -1)
-                        perror("dup2");
+                        error_perror("dup2");
                 close(in_fd);
         }
 
@@ -74,9 +74,9 @@ void    setup_redirections(int in_fd, int out_fd, int *save_in, int *save_out)
         {
                 *save_out = dup(STDOUT_FILENO);
                 if (*save_out == -1)
-                        perror("dup");
+                        error_perror("dup");
                 if (dup2(out_fd, STDOUT_FILENO) == -1)
-                        perror("dup2");
+                        error_perror("dup2");
                 close(out_fd);
         }
 }
@@ -86,14 +86,14 @@ void    restore_redirections(int save_in, int save_out)
         if (save_in != -1)
         {
                 if (dup2(save_in, STDIN_FILENO) == -1)
-                        perror("dup2");
+                        error_perror("dup2");
                 close(save_in);
         }
 
         if (save_out != -1)
         {
                 if (dup2(save_out, STDOUT_FILENO) == -1)
-                        perror("dup2");
+                        error_perror("dup2");
                 close(save_out);
         }
 }

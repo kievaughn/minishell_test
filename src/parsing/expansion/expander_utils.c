@@ -1,4 +1,4 @@
-#include "../libft/libft.h"
+#include "../../libft/libft.h"
 #include "minishell.h"
 
 void remove_quotes(char *str)

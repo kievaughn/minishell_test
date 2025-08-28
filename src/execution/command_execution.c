@@ -10,7 +10,7 @@
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "libft/libft.h"
+#include "../libft/libft.h"
 #include "minishell.h"
 
 int token_array_len(t_token **tokens)
@@ -28,7 +28,7 @@ int	wait_next(pid_t pid, int *status)
 {
 	if (waitpid(pid, status, 0) == -1)
 	{
-		perror("waitpid");
+		error_perror("waitpid");
 		return (1);
 	}
 	if (WIFEXITED(*status))
@@ -80,7 +80,7 @@ int execute_command(char *path, t_token **tokens, char **envp)
     if (pid == 0)
     {
         execve(path, argv, envp);
-        perror("execve");
+        error_perror("execve");
         free_cmd(argv);
         _exit(127);
     }
@@ -91,7 +91,7 @@ int execute_command(char *path, t_token **tokens, char **envp)
     }
     else
     {
-        perror("fork");
+        error_perror("fork");
         free_cmd(argv);
         return (1);
     }
