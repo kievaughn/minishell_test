@@ -6,7 +6,7 @@
 /*   By: dimendon <dimendon@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/05 13:39:33 by dimendon          #+#    #+#             */
-/*   Updated: 2025/08/05 16:19:23 by dimendon         ###   ########.fr       */
+/*   Updated: 2025/08/26 16:00:00 by dimendon         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -53,83 +53,63 @@ static void     handle_output_redirection(int redir_out, int *fd, int last)
         }
 }
 
-static void     child_process(char **envp, char **cmd, int *quoted,
-                t_pipe_info pipe_info)
+static void child_process(char **envp, t_command *cmd, t_pipe_info pipe_info)
 {
-        int     redir_in;
-        int     redir_out;
+    handle_input_redirection(cmd->in_fd, &pipe_info.in_fd);
+    handle_output_redirection(cmd->out_fd, pipe_info.fd, pipe_info.last);
 
-        redir_in = STDIN_FILENO;
-        redir_out = STDOUT_FILENO;
-        cmd = handle_redirections(cmd, quoted, count_strings(cmd) + 1, envp,
-                        &redir_in, &redir_out);
-        free(quoted);
-        if (cmd == NULL)
-                exit(1);
-        handle_input_redirection(redir_in, &pipe_info.in_fd);
-        handle_output_redirection(redir_out, pipe_info.fd, pipe_info.last);
-        if (!pipe_info.last)
-        {
-                close(pipe_info.fd[0]);
-                close(pipe_info.fd[1]);
-        }
-        if (redir_out != STDOUT_FILENO)
-                close(redir_out);
-        execute_cmd(envp, cmd);
+    if (!pipe_info.last)
+    {
+        close(pipe_info.fd[0]);
+        close(pipe_info.fd[1]);
+    }
+
+    execute_cmd(envp, cmd->tokens);
+    exit(0);
 }
 
-static int      pipeline_step(t_pipeline_data *pipeline, int *in_fd, int *fd, int i)
+static int pipeline_step(t_pipeline_data *pipeline, int *in_fd, int *fd, int i)
 {
-        char            **cmd;
-        int             *quoted;
-        t_pipe_info     pipe_info;
+    t_pipe_info pipe_info;
 
-        if (i < pipeline->nbr_segments - 1 && pipe(fd) == -1)
-        {
-                perror("pipe");
-                return (0);
-        }
-        cmd = tokenize_command(pipeline->segments[i], ' ', pipeline->envp, &quoted);
-        if (!cmd || !cmd[0])
-        {
-                free(quoted);
-                free_cmd(cmd);
-                if (*in_fd != STDIN_FILENO)
-                {
-                        close(*in_fd);
-                        *in_fd = STDIN_FILENO;
-                }
-                if (i < pipeline->nbr_segments - 1)
-                        close_pipe(fd);
-                return (1);
-        }
-        pipe_info.in_fd = *in_fd;
-        pipe_info.fd = fd;
-        pipe_info.last = (i == pipeline->nbr_segments - 1);
+    if (i < pipeline->nbr_segments - 1 && pipe(fd) == -1)
+    {
+        perror("pipe");
+        return (0);
+    }
+
+    pipe_info.in_fd = *in_fd;
+    pipe_info.fd = fd;
+    pipe_info.last = (i == pipeline->nbr_segments - 1);
+
+    if (pipeline->cmds[i].tokens)
+    {
         pipeline->pids[i] = fork();
         if (pipeline->pids[i] == 0)
-                child_process(pipeline->envp, cmd, quoted, pipe_info);
-        free_cmd(cmd);
-        free(quoted);
-        parent_cleanup(in_fd, fd, i, pipeline->nbr_segments);
-        return (1);
+            child_process(pipeline->envp, &pipeline->cmds[i], pipe_info);
+    }
+    else
+        pipeline->pids[i] = -1;
+
+    // Parent cleanup
+    parent_cleanup(in_fd, fd, i, pipeline->nbr_segments);
+    return (1);
 }
 
-void    pipeline_loop(t_pipeline_data *pipeline)
-{
-        int     in_fd;
-        int     fd[2];
-        int     i;
 
-        in_fd = STDIN_FILENO;
-        i = 0;
-        while (i < pipeline->nbr_segments)
-        {
-                if (!pipeline_step(pipeline, &in_fd, fd, i))
-                        break ;
-                i++;
-        }
-        if (in_fd != STDIN_FILENO)
-                close(in_fd);
+void pipeline_loop(t_pipeline_data *pipeline)
+{
+    int in_fd = STDIN_FILENO;
+    int fd[2];
+    int i = 0;
+
+    while (i < pipeline->nbr_segments)
+    {
+        if (!pipeline_step(pipeline, &in_fd, fd, i))
+            break;
+        i++;
+    }
+    if (in_fd != STDIN_FILENO)
+        close(in_fd);
 }
 

@@ -6,27 +6,27 @@
 /*   By: dimendon <dimendon@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/13 18:15:55 by dimendon          #+#    #+#             */
-/*   Updated: 2025/08/19 11:09:15 by dimendon         ###   ########.fr       */
+/*   Updated: 2025/08/26 14:27:31 by dimendon         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../libft/libft.h"
 #include "minishell.h"
 
-static int	skip_n_flags(char **arg, int start)
+static int	skip_n_flags(t_token **arg, int start)
 {
 	int	i;
 	int	j;
 	int	all_n;
 
 	i = start;
-	while (arg[i] && ft_strncmp(arg[i], "-n", 2) == 0)
+	while (arg[i] && ft_strncmp(arg[i]->str, "-n", 2) == 0)
 	{
 		j = 1;
 		all_n = 1;
-		while (arg[i][j])
+		while (arg[i]->str[j])
 		{
-			if (arg[i][j] != 'n')
+			if (arg[i]->str[j] != 'n')
 			{
 				all_n = 0;
 				break ;
@@ -40,10 +40,16 @@ static int	skip_n_flags(char **arg, int start)
 	return (i);
 }
 
-static int	write_echo_arg(const char *arg)
+static int	write_echo_arg(t_token *tok)
 {
 	char	*code;
+	const char *arg = tok->str;
 
+	if (tok->quoted == 1)
+	{
+		write(1, arg, ft_strlen(arg));
+		return (0);
+	}
 	if (ft_strncmp(arg, "$?", 3) == 0)
 	{
 		code = ft_itoa(g_exit_code);
@@ -57,11 +63,11 @@ static int	write_echo_arg(const char *arg)
 	return (0);
 }
 
-static int	print_echo_args(char **arg, int start)
-{
-	int	i;
 
-	i = start;
+static int	print_echo_args(t_token **arg, int start)
+{
+	int	i = start;
+
 	while (arg[i])
 	{
 		if (write_echo_arg(arg[i]))
@@ -73,7 +79,7 @@ static int	print_echo_args(char **arg, int start)
 	return (0);
 }
 
-short int	custom_echo(char **arg)
+short int	custom_echo(t_token **arg)
 {
 	int	i;
 	int	flag_newline;
@@ -89,3 +95,4 @@ short int	custom_echo(char **arg)
 		write(1, "\n", 1);
 	return (0);
 }
+

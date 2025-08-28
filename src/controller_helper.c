@@ -6,7 +6,7 @@
 /*   By: dimendon <dimendon@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/30 14:15:02 by dimendon          #+#    #+#             */
-/*   Updated: 2025/08/20 11:57:36 by dimendon         ###   ########.fr       */
+/*   Updated: 2025/08/25 12:42:30 by dimendon         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,34 +27,32 @@ int     is_folder(char *arg)
         return (0);
 }
 
-char    **prepare_command(char *segment, int *in_fd, int *out_fd, char ***envp)
+t_token **prepare_command(char *segment, int *in_fd, int *out_fd, char ***envp)
 {
-        char    **cmd;
-        int             *quoted;
+    t_token **cmd;
+    
+    cmd = tokenize_command(segment, ' ', *envp);
+    if (!cmd)
+        return (NULL);
 
-        cmd = tokenize_command(segment, ' ', *envp, &quoted);
-        if (!cmd)
-                return (NULL);
-        cmd = handle_redirections(cmd, quoted, count_strings(cmd) + 1, *envp,
-                        in_fd, out_fd);
-        free(quoted);
-        if (!cmd || !cmd[0])
+    cmd = handle_redirections(cmd, *envp, in_fd, out_fd);
+    if (!cmd || !cmd[0])
+    {
+        if (cmd)
+            free_tokens(cmd);
+        if (*in_fd != STDIN_FILENO)
         {
-                if (cmd)
-                        free_cmd(cmd);
-                if (*in_fd != STDIN_FILENO)
-                {
-                        close(*in_fd);
-                        *in_fd = STDIN_FILENO;
-                }
-                if (*out_fd != STDOUT_FILENO)
-                {
-                        close(*out_fd);
-                        *out_fd = STDOUT_FILENO;
-                }
-                return (NULL);
+            close(*in_fd);
+            *in_fd = STDIN_FILENO;
         }
-        return (cmd);
+        if (*out_fd != STDOUT_FILENO)
+        {
+            close(*out_fd);
+            *out_fd = STDOUT_FILENO;
+        }
+        return (NULL);
+    }
+    return (cmd);
 }
 
 void    setup_redirections(int in_fd, int out_fd, int *save_in, int *save_out)

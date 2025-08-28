@@ -6,7 +6,7 @@
 /*   By: dimendon <dimendon@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/04 13:41:29 by dimendon          #+#    #+#             */
-/*   Updated: 2025/08/20 12:27:42 by dimendon         ###   ########.fr       */
+/*   Updated: 2025/08/25 10:07:27 by dimendon         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -36,9 +36,24 @@ int	main(int argc, char **argv, char **envp)
 	signal(SIGQUIT, SIG_IGN);
 	while (1)
 	{
-		line = readline("minishell$ ");
+		//line = readline("minishell$ ");
+		if (isatty(fileno(stdin))) //Snippet for tester
+			line = readline("minishell$ ");
+		else
+		{
+			char *getline;
+			getline = get_next_line(fileno(stdin));
+			if(!getline)
+				break;
+			line = ft_strtrim(getline, "\n");
+			free(getline);
+		}
 		if (line == NULL)
 			break ;
+		char *temp;
+		temp = ft_strdup(line);
+		free(line);
+		line = temp;
 		if (*line)
 			add_history(line);
 		process_command(&env, line);

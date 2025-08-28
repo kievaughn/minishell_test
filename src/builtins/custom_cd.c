@@ -6,21 +6,31 @@
 /*   By: dimendon <dimendon@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/13 18:15:57 by dimendon          #+#    #+#             */
-/*   Updated: 2025/06/25 14:40:24 by dimendon         ###   ########.fr       */
+/*   Updated: 2025/08/25 11:55:26 by dimendon         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../libft/libft.h"
 #include "minishell.h"
 
-static char	*get_cd_target(char **envp, char **args)
+t_token *make_token(char *str)
+{
+    t_token *tok = malloc(sizeof(t_token));
+    if (!tok)
+        return (NULL);
+    tok->str = (str ? ft_strdup(str) : NULL);
+    tok->type = 0;
+    return tok;
+}
+
+static char	*get_cd_target(char **envp, t_token **args)
 {
 	char	*oldpwd;
 	char	*home;
 
 	oldpwd = NULL;
 	home = NULL;
-	if (args[1] && ft_strncmp(args[1], "-", 2) == 0)
+	if (args[1] && args[1]->str && ft_strncmp(args[1]->str, "-", 2) == 0)
 	{
 		oldpwd = get_env_value(envp, "OLDPWD");
 		if (!oldpwd)
@@ -29,14 +39,14 @@ static char	*get_cd_target(char **envp, char **args)
 			printf("%s\n", oldpwd);
 		return (oldpwd);
 	}
-	if (!args[1] || ft_strlen(args[1]) == 0)
+	if (!args[1] || !args[1]->str || args[1]->str[0] == '~' || ft_strlen(args[1]->str) == 0)
 	{
 		home = get_env_value(envp, "HOME");
 		if (!home)
 			fprintf(stderr, "cd: HOME not set\n");
 		return (home);
 	}
-	return (args[1]);
+	return (args[1]->str);
 }
 
 static short int	update_pwd_vars(char ***envp, const char *oldpwd,
@@ -44,20 +54,24 @@ static short int	update_pwd_vars(char ***envp, const char *oldpwd,
 {
 	char		*old_str;
 	char		*new_str;
-	char		*export_args[4];
+	t_token		*export_args[4];
 	short int	res;
 
 	old_str = ft_strjoin("OLDPWD=", oldpwd);
 	new_str = ft_strjoin("PWD=", newpwd);
-	export_args[0] = "export";
-	export_args[1] = old_str;
-	export_args[2] = new_str;
+
+	export_args[0] = make_token("export");
+	export_args[1] = make_token(old_str);
+	export_args[2] = make_token(new_str);
 	export_args[3] = NULL;
+
 	res = 1;
 	if (old_str && new_str)
 		res = custom_export(envp, export_args);
+
 	free(old_str);
 	free(new_str);
+	free_tokens(export_args);
 	return (res);
 }
 
@@ -88,7 +102,7 @@ static short int	change_and_get_pwds(const char *target, char **oldpwd,
 	return (0);
 }
 
-short int	custom_cd(char ***envp, char **args)
+short int	custom_cd(char ***envp, t_token **args)
 {
 	char		*target;
 	char		*oldpwd;
@@ -112,3 +126,5 @@ short int	custom_cd(char ***envp, char **args)
 	free(newpwd);
 	return (ret);
 }
+
+

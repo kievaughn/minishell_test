@@ -40,7 +40,7 @@ static int      handle_exit_code_case(char **result, char *str, int *i, int *sta
 static int      handle_env_var_case(char **result, char *str, int *i, int *start,
                 char **envp)
 {
-        if (ft_isalnum(str[*i + 1]))
+        if (ft_isalnum(str[*i + 1]) || str[*i + 1] == '_')
         {
                 if (!(*result = append_literal(*result, str, *start, *i)))
                         return (-1);
@@ -52,40 +52,46 @@ static int      handle_env_var_case(char **result, char *str, int *i, int *start
         return (0);
 }
 
-char    *build_expanded_str(char *str, char **envp)
+char *build_expanded_str(char *str, char **envp)
 {
-        int             i;
-        int             start;
-        char            quote;
-        char            *result;
-        int             env_result;
+    int i = 0;
+    int start = 0;
+    char quote = 0;
+    char *result = NULL;
+    int env_result;
 
-        i = 0;
-        start = 0;
-        quote = 0;
-        result = NULL;
-        while (str[i])
+    while (str[i])
+    {
+        if (!quote && str[i] == '$' && (str[i + 1] == '"'))
         {
-                if (!quote && (str[i] == '\'' || str[i] == '"'))
-                        quote = str[i++];
-                else if (quote && str[i] == quote)
-                        quote = 0, i++;
-                else if (str[i] == '$' && quote != '\'')
-                {
-                        if (handle_exit_code_case(&result, str, &i, &start))
-                                continue ;
-                        env_result = handle_env_var_case(&result, str, &i, &start, envp);
-                        if (env_result == -1)
-                                return (NULL);
-                        else if (env_result == 1)
-                                continue ;
-                        i++;
-                }
-                else
-                        i++;
-        }
-        if (!(result = ft_strcatrealloc(result, str + start)))
+            if (!(result = append_literal(result, str, start, i)))
                 return (NULL);
-        return (result);
+            i++;
+            start = i;
+            continue;
+        }
+        if (!quote && (str[i] == '\'' || str[i] == '"'))
+            quote = str[i++];
+        else if (quote && str[i] == quote)
+            quote = 0, i++;
+        else if (str[i] == '$' && quote != '\'')
+        {
+            if (handle_exit_code_case(&result, str, &i, &start))
+                continue;
+            env_result = handle_env_var_case(&result, str, &i, &start, envp);
+            if (env_result == -1)
+                return (NULL);
+            else if (env_result == 1)
+                continue;
+            i++;
+        }
+        else
+            i++;
+    }
+    if (!(result = ft_strcatrealloc(result, str + start)))
+        return (NULL);
+    return (result);
 }
+
+
 

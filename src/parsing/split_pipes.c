@@ -51,6 +51,11 @@ char	**split_pipes(const char *line)
 		handle_quote_state(line[i], &quote);
 		if (!quote && line[i] == '|')
 		{
+			if (i > 0 && (line[i - 1] == '>' ))
+			{
+				fprintf(stderr, "minishell: syntax error near unexpected token `|'\n");
+				return (NULL);
+			}
 			arr[seg++] = ft_substr(line, start, i - start);
 			start = i + 1;
 		}

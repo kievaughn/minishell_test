@@ -6,7 +6,7 @@
 /*   By: dimendon <dimendon@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/13 18:15:48 by dimendon          #+#    #+#             */
-/*   Updated: 2025/06/13 18:20:46 by dimendon         ###   ########.fr       */
+/*   Updated: 2025/08/21 16:28:41 by dimendon         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,9 +21,11 @@ short int	custom_pwd(void)
 	if (!cwd)
 	{
 		perror("pwd");
+		g_exit_code = 1;
 		return (1);
 	}
 	printf("%s\n", cwd);
 	free(cwd);
+	g_exit_code = 0;
 	return (0);
 }
