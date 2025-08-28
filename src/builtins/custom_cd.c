@@ -18,7 +18,10 @@ t_token *make_token(char *str)
     t_token *tok = malloc(sizeof(t_token));
     if (!tok)
         return (NULL);
-    tok->str = (str ? ft_strdup(str) : NULL);
+    if (str)
+        tok->str = ft_strdup(str);
+    else
+        tok->str = NULL;
     tok->type = 0;
     return tok;
 }

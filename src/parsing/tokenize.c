@@ -166,7 +166,8 @@ t_token **tokenize_command(char const *s, char c, char **envp)
     if (!arr)
         return NULL;
 
-    for (i = 0; arr[i]; i++)
+    i = 0;
+    while (arr[i])
     {
         if (arr[i]->quoted != 1)
         {
@@ -179,8 +180,9 @@ t_token **tokenize_command(char const *s, char c, char **envp)
             free(arr[i]->str);
             arr[i]->str = expanded;
         }
-    if (ft_strchr(arr[i]->str, '"') || ft_strchr(arr[i]->str, '\''))
-        remove_quotes(arr[i]->str);
+        if (ft_strchr(arr[i]->str, '"') || ft_strchr(arr[i]->str, '\''))
+            remove_quotes(arr[i]->str);
+        i++;
     }
     arr = split_expanded_tokens(arr);
     if (!arr)

@@ -143,7 +143,13 @@ static int handle_redirection_logic(t_token **cmd, char **envp,
     }
     else if (cmd[*i]->type == 2) /* << */
     {
-        if (handle_heredoc(filename ? filename : "", quoted, envp, in_fd) == -1)
+        const char  *name;
+
+        if (filename)
+            name = filename;
+        else
+            name = "";
+        if (handle_heredoc(name, quoted, envp, in_fd) == -1)
             return (-1);
     }
     else if (cmd[*i]->type == 3) /* > */
@@ -167,7 +173,10 @@ static int handle_redirection_logic(t_token **cmd, char **envp,
         free_token(cmd[*i + 1]);
         cmd[*i + 1] = NULL;
     }
-    *i += filename ? 2 : 1;
+    if (filename)
+        *i += 2;
+    else
+        *i += 1;
     return (1);
 }
 
