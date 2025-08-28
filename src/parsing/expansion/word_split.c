@@ -6,14 +6,13 @@ static int  is_whitespace(char c)
     return (c == ' ' || c == '\t');
 }
 
-static char **split_whitespace(const char *s)
+static int  count_words(const char *s)
 {
-    int i = 0;
-    int start;
-    int k = 0;
-    char **out;
+    int i;
+    int count;
 
-    int count = 0;
+    i = 0;
+    count = 0;
     while (s[i])
     {
         while (is_whitespace(s[i]))
@@ -24,12 +23,17 @@ static char **split_whitespace(const char *s)
         while (s[i] && !is_whitespace(s[i]))
             i++;
     }
+    return (count);
+}
 
-    out = malloc(sizeof(char *) * (count + 1));
-    if (!out)
-        return (NULL);
+static void fill_words(char **out, const char *s)
+{
+    int i;
+    int k;
+    int start;
 
     i = 0;
+    k = 0;
     while (s[i])
     {
         while (is_whitespace(s[i]))
@@ -42,6 +46,19 @@ static char **split_whitespace(const char *s)
         out[k++] = ft_substr(s, start, i - start);
     }
     out[k] = NULL;
+}
+
+static char **split_whitespace(const char *s)
+{
+    char    **out;
+    int     count;
+
+    count = count_words(s);
+    out = malloc(sizeof(char *) * (count + 1));
+    if (!out)
+        return (NULL);
+
+    fill_words(out, s);
     return (out);
 }
 
