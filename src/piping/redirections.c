@@ -55,55 +55,83 @@ static t_token  **alloc_clean_array(int count)
     return (clean);
 }
 
-static int handle_redirection_logic(t_token **cmd, char **envp,
-                                    int *in_fd, int *out_fd, int *i)
+static int  apply_infile(char *filename, int *in_fd)
 {
-    char    *filename;
-    int     quoted;
+    if (!filename || filename[0] == '\0'
+        || open_infile(filename, in_fd) == -1)
+        return (-1);
+    return (0);
+}
 
-    if (!(cmd[*i] && (cmd[*i]->type == 1 || cmd[*i]->type == 2
-                   || cmd[*i]->type == 3 || cmd[*i]->type == 4)))
-        return (0);
-    filename = NULL;
-    quoted = 0;
+static int  apply_heredoc(char *filename, int quoted,
+                          char **envp, int *in_fd)
+{
+    const char  *name;
+
+    if (filename)
+        name = filename;
+    else
+        name = "";
+    if (handle_heredoc(name, quoted, envp, in_fd) == -1)
+        return (-1);
+    return (0);
+}
+
+static int  apply_outfile(char *filename, int *out_fd)
+{
+    if (!filename || filename[0] == '\0'
+        || open_outfile(filename, out_fd) == -1)
+        return (-1);
+    return (0);
+}
+
+static int  apply_append(char *filename, int *out_fd)
+{
+    if (!filename || filename[0] == '\0'
+        || open_appendfile(filename, out_fd) == -1)
+        return (-1);
+    return (0);
+}
+
+static int  fetch_filename(t_token **cmd, int *i,
+                           char **filename, int *quoted)
+{
+    *filename = NULL;
+    *quoted = 0;
     if (cmd[*i + 1] && cmd[*i + 1]->type == 0)
     {
-        filename = cmd[*i + 1]->str;
-        quoted = (cmd[*i + 1]->quoted != 0);
+        *filename = cmd[*i + 1]->str;
+        *quoted = (cmd[*i + 1]->quoted != 0);
     }
     else if (!cmd[*i + 1] && cmd[*i]->type != 2)
         return (-1);
     else if (cmd[*i + 1] && cmd[*i + 1]->type != 0)
         return (-1);
-    if (cmd[*i]->type == 1)
-    {
-        if (!filename || filename[0] == '\0'
-            || open_infile(filename, in_fd) == -1)
-            return (-1);
-    }
-    else if (cmd[*i]->type == 2)
-    {
-        const char  *name;
+    return (0);
+}
 
-        if (filename)
-            name = filename;
-        else
-            name = "";
-        if (handle_heredoc(name, quoted, envp, in_fd) == -1)
-            return (-1);
-    }
+static int handle_redirection_logic(t_token **cmd, char **envp,
+                                    int *in_fd, int *out_fd, int *i)
+{
+    char    *filename;
+    int     quoted;
+    int     res;
+
+    if (!(cmd[*i] && (cmd[*i]->type == 1 || cmd[*i]->type == 2
+                   || cmd[*i]->type == 3 || cmd[*i]->type == 4)))
+        return (0);
+    if (fetch_filename(cmd, i, &filename, &quoted) == -1)
+        return (-1);
+    if (cmd[*i]->type == 1)
+        res = apply_infile(filename, in_fd);
+    else if (cmd[*i]->type == 2)
+        res = apply_heredoc(filename, quoted, envp, in_fd);
     else if (cmd[*i]->type == 3)
-    {
-        if (!filename || filename[0] == '\0'
-            || open_outfile(filename, out_fd) == -1)
-            return (-1);
-    }
-    else if (cmd[*i]->type == 4)
-    {
-        if (!filename || filename[0] == '\0'
-            || open_appendfile(filename, out_fd) == -1)
-            return (-1);
-    }
+        res = apply_outfile(filename, out_fd);
+    else
+        res = apply_append(filename, out_fd);
+    if (res == -1)
+        return (-1);
     free_token(cmd[*i]);
     cmd[*i] = NULL;
     if (cmd[*i + 1])
