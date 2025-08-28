@@ -13,17 +13,19 @@
 #include "../libft/libft.h"
 #include "minishell.h"
 
-t_token *make_token(char *str)
+t_token	*make_token(char *str)
 {
-    t_token *tok = malloc(sizeof(t_token));
-    if (!tok)
-        return (NULL);
-    if (str)
-        tok->str = ft_strdup(str);
-    else
-        tok->str = NULL;
-    tok->type = 0;
-    return tok;
+	t_token	*tok;
+
+	tok = malloc(sizeof(t_token));
+	if (!tok)
+		return (NULL);
+	if (str)
+		tok->str = ft_strdup(str);
+	else
+		tok->str = NULL;
+	tok->type = 0;
+	return (tok);
 }
 
 static char	*get_cd_target(char **envp, t_token **args)
@@ -42,7 +44,8 @@ static char	*get_cd_target(char **envp, t_token **args)
 			printf("%s\n", oldpwd);
 		return (oldpwd);
 	}
-	if (!args[1] || !args[1]->str || args[1]->str[0] == '~' || ft_strlen(args[1]->str) == 0)
+	if (!args[1] || !args[1]->str || args[1]->str[0] == '~'
+		|| ft_strlen(args[1]->str) == 0)
 	{
 		home = get_env_value(envp, "HOME");
 		if (!home)
@@ -62,16 +65,13 @@ static short int	update_pwd_vars(char ***envp, const char *oldpwd,
 
 	old_str = ft_strjoin("OLDPWD=", oldpwd);
 	new_str = ft_strjoin("PWD=", newpwd);
-
 	export_args[0] = make_token("export");
 	export_args[1] = make_token(old_str);
 	export_args[2] = make_token(new_str);
 	export_args[3] = NULL;
-
 	res = 1;
 	if (old_str && new_str)
 		res = custom_export(envp, export_args);
-
 	free(old_str);
 	free(new_str);
 	free_tokens(export_args);
@@ -129,5 +129,3 @@ short int	custom_cd(char ***envp, t_token **args)
 	free(newpwd);
 	return (ret);
 }
-
-

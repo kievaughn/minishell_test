@@ -28,6 +28,8 @@ int	main(int argc, char **argv, char **envp)
 {
 	char	*line;
 	char	**env;
+			char *getline;
+		char *temp;
 
 	(void)argc;
 	(void)argv;
@@ -36,21 +38,19 @@ int	main(int argc, char **argv, char **envp)
 	signal(SIGQUIT, SIG_IGN);
 	while (1)
 	{
-		//line = readline("minishell$ ");
-		if (isatty(fileno(stdin))) //Snippet for tester
+		// line = readline("minishell$ ");
+		if (isatty(fileno(stdin))) // Snippet for tester
 			line = readline("minishell$ ");
 		else
 		{
-			char *getline;
 			getline = get_next_line(fileno(stdin));
-			if(!getline)
-				break;
+			if (!getline)
+				break ;
 			line = ft_strtrim(getline, "\n");
 			free(getline);
 		}
 		if (line == NULL)
 			break ;
-		char *temp;
 		temp = ft_strdup(line);
 		free(line);
 		line = temp;

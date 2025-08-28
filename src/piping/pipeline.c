@@ -12,118 +12,113 @@
 
 #include "minishell.h"
 
-static void     handle_input_redirection(int redir_in, int *in_fd)
+static void	handle_input_redirection(int redir_in, int *in_fd)
 {
-        if (redir_in != STDIN_FILENO)
-        {
-                if (redir_in < 0)
-                {
-                        error_perror("Input redirection");
-                        exit(1);
-                }
-                dup2(redir_in, STDIN_FILENO);
-                close(redir_in);
-                if (*in_fd != STDIN_FILENO)
-                {
-                        close(*in_fd);
-                        *in_fd = STDIN_FILENO;
-                }
-        }
-        else if (*in_fd != STDIN_FILENO)
-        {
-                dup2(*in_fd, STDIN_FILENO);
-                close(*in_fd);
-        }
+	if (redir_in != STDIN_FILENO)
+	{
+		if (redir_in < 0)
+		{
+			error_perror("Input redirection");
+			exit(1);
+		}
+		dup2(redir_in, STDIN_FILENO);
+		close(redir_in);
+		if (*in_fd != STDIN_FILENO)
+		{
+			close(*in_fd);
+			*in_fd = STDIN_FILENO;
+		}
+	}
+	else if (*in_fd != STDIN_FILENO)
+	{
+		dup2(*in_fd, STDIN_FILENO);
+		close(*in_fd);
+	}
 }
 
-static void     handle_output_redirection(int redir_out, int *fd, int last)
+static void	handle_output_redirection(int redir_out, int *fd, int last)
 {
-        if (!last && redir_out == STDOUT_FILENO)
-        {
-                dup2(fd[1], STDOUT_FILENO);
-        }
-        else if (redir_out != STDOUT_FILENO)
-        {
-                if (redir_out < 0)
-                {
-                        error_perror("Output redirection");
-                        exit(1);
-                }
-                dup2(redir_out, STDOUT_FILENO);
-        }
+	if (!last && redir_out == STDOUT_FILENO)
+	{
+		dup2(fd[1], STDOUT_FILENO);
+	}
+	else if (redir_out != STDOUT_FILENO)
+	{
+		if (redir_out < 0)
+		{
+			error_perror("Output redirection");
+			exit(1);
+		}
+		dup2(redir_out, STDOUT_FILENO);
+	}
 }
 
-static void child_process(char **envp, t_command *cmd, t_pipe_context pipe_ctx)
+static void	child_process(char **envp, t_command *cmd, t_pipe_context pipe_ctx)
 {
-    handle_input_redirection(cmd->in_fd, &pipe_ctx.in_fd);
-    handle_output_redirection(cmd->out_fd, pipe_ctx.fd, pipe_ctx.last);
-
-    if (!pipe_ctx.last)
-    {
-        close(pipe_ctx.fd[0]);
-        close(pipe_ctx.fd[1]);
-    }
-
-    execute_cmd(envp, cmd->tokens);
-    exit(0);
+	handle_input_redirection(cmd->in_fd, &pipe_ctx.in_fd);
+	handle_output_redirection(cmd->out_fd, pipe_ctx.fd, pipe_ctx.last);
+	if (!pipe_ctx.last)
+	{
+		close(pipe_ctx.fd[0]);
+		close(pipe_ctx.fd[1]);
+	}
+	execute_cmd(envp, cmd->tokens);
+	exit(0);
 }
 
-static int  create_pipe_if_needed(t_pipeline *p, int *fd, int i)
+static int	create_pipe_if_needed(t_pipeline *p, int *fd, int i)
 {
-    if (i < p->nbr_segments - 1)
-    {
-        if (pipe(fd) == -1)
-        {
-            error_perror("pipe");
-            return (0);
-        }
-    }
-    return (1);
+	if (i < p->nbr_segments - 1)
+	{
+		if (pipe(fd) == -1)
+		{
+			error_perror("pipe");
+			return (0);
+		}
+	}
+	return (1);
 }
 
-static void spawn_child(t_pipeline *p, t_pipe_context ctx, int i)
+static void	spawn_child(t_pipeline *p, t_pipe_context ctx, int i)
 {
-    if (p->cmds[i].tokens)
-    {
-        p->pids[i] = fork();
-        if (p->pids[i] == 0)
-            child_process(p->envp, &p->cmds[i], ctx);
-    }
-    else
-        p->pids[i] = -1;
+	if (p->cmds[i].tokens)
+	{
+		p->pids[i] = fork();
+		if (p->pids[i] == 0)
+			child_process(p->envp, &p->cmds[i], ctx);
+	}
+	else
+		p->pids[i] = -1;
 }
 
-static int pipeline_step(t_pipeline *pipeline, int *in_fd, int *fd, int i)
+static int	pipeline_step(t_pipeline *pipeline, int *in_fd, int *fd, int i)
 {
-    t_pipe_context pipe_ctx;
+	t_pipe_context	pipe_ctx;
 
-    if (!create_pipe_if_needed(pipeline, fd, i))
-        return (0);
-
-    pipe_ctx.in_fd = *in_fd;
-    pipe_ctx.fd = fd;
-    pipe_ctx.last = (i == pipeline->nbr_segments - 1);
-
-    spawn_child(pipeline, pipe_ctx, i);
-
-    parent_cleanup(in_fd, fd, i, pipeline->nbr_segments);
-    return (1);
+	if (!create_pipe_if_needed(pipeline, fd, i))
+		return (0);
+	pipe_ctx.in_fd = *in_fd;
+	pipe_ctx.fd = fd;
+	pipe_ctx.last = (i == pipeline->nbr_segments - 1);
+	spawn_child(pipeline, pipe_ctx, i);
+	parent_cleanup(in_fd, fd, i, pipeline->nbr_segments);
+	return (1);
 }
 
-
-void pipeline_loop(t_pipeline *pipeline)
+void	pipeline_loop(t_pipeline *pipeline)
 {
-    int in_fd = STDIN_FILENO;
-    int fd[2];
-    int i = 0;
+	int	in_fd;
+	int	fd[2];
+	int	i;
 
-    while (i < pipeline->nbr_segments)
-    {
-        if (!pipeline_step(pipeline, &in_fd, fd, i))
-            break;
-        i++;
-    }
-    if (in_fd != STDIN_FILENO)
-        close(in_fd);
+	in_fd = STDIN_FILENO;
+	i = 0;
+	while (i < pipeline->nbr_segments)
+	{
+		if (!pipeline_step(pipeline, &in_fd, fd, i))
+			break ;
+		i++;
+	}
+	if (in_fd != STDIN_FILENO)
+		close(in_fd);
 }
-

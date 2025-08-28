@@ -27,14 +27,17 @@ void	free_cmd(char **cmd)
 	free(cmd);
 }
 
-void free_tokens(t_token **arr)
+void	free_tokens(t_token **arr)
 {
-    int i = 0;
-    if (!arr) return;
-    while (arr[i])
-    {
-        free(arr[i]->str);
-        free(arr[i]);
-        i++;
-    }
+	int	i;
+
+	i = 0;
+	if (!arr)
+		return ;
+	while (arr[i])
+	{
+		free(arr[i]->str);
+		free(arr[i]);
+		i++;
+	}
 }

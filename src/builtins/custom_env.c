@@ -34,4 +34,3 @@ short int	custom_env(char **envp, t_token **args)
 	g_exit_code = 0;
 	return (0);
 }
-

@@ -13,15 +13,16 @@
 #include "../libft/libft.h"
 #include "minishell.h"
 
-int token_array_len(t_token **tokens)
+int	token_array_len(t_token **tokens)
 {
-    int i = 0;
+	int	i;
 
-    if (!tokens)
-        return 0;
-    while (tokens[i])
-        i++;
-    return i;
+	i = 0;
+	if (!tokens)
+		return (0);
+	while (tokens[i])
+		i++;
+	return (i);
 }
 
 int	wait_next(pid_t pid, int *status)
@@ -39,60 +40,61 @@ int	wait_next(pid_t pid, int *status)
 		return (1);
 }
 
-char **prepare_argv_from_tokens(t_token **tokens)
+char	**prepare_argv_from_tokens(t_token **tokens)
 {
-    int count = token_array_len(tokens);
-    char **argv = malloc(sizeof(char *) * (count + 1));
-    if (!argv)
-        return (NULL);
+	int		count;
+	char	**argv;
+	int		i;
 
-    int i = 0;
-    while (i < count)
-    {
-        argv[i] = ft_strdup(tokens[i]->str);
-        if (!argv[i])
-            return (free_cmd(argv), NULL);
-        /*
-         * Quotes that affected tokenisation have already been removed during
-         * parsing.  Any remaining quotes in the token are meant to be literal
-         * characters (e.g. the command `echo '"$USER"'` should pass the
-         * string "\"$USER\"" to echo).  Stripping quotes here would modify
-         * the intended argument and lead to behaviour that differs from Bash.
-         */
-        i++;
-    }
-    argv[count] = NULL;
-    return argv;
+	count = token_array_len(tokens);
+	argv = malloc(sizeof(char *) * (count + 1));
+	if (!argv)
+		return (NULL);
+	i = 0;
+	while (i < count)
+	{
+		argv[i] = ft_strdup(tokens[i]->str);
+		if (!argv[i])
+			return (free_cmd(argv), NULL);
+		/*
+			* Quotes that affected tokenisation have already been removed during
+			* parsing.  Any remaining quotes in the token are meant to be literal
+			* characters (e.g. the command `echo '"$USER"'` should pass the
+			* string "\"$USER\"" to echo).  Stripping quotes here would modify
+			* the intended argument and lead to behaviour that differs from Bash.
+			*/
+		i++;
+	}
+	argv[count] = NULL;
+	return (argv);
 }
 
-
-int execute_command(char *path, t_token **tokens, char **envp)
+int	execute_command(char *path, t_token **tokens, char **envp)
 {
-    pid_t   pid;
-    int     status;
-    char  **argv;
+	pid_t	pid;
+	int		status;
+	char	**argv;
 
-    argv = prepare_argv_from_tokens(tokens);
-    if (!argv)
-        return (1);
-
-    pid = fork();
-    if (pid == 0)
-    {
-        execve(path, argv, envp);
-        error_perror("execve");
-        free_cmd(argv);
-        _exit(127);
-    }
-    else if (pid > 0)
-    {
-        free_cmd(argv);
-        return (wait_next(pid, &status));
-    }
-    else
-    {
-        error_perror("fork");
-        free_cmd(argv);
-        return (1);
-    }
+	argv = prepare_argv_from_tokens(tokens);
+	if (!argv)
+		return (1);
+	pid = fork();
+	if (pid == 0)
+	{
+		execve(path, argv, envp);
+		error_perror("execve");
+		free_cmd(argv);
+		_exit(127);
+	}
+	else if (pid > 0)
+	{
+		free_cmd(argv);
+		return (wait_next(pid, &status));
+	}
+	else
+	{
+		error_perror("fork");
+		free_cmd(argv);
+		return (1);
+	}
 }

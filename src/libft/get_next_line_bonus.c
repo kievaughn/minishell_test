@@ -43,7 +43,7 @@ static char	*ft_remove_line(char *stack, char *line)
 	return (new_stack);
 }
 
-static char	*ft_update_stack(char	**stack)
+static char	*ft_update_stack(char **stack)
 {
 	char	*line;
 

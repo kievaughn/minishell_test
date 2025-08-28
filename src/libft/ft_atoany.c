@@ -31,7 +31,7 @@ int	checkoverflow(const char *str, int *i, int sign, long long *result)
 		else
 		{
 			if ((unsigned long long)res > ((unsigned long long)(-(LLONG_MIN
-						+ digit))) / 10)
+							+ digit))) / 10)
 				return (0);
 		}
 		res = res * 10 + digit;
