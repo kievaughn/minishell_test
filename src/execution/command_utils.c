@@ -6,13 +6,57 @@
 /*   By: dimendon <dimendon@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/30 14:15:02 by dimendon          #+#    #+#             */
-/*   Updated: 2025/08/25 12:42:30 by dimendon         ###   ########.fr       */
+/*   Updated: 2025/08/27 12:10:00 by dimendon         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../libft/libft.h"
 #include "minishell.h"
 #include <fcntl.h>
+
+static t_token **parse_segment(char *segment, char ***envp)
+{
+    t_token **cmd;
+
+    cmd = tokenize_command(segment, ' ', *envp);
+    if (!cmd || !cmd[0])
+    {
+        if (cmd)
+            free_tokens(cmd);
+        return (NULL);
+    }
+    return (cmd);
+}
+
+static int  apply_redirs(t_token ***cmd, char ***envp, int *in_fd, int *out_fd)
+{
+    t_token **clean;
+
+    clean = handle_redirections(*cmd, *envp, in_fd, out_fd);
+    if (!clean || !clean[0])
+    {
+        if (clean)
+            free_tokens(clean);
+        *cmd = NULL;
+        return (1);
+    }
+    *cmd = clean;
+    return (0);
+}
+
+static void reset_fds(int *in_fd, int *out_fd)
+{
+    if (*in_fd != STDIN_FILENO)
+    {
+        close(*in_fd);
+        *in_fd = STDIN_FILENO;
+    }
+    if (*out_fd != STDOUT_FILENO)
+    {
+        close(*out_fd);
+        *out_fd = STDOUT_FILENO;
+    }
+}
 
 int     is_folder(char *arg)
 {
@@ -30,26 +74,13 @@ int     is_folder(char *arg)
 t_token **prepare_command(char *segment, int *in_fd, int *out_fd, char ***envp)
 {
     t_token **cmd;
-    
-    cmd = tokenize_command(segment, ' ', *envp);
+
+    cmd = parse_segment(segment, envp);
     if (!cmd)
         return (NULL);
-
-    cmd = handle_redirections(cmd, *envp, in_fd, out_fd);
-    if (!cmd || !cmd[0])
+    if (apply_redirs(&cmd, envp, in_fd, out_fd))
     {
-        if (cmd)
-            free_tokens(cmd);
-        if (*in_fd != STDIN_FILENO)
-        {
-            close(*in_fd);
-            *in_fd = STDIN_FILENO;
-        }
-        if (*out_fd != STDOUT_FILENO)
-        {
-            close(*out_fd);
-            *out_fd = STDOUT_FILENO;
-        }
+        reset_fds(in_fd, out_fd);
         return (NULL);
     }
     return (cmd);
