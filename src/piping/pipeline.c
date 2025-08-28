@@ -68,30 +68,44 @@ static void child_process(char **envp, t_command *cmd, t_pipe_context pipe_ctx)
     exit(0);
 }
 
+static int  create_pipe_if_needed(t_pipeline *p, int *fd, int i)
+{
+    if (i < p->nbr_segments - 1)
+    {
+        if (pipe(fd) == -1)
+        {
+            error_perror("pipe");
+            return (0);
+        }
+    }
+    return (1);
+}
+
+static void spawn_child(t_pipeline *p, t_pipe_context ctx, int i)
+{
+    if (p->cmds[i].tokens)
+    {
+        p->pids[i] = fork();
+        if (p->pids[i] == 0)
+            child_process(p->envp, &p->cmds[i], ctx);
+    }
+    else
+        p->pids[i] = -1;
+}
+
 static int pipeline_step(t_pipeline *pipeline, int *in_fd, int *fd, int i)
 {
     t_pipe_context pipe_ctx;
 
-    if (i < pipeline->nbr_segments - 1 && pipe(fd) == -1)
-    {
-        error_perror("pipe");
+    if (!create_pipe_if_needed(pipeline, fd, i))
         return (0);
-    }
 
     pipe_ctx.in_fd = *in_fd;
     pipe_ctx.fd = fd;
     pipe_ctx.last = (i == pipeline->nbr_segments - 1);
 
-    if (pipeline->cmds[i].tokens)
-    {
-        pipeline->pids[i] = fork();
-        if (pipeline->pids[i] == 0)
-            child_process(pipeline->envp, &pipeline->cmds[i], pipe_ctx);
-    }
-    else
-        pipeline->pids[i] = -1;
+    spawn_child(pipeline, pipe_ctx, i);
 
-    // Parent cleanup
     parent_cleanup(in_fd, fd, i, pipeline->nbr_segments);
     return (1);
 }
