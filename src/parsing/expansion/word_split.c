@@ -62,28 +62,61 @@ static char **split_whitespace(const char *s)
     return (out);
 }
 
-t_token **split_expanded_tokens(t_token **arr)
+static int  compute_total(t_token **arr, int *total)
 {
-    int i, j, k, total;
-    char **parts;
-    t_token **out;
+    int     i;
+    char    **parts;
 
     i = 0;
-    total = 0;
+    *total = 0;
     while (arr && arr[i])
     {
         if (arr[i]->quoted)
-            total++;
+            (*total)++;
         else
         {
             parts = split_whitespace(arr[i]->str);
             if (!parts)
-                return (free_tokens(arr), NULL);
-            total += count_strings(parts);
+                return (free_tokens(arr), 1);
+            *total += count_strings(parts);
             free_cmd(parts);
         }
         i++;
     }
+    return (0);
+}
+
+static int  expand_token(t_token **out, t_token *tok, int *k)
+{
+    char    **parts;
+    int     j;
+
+    if (tok->quoted)
+    {
+        out[(*k)++] = tok;
+        return (0);
+    }
+    parts = split_whitespace(tok->str);
+    free(tok->str);
+    free(tok);
+    if (!parts)
+        return (1);
+    j = 0;
+    while (parts[j])
+        out[(*k)++] = new_token(parts[j++], 0, 0);
+    free(parts);
+    return (0);
+}
+
+t_token **split_expanded_tokens(t_token **arr)
+{
+    int     i;
+    int     k;
+    int     total;
+    t_token **out;
+
+    if (compute_total(arr, &total))
+        return (NULL);
 
     out = malloc(sizeof(t_token *) * (total + 1));
     if (!out)
@@ -93,31 +126,16 @@ t_token **split_expanded_tokens(t_token **arr)
     k = 0;
     while (arr && arr[i])
     {
-        if (arr[i]->quoted)
+        if (expand_token(out, arr[i], &k))
         {
-            out[k++] = arr[i];
-        }
-        else
-        {
-            parts = split_whitespace(arr[i]->str);
-            free(arr[i]->str);
-            free(arr[i]);
-            if (!parts)
-            {
-                free_tokens(out);
-                free_tokens(arr + i + 1);
-                free(arr);
-                return (NULL);
-            }
-            j = 0;
-            while (parts[j])
-                out[k++] = new_token(parts[j++], 0, 0);
-            free(parts);
+            free_tokens(out);
+            free_tokens(arr + i + 1);
+            free(arr);
+            return (NULL);
         }
         i++;
     }
     out[k] = NULL;
-
     free(arr);
     return (out);
 }
