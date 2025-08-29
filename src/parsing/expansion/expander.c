@@ -41,26 +41,15 @@ static void update_quote(char c, char *quote, int *i)
 static char *collect_var_name(char *str, int *i)
 {
     int     j;
-    char    quote;
     char    *name;
     char    tmp[2];
 
     j = *i + 1;
-    quote = 0;
     name = NULL;
     while (str[j])
     {
-        if (!quote && (str[j] == '\'' || str[j] == '"'))
-        {
-            quote = str[j++];
-            continue;
-        }
-        if (quote && str[j] == quote)
-        {
-            quote = 0;
-            j++;
-            continue;
-        }
+        if (str[j] == '\'' || str[j] == '"')
+            break;
         if (ft_isalnum(str[j]) || str[j] == '_')
         {
             tmp[0] = str[j++];
@@ -91,7 +80,7 @@ static int process_dollar(char **res, char *str, int *i, int *start, char **envp
         *start = *i;
         return (1);
     }
-    if (ft_isalnum(str[*i + 1]) || str[*i + 1] == '_' || str[*i + 1] == '\'' || str[*i + 1] == '"')
+    if (ft_isalnum(str[*i + 1]) || str[*i + 1] == '_')
     {
         if (!(*res = append_literal(*res, str, *start, *i)))
             return (-1);

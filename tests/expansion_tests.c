@@ -11,6 +11,8 @@ static void run_case(const char *input, const char *expected, char **env)
     char *dup = ft_strdup(input);
     char *res = build_expanded_str(dup, env);
     free(dup);
+    if (res)
+        remove_quotes(res);
     printf("input: %s -> %s\n", input, res ? res : "(null)");
     assert(res && strcmp(res, expected) == 0);
     free(res);
@@ -20,8 +22,9 @@ int main(void)
 {
     char *env[] = {"USER=testuser", NULL};
     run_case("$USER", "testuser", env);
-    run_case("$US\"E\"R", "testuser", env);
-    run_case("$U'S'E'R", "testuser", env);
+    run_case("\"$USER\"", "testuser", env);
+    run_case("$US\"E\"R", "ER", env);
+    run_case("$U'S'E'R", "SER", env);
     printf("All expansion tests passed\n");
     return 0;
 }
