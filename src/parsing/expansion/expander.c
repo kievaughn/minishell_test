@@ -115,6 +115,15 @@ char *build_expanded_str(char *str, char **envp)
     result = NULL;
     while (str[i])
     {
+        if (!quote && str[i] == '$' && str[i + 1] == '"')
+        {
+            if (!(result = append_literal(result, str, start, i)))
+                return (NULL);
+            start = i + 1;
+            i++;
+            update_quote(str[i], &quote, &i);
+            continue;
+        }
         handled = i;
         update_quote(str[i], &quote, &i);
         if (i != handled)
