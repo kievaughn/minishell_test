@@ -47,6 +47,8 @@ static int      populate_tokens(t_token **arr, const char *s, char c)
                         return (1);
                 }
                 quoted = fully_quoted(substr);
+                if (!quoted && (ft_strchr(substr, '"') || ft_strchr(substr, '\'')))
+                        quoted = 3;
                 type = 0;
                 arr[i] = new_token(substr, quoted, type);
                 free(substr);
@@ -92,8 +94,12 @@ static int      expand_all(t_token **arr, char **envp)
                         free(arr[i]->str);
                         arr[i]->str = expanded;
                 }
-                if (ft_strchr(arr[i]->str, '"') || ft_strchr(arr[i]->str, '\''))
-                        remove_quotes(arr[i]->str);
+		if (ft_strchr(arr[i]->str, '"') || ft_strchr(arr[i]->str, '\''))
+		{
+			remove_quotes(arr[i]->str);
+			if (arr[i]->quoted == 3)
+				arr[i]->quoted = 0;
+		}
                 i++;
         }
         return (0);
