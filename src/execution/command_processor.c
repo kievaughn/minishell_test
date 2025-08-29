@@ -16,38 +16,38 @@
 
 int     run_builtin(char ***envp, t_token **cmd)
 {
-	char	*name;
-	char	*trimmed;
+        char    *name;
+        char    *trimmed;
 
-	if (!cmd || !cmd[0] || !cmd[0]->str)
-		return (127);
-	trimmed = ft_strtrim(cmd[0]->str, " \t\n\r\v\f");
-	if (!trimmed)
-		return (127);
-	free(cmd[0]->str);
-	cmd[0]->str = trimmed;
-	name = cmd[0]->str;
-	if (!ft_strcmp(name, "echo"))
-		g_exit_code = custom_echo(cmd);
-	else if (!ft_strcmp(name, "cd"))
-		g_exit_code = custom_cd(envp, cmd);
-	else if (!ft_strcmp(name, "pwd"))
-		g_exit_code = custom_pwd();
-	else if (!ft_strcmp(name, "export"))
-		g_exit_code = custom_export(envp, cmd);
-	else if (!ft_strcmp(name, "unset"))
-		g_exit_code = custom_unset(envp, cmd);
-	else if (!ft_strcmp(name, "env"))
-		g_exit_code = custom_env(*envp, cmd);
-	else if (!ft_strcmp(name, "exit"))
-	{
-		g_exit_code = custom_exit(cmd);
-		if (g_exit_code != 1)
-			exit(g_exit_code);
-	}
-	else
-		g_exit_code = 127;
-	return (g_exit_code);
+        if (!cmd || !cmd[0] || !cmd[0]->str)
+                return (127);
+        trimmed = ft_strtrim(cmd[0]->str, " \t\n\r\v\f");
+        if (!trimmed)
+                return (127);
+        free(cmd[0]->str);
+        cmd[0]->str = trimmed;
+        name = cmd[0]->str;
+        if (!ft_strcmp(name, "echo"))
+                g_exit_code = custom_echo(cmd);
+        else if (!ft_strcmp(name, "cd"))
+                g_exit_code = custom_cd(envp, cmd);
+        else if (!ft_strcmp(name, "pwd"))
+                g_exit_code = custom_pwd();
+        else if (!ft_strcmp(name, "export"))
+                g_exit_code = custom_export(envp, cmd);
+        else if (!ft_strcmp(name, "unset"))
+                g_exit_code = custom_unset(envp, cmd);
+        else if (!ft_strcmp(name, "env"))
+                g_exit_code = custom_env(*envp, cmd);
+        else if (!ft_strcmp(name, "exit"))
+        {
+                g_exit_code = custom_exit(cmd);
+                if (g_exit_code != 1)
+                        exit(g_exit_code);
+        }
+        else
+                g_exit_code = 127;
+        return (g_exit_code);
 }
 
 static void	execute_command_with_path(t_token **cmd, char ***envp)
