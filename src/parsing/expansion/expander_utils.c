@@ -121,3 +121,4 @@ char    *append_expanded_var(char *result, char *str, int *i, char **envp)
     *i += var_len + 1;
     return (tmp);
 }
+
