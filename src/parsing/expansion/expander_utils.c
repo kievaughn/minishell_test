@@ -12,12 +12,6 @@ void    remove_quotes(char *str)
         j = 0;
         while (str[i])
         {
-                if (quote != '\'' && str[i] == '\\' && str[i + 1])
-                {
-                        str[j++] = str[++i];
-                        i++;
-                        continue ;
-                }
                 if (!quote && (str[i] == '\'' || str[i] == '"'))
                         quote = str[i++];
                 else if (quote && str[i] == quote)

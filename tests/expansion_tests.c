@@ -25,6 +25,10 @@ int main(void)
     run_case("\"$USER\"", "testuser", env);
     run_case("$US\"E\"R", "ER", env);
     run_case("$U'S'E'R", "SER", env);
+    run_case("$\"HOME\"$USER", "HOMEtestuser", env);
+    run_case("$\"HOM\"E$USER", "HOMEtestuser", env);
+    run_case("$\"HOME\"", "HOME", env);
+    run_case("$\"42$\"", "42$", env);
     printf("All expansion tests passed\n");
     return 0;
 }
