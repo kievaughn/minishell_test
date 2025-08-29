@@ -17,14 +17,16 @@
 int     run_builtin(char ***envp, t_token **cmd)
 {
         char    *name;
+        char    *trimmed;
 
         if (!cmd || !cmd[0] || !cmd[0]->str)
                 return (127);
+        trimmed = ft_strtrim(cmd[0]->str, " \t\n\r\v\f");
+        if (!trimmed)
+                return (127);
+        free(cmd[0]->str);
+        cmd[0]->str = trimmed;
         name = cmd[0]->str;
-        /*
-         * Use the command name verbatim so that quoted names with trailing
-         * whitespace aren't mistaken for builtins.
-         */
         if (!ft_strcmp(name, "echo"))
                 g_exit_code = custom_echo(cmd);
         else if (!ft_strcmp(name, "cd"))
