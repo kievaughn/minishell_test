@@ -90,28 +90,28 @@ static int	expand_token(t_token **out, t_token *tok, int *k)
 	char	**parts;
 	int		j;
 
-	if (tok->quoted)
-	{
-		restore_marked_chars(tok->str);
-		out[(*k)++] = tok;
-		return (0);
-	}
-	parts = split_whitespace(tok->str);
-	free(tok->str);
-	free(tok);
-	if (!parts)
-		return (1);
-	j = 0;
-	while (parts[j])
-	{
-		out[(*k)] = new_token(parts[j], 0, 0);
-		if (!out[(*k)])
-			return (free_cmd(parts), 1);
-		restore_marked_chars(out[(*k)++]->str);
-		j++;
-	}
-	free(parts);
-	return (0);
+        if (tok->quoted)
+        {
+                restore_marked_spaces(tok->str);
+                out[(*k)++] = tok;
+                return (0);
+        }
+        parts = split_whitespace(tok->str);
+        free(tok->str);
+        free(tok);
+        if (!parts)
+                return (1);
+        j = 0;
+        while (parts[j])
+        {
+                out[(*k)] = new_token(parts[j], 0, 0);
+                if (!out[(*k)])
+                        return (free_cmd(parts), 1);
+                restore_marked_spaces(out[(*k)++]->str);
+                j++;
+        }
+        free(parts);
+        return (0);
 }
 
 t_token	**split_expanded_tokens(t_token **arr)
@@ -143,4 +143,3 @@ t_token	**split_expanded_tokens(t_token **arr)
 	free(arr);
 	return (out);
 }
-
