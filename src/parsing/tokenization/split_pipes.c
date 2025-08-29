@@ -1,68 +1,84 @@
 #include "../../libft/libft.h"
 #include "minishell.h"
 
-static size_t	count_segments(const char *line)
+static size_t    count_segments(const char *line)
 {
-	size_t	i;
-	size_t	count;
-	char	quote;
+        size_t  i;
+        size_t  count;
+        char    quote;
 
-	i = 0;
-	count = 1;
-	quote = 0;
-	while (line && line[i])
-	{
-		if (!quote && (line[i] == '\'' || line[i] == '"'))
-			quote = line[i];
-		else if (quote && line[i] == quote)
-			quote = 0;
-		else if (!quote && line[i] == '|')
-			count++;
-		i++;
-	}
-	return (count);
+        i = 0;
+        count = 1;
+        quote = 0;
+        while (line && line[i])
+        {
+                if (!quote && (line[i] == '\'' || line[i] == '"'))
+                        quote = line[i];
+                else if (quote && line[i] == quote)
+                        quote = 0;
+                else if (!quote && line[i] == '|')
+                        count++;
+                i++;
+        }
+        return (count);
 }
 
-static void	handle_quote_state(char c, char *quote)
+static void     free_segments(char **arr, size_t seg)
 {
-	if (!*quote && (c == '\'' || c == '"'))
-		*quote = c;
-	else if (*quote && c == *quote)
-		*quote = 0;
+        while (seg-- > 0)
+                free(arr[seg]);
+        free(arr);
 }
 
-char	**split_pipes(const char *line)
+static void     handle_quote_state(char c, char *quote)
 {
-	size_t	i;
-	size_t	start;
-	size_t	seg;
-	char	quote;
-	char	**arr;
-
-	i = 0;
-	start = 0;
-	seg = 0;
-	quote = 0;
-	arr = malloc(sizeof(char *) * (count_segments(line) + 1));
-	if (!arr)
-		return (NULL);
-	while (line && line[i])
-	{
-		handle_quote_state(line[i], &quote);
-		if (!quote && line[i] == '|')
-		{
-			if (i > 0 && (line[i - 1] == '>'))
-			{
-				fprintf(stderr,
-					"minishell: syntax error near unexpected token `|'\n");
-				return (NULL);
-			}
-			arr[seg++] = ft_substr(line, start, i - start);
-			start = i + 1;
-		}
-		i++;
-	}
-	arr[seg++] = ft_substr(line, start, i - start);
-	arr[seg] = NULL;
-	return (arr);
+        if (!*quote && (c == '\'' || c == '"'))
+                *quote = c;
+        else if (*quote && c == *quote)
+                *quote = 0;
 }
+
+static char     **pipe_syntax_error(char **arr, size_t seg)
+{
+        free_segments(arr, seg);
+        fprintf(stderr, "minishell: syntax error near unexpected token `|'\n");
+        g_exit_code = 2;
+        return (NULL);
+}
+
+char    **split_pipes(const char *line)
+{
+        size_t  i;
+        size_t  start;
+        size_t  seg;
+        char    quote;
+        char    **arr;
+
+        i = 0;
+        start = 0;
+        seg = 0;
+        quote = 0;
+        arr = malloc(sizeof(char *) * (count_segments(line) + 1));
+        if (!arr)
+                return (NULL);
+        while (line && line[i])
+        {
+                handle_quote_state(line[i], &quote);
+                if (!quote && line[i] == '|')
+                {
+                        if (i > 0 && line[i - 1] == '>')
+                                return (pipe_syntax_error(arr, seg));
+                        if (i == start)
+                                return (pipe_syntax_error(arr, seg));
+                        arr[seg++] = ft_substr(line, start, i - start);
+                        start = i + 1;
+                }
+                i++;
+        }
+        if (start == i)
+                return (pipe_syntax_error(arr, seg));
+        arr[seg++] = ft_substr(line, start, i - start);
+        arr[seg] = NULL;
+        return (arr);
+}
+
