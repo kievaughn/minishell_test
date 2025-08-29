@@ -107,10 +107,10 @@ static int      expand_all(t_token **arr, char **envp)
 
 static t_token  **post_process_tokens(t_token **arr)
 {
-        arr = split_expanded_tokens(arr);
+        arr = split_redirs(arr);
         if (!arr)
                 return (NULL);
-        arr = split_redirs(arr);
+        arr = split_expanded_tokens(arr);
         if (!arr)
                 return (NULL);
         return (arr);
