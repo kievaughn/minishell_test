@@ -48,6 +48,7 @@ SRCS = \
     src/parsing/tokenization/split_pipes.c \
     src/parsing/tokenization/tokenize.c \
     src/parsing/tokenization/token_utils.c \
+    src/parsing/tokenization/quote_utils.c \
     src/piping/pipeline.c \
     src/piping/redirections.c \
     src/piping/pipeline_setup.c \
