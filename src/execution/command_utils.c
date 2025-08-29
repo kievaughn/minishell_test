@@ -126,21 +126,25 @@ void restore_redirections(int save_in, int save_out)
     }
 }
 
-short int	is_builtin(const char *cmd)
+short int       is_builtin(const char *cmd)
 {
-	char		*trimmed;
-	short int	result;
-
-	if (!cmd)
-		return (0);
-	trimmed = ft_strtrim(cmd, " \t\n\r\v\f");
-	if (!trimmed)
-		return (0);
-	result = (!ft_strcmp(trimmed, "echo") || !ft_strcmp(trimmed, "cd")
-		|| !ft_strcmp(trimmed, "pwd") || !ft_strcmp(trimmed, "export")
-		|| !ft_strcmp(trimmed, "unset") || !ft_strcmp(trimmed, "env")
-		|| !ft_strcmp(trimmed, "exit"));
-	free(trimmed);
-	return (result);
+        if (!cmd)
+                return (0);
+        /*
+         * Reject names containing any whitespace so quoted commands like
+         * "echo " are executed externally instead of dispatching to builtins.
+         */
+        if (ft_strchr(cmd, ' ') || ft_strchr(cmd, '\t')
+                || ft_strchr(cmd, '\n') || ft_strchr(cmd, '\r')
+                || ft_strchr(cmd, '\v') || ft_strchr(cmd, '\f'))
+                return (0);
+        return (!ft_strcmp((char *)cmd, "echo")
+                || !ft_strcmp((char *)cmd, "cd")
+                || !ft_strcmp((char *)cmd, "pwd")
+                || !ft_strcmp((char *)cmd, "export")
+                || !ft_strcmp((char *)cmd, "unset")
+                || !ft_strcmp((char *)cmd, "env")
+                || !ft_strcmp((char *)cmd, "exit"));
 }
+
 
