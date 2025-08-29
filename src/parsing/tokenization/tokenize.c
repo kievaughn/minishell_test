@@ -119,6 +119,7 @@ t_token **tokenize_command(char const *s, char c, char **envp)
         if (has_unclosed_quotes(s))
         {
                 error_msg("minishell", "unexpected EOF while looking for matching quote");
+                g_exit_code = 2;
                 return (NULL);
         }
         arr = fill_arr_from_string(s, c);
